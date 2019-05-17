@@ -1,0 +1,19 @@
+.skill {
+  display: flex;
+  margin-bottom: 8px;
+  max-width: 400px;
+  font-size: 14px;
+
+  .name {
+    flex: 1 0 50%;
+    font-weight: 600;
+  }
+
+  .duration {
+    flex: 1 0 25%;
+  }
+
+  .proficiency {
+    flex: 1 0 25%;
+  }
+}

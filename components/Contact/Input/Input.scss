@@ -1,0 +1,23 @@
+.input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0 15px;
+  border: 1px solid rgba(68, 68, 68, 0.2);
+  outline: 0;
+  line-height: 1;
+  font-size: 13px;
+  vertical-align: baseline;
+  transition: 0.2s all cubic-bezier(.4,0,.2,1);
+  -webkit-appearance: none;
+
+  &:not(.multiline) {
+    height: 40px;
+  }
+
+  &.multiline {
+    min-height: 200px;
+    padding: 15px;
+    resize: vertical;
+  }
+}

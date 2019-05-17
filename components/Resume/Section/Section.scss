@@ -1,0 +1,16 @@
+.section {
+  margin: 0 0 48px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .title {
+    margin: 0 0 24px;
+    color: #888;
+    font-family: "Josefin Sans", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600px;
+    text-transform: uppercase;
+  }
+}

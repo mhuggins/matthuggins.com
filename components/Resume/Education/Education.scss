@@ -1,0 +1,28 @@
+.education {
+  margin-bottom: 18px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .degree {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .overview {
+    color: #888;
+    font-size: 14px;
+  }
+
+  ul {
+    margin-left: 0;
+    padding-left: 0;
+    font-size: 14px;
+
+    li {
+      margin: 0 0 4px 1em;
+      line-height: 1.25em;
+    }
+  }
+}
