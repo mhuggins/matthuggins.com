@@ -1,0 +1,26 @@
+.page___3dbH6 {
+  margin-bottom: 5rem;
+  padding: 100px 10%;
+  background: #fff;
+  box-shadow: 0 30px 50px 0 rgba(0, 0, 0, 0.15); }
+  .page___3dbH6 .title___3WT9U {
+    position: relative;
+    margin: 0 auto 20px;
+    padding: 0 0 40px;
+    font-size: 15px;
+    text-align: center;
+    text-transform: uppercase; }
+    .page___3dbH6 .title___3WT9U:after {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 50px;
+      height: 1px;
+      margin-left: -25px;
+      content: "";
+      background: rgba(51, 51, 51, 0.2); }
+
+@media only screen and (max-width: 420px) {
+  .page___3dbH6 {
+    margin-bottom: 0; } }
+
