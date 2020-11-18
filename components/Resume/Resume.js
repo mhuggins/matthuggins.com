@@ -10,9 +10,9 @@ const Resume = () => (
   <Page className={styles.resume} title="Resume">
     <Section title="Skills">
       <Skill name="Ruby / Rails" years={10} proficiency="Expert" />
-      <Skill name="JavaScript" years={14} proficiency="Expert" />
-      <Skill name="CSS" years={14} proficiency="Expert" />
-      <Skill name="React" years={5} proficiency="Advanced" />
+      <Skill name="JavaScript" years={15} proficiency="Expert" />
+      <Skill name="CSS" years={15} proficiency="Expert" />
+      <Skill name="React" years={6} proficiency="Advanced" />
       <Skill name="SQL" years={10} proficiency="Advanced" />
       <Skill name="Java" years={5} proficiency="Moderate" />
       <Skill name="PHP" years={4} proficiency="Moderate" />
@@ -20,13 +20,25 @@ const Resume = () => (
 
     <Section title="Experience">
       <Experience
+        company={{ name: "Tanium", url: "https://tanium.com", location: "Emeryville, CA" }}
+        role="Senior Software Engineer / Architect"
+        start={new Date('2019-08-15T00:00:00-0600')}
+        points={[
+          "Creating endpoint security management & software management applications with React.",
+          "Driving the architecture around a unified front-end development experience.",
+          "Led and coordinated a team around the implemention of consistent user experiences across 17 products.",
+        ]}
+      />
+
+      <Experience
         company={{ name: "Kapost", url: "https://kapost.com", location: "Boulder, CO" }}
         role="Tech Lead"
         start={new Date('2015-03-01T00:00:00-0600')}
+        end={new Date('2019-08-15T00:00:00-0600')}
         points={[
-          "Enabling team success through architectural decisions, scope definition, pair programming, code reviews, and general leadership and guidance.",
-          "Architecting scalable internal cross-application services using Ruby on Rails.",
-          "Building consumer-grade application front-ends with React, Redux, and WebPack.",
+          "Enabled team success through architectural decisions, scope definition, pair programming, code reviews, and general leadership and guidance.",
+          "Architected scalable internal cross-application services using Ruby on Rails.",
+          "Built consumer-grade application front-ends with React, Redux, and WebPack.",
         ]}
       />
 
@@ -120,18 +132,18 @@ const Resume = () => (
     <Section title="Education">
       <Education
         school="University of Delaware"
-        degree="Bachelors"
-        program="Computer & Information Sciences"
-        start={new Date('2000-09-01T00:00:00-0600')}
-        end={new Date('2004-05-01T00:00:00-0600')}
-      />
-
-      <Education
-        school="University of Delaware"
         degree="Masters Program"
         program="Business"
         start={new Date('2004-09-01T00:00:00-0600')}
         end={new Date('2006-12-01T00:00:00-0600')}
+      />
+
+      <Education
+        school="University of Delaware"
+        degree="Bachelors"
+        program="Computer & Information Sciences"
+        start={new Date('2000-09-01T00:00:00-0600')}
+        end={new Date('2004-05-01T00:00:00-0600')}
       />
     </Section>
   </Page>

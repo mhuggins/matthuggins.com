@@ -5,11 +5,6 @@ import DateRange from "../DateRange";
 
 import styles from "./Experience.scss";
 
-const DATE_OPTIONS = {
-  year: "numeric",
-  month: "short",
-};
-
 class Experience extends React.Component {
   static propTypes = {
     company: companyShape.isRequired,
