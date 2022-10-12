@@ -12,9 +12,10 @@ const Resume = () => (
   <Page title="Resume">
     <Section title="Skills">
       <Skill name="React" years={8} proficiency="Expert" />
-      <Skill name="Ruby / Rails" years={10} proficiency="Expert" />
+      <Skill name="TypeScript" years={3} proficiency="Advanced" />
       <Skill name="JavaScript" years={17} proficiency="Expert" />
       <Skill name="CSS / SCSS" years={17} proficiency="Expert" />
+      <Skill name="Ruby / Rails" years={10} proficiency="Expert" />
       <Skill name="SQL" years={10} proficiency="Advanced" />
       <Skill name="Java" years={5} proficiency="Moderate" />
       <Skill name="PHP" years={4} proficiency="Moderate" />
