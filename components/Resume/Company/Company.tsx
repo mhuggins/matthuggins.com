@@ -12,6 +12,8 @@ const Container = styled('div')({
   borderBottom: '1px solid #ebebeb',
   ':last-child': {
     marginBottom: 0,
+    paddingBottom: 0,
+    borderBottom: 0,
   },
   'a': {
     textDecoration: 'none',
