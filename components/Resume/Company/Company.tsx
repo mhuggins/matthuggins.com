@@ -15,9 +15,6 @@ const Container = styled('div')({
     paddingBottom: 0,
     borderBottom: 0,
   },
-  'a': {
-    textDecoration: 'none',
-  },
   'ul': {
     marginLeft: 0,
     paddingLeft: 0,
