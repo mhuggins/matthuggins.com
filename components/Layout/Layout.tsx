@@ -1,4 +1,7 @@
 import styled from '@emotion/styled';
+import { faEnvelope, faIdCard } from '@fortawesome/free-solid-svg-icons';
+import { faGithub, faLinkedin } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
 import React from 'react';
 
@@ -55,6 +58,9 @@ const Links = styled('ul')({
     },
   },
   'a': {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
     padding: '16px 14px 13px',
     color: '#fff',
     fontFamily: '"Josefin Sans", Arial, sans-serif',
@@ -107,10 +113,34 @@ const Layout = ({ children }: Props) => (
         <Role>Web &amp; Mobile Developer</Role>
       </Title>
       <Links>
-        <li><Link href="/"><a>Resume</a></Link></li>
-        <li><a href="https://github.com/mhuggins" target="_blank" rel="noreferrer">GitHub</a></li>
-        <li><a href="https://www.linkedin.com/in/huggie/" target="_blank" rel="noreferrer">LinkedIn</a></li>
-        <li><Link href="/contact"><a>Contact</a></Link></li>
+        <li>
+          <Link href="/">
+            <a>
+              <FontAwesomeIcon icon={faIdCard} />
+              <span>Resume</span>
+            </a>
+          </Link>
+        </li>
+        <li>
+          <a href="https://github.com/mhuggins" target="_blank" rel="noreferrer">
+            <FontAwesomeIcon icon={faGithub} />
+            <span>GitHub</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.linkedin.com/in/huggie/" target="_blank" rel="noreferrer">
+            <FontAwesomeIcon icon={faLinkedin} />
+            <span>LinkedIn</span>
+          </a>
+        </li>
+        <li>
+          <Link href="/contact">
+            <a>
+              <FontAwesomeIcon icon={faEnvelope} />
+              <span>Contact</span>
+            </a>
+          </Link>
+        </li>
       </Links>
     </Header>
 
