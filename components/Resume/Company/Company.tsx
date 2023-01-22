@@ -37,6 +37,11 @@ const Heading = styled('div')({
   marginBottom: '4px',
 });
 
+const SubHeading = styled('div')({
+  marginBottom: '4px',
+  color: '#444',
+});
+
 const Details = styled('div')({
   display: 'flex',
   color: '#888',
@@ -106,10 +111,10 @@ const Company = ({ location, name, roles, icon = faBuilding }: CompanyProps) => 
         {roles.length === 1 ? (
           <>
             <Heading>{roles[0].title}</Heading>
+            <SubHeading>{name}</SubHeading>
             <Details>
-              <DetailItem>{name}</DetailItem>
               <DetailItem>
-                <DateRange start={roles[0].start} end={roles[0].end} format={{ year: 'numeric' }} />
+                <DateRange start={roles[0].start} end={roles[0].end} format={{ year: 'numeric', month: 'short' }} />
               </DetailItem>
               <DetailItem>{location}</DetailItem>
             </Details>
@@ -134,7 +139,7 @@ const Company = ({ location, name, roles, icon = faBuilding }: CompanyProps) => 
           {roles.length > 1 && <div>{role.title}</div>}
           {roles.length > 1 && (
             <Details>
-              <DateRange start={role.start} end={role.end} format={{ year: 'numeric' }} />
+              <DateRange start={role.start} end={role.end} format={{ year: 'numeric', month: 'short' }} />
             </Details>
           )}
           {role.points.length > 0 && (
