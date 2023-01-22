@@ -28,7 +28,7 @@ const Resume = () => (
         roles={[
           {
             title: 'Staff Engineer',
-            start: new Date('2020-04-15T00:00:00'),
+            start: new Date('2022-04-15T00:00:00'),
             points: [
               'Building cohesive first time user experiences with TypeScript and React.',
               'Automating common user workflows.',
@@ -36,8 +36,8 @@ const Resume = () => (
           },
           {
             title: 'Principal Engineer',
-            start: new Date('2020-01-15T00:00:00'),
-            end: new Date('2020-04-15T00:00:00'),
+            start: new Date('2021-01-15T00:00:00'),
+            end: new Date('2022-04-15T00:00:00'),
             points: [
               'Architected reusable front-end experiences for security management, enterprise risk, & software management applications with TypeScript and React.',
               'Coordinated with leadership and engineering to define project scope, team structure, and beneficial process changes.',
@@ -46,7 +46,7 @@ const Resume = () => (
           {
             title: 'Senior Software Engineer',
             start: new Date('2019-08-15T00:00:00'),
-            end: new Date('2020-01-15T00:00:00'),
+            end: new Date('2021-01-15T00:00:00'),
             points: [
               'Led a team of 8 to coordinate the implementation of consistent React-based user experiences across 17 products.',
               'Created endpoint security management & software management applications with React.',
