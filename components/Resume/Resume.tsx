@@ -28,7 +28,7 @@ const Resume = () => (
         roles={[
           {
             title: 'Staff Engineer',
-            start: new Date('2020-04-15T00:00:00-0600'),
+            start: new Date('2020-04-15T00:00:00'),
             points: [
               'Building cohesive first time user experiences with TypeScript and React.',
               'Automating common user workflows.',
@@ -36,8 +36,8 @@ const Resume = () => (
           },
           {
             title: 'Principal Engineer',
-            start: new Date('2020-01-15T00:00:00-0600'),
-            end: new Date('2020-04-15T00:00:00-0600'),
+            start: new Date('2020-01-15T00:00:00'),
+            end: new Date('2020-04-15T00:00:00'),
             points: [
               'Architected reusable front-end experiences for security management, enterprise risk, & software management applications with TypeScript and React.',
               'Coordinated with leadership and engineering to define project scope, team structure, and beneficial process changes.',
@@ -45,8 +45,8 @@ const Resume = () => (
           },
           {
             title: 'Senior Software Engineer',
-            start: new Date('2019-08-15T00:00:00-0600'),
-            end: new Date('2020-01-15T00:00:00-0600'),
+            start: new Date('2019-08-15T00:00:00'),
+            end: new Date('2020-01-15T00:00:00'),
             points: [
               'Led a team of 8 to coordinate the implementation of consistent React-based user experiences across 17 products.',
               'Created endpoint security management & software management applications with React.',
@@ -61,8 +61,8 @@ const Resume = () => (
         roles={[
           {
             title: 'Tech Lead',
-            start: new Date('2018-03-01T00:00:00-0600'),
-            end: new Date('2019-08-15T00:00:00-0600'),
+            start: new Date('2018-03-01T00:00:00'),
+            end: new Date('2019-08-15T00:00:00'),
             points: [
               'Enabled team success through architectural decisions, scope definition, pair programming, code reviews, and general leadership and guidance.',
               'Architected scalable internal cross-application services using Ruby on Rails.',
@@ -71,8 +71,8 @@ const Resume = () => (
           },
           {
             title: 'Senior Developer',
-            start: new Date('2015-03-01T00:00:00-0600'),
-            end: new Date('2018-03-01T00:00:00-0600'),
+            start: new Date('2015-03-01T00:00:00'),
+            end: new Date('2018-03-01T00:00:00'),
             points: [
               'Authored the open-source "circuitry" rubygem for reliable cross-application fanout messaging atop Amazon SNS & SQS.',
             ],
@@ -86,8 +86,8 @@ const Resume = () => (
         roles={[
           {
             title: 'Senior Developer (Consultant)',
-            start: new Date('2013-06-01T00:00:00-0600'),
-            end: new Date('2015-03-01T00:00:00-0600'),
+            start: new Date('2013-06-01T00:00:00'),
+            end: new Date('2015-03-01T00:00:00'),
             points: [
               'Built MVP mobile app for outdoor social network using Cordova, React, & Ampersand.js.',
               'Outlined and resolved technical problems preventing a financial startup\'s growth by migrating from MongoDB to PostgreSQL, fixing inherent data structure flaws, and replacing custom encryption with an accepted standard.',
@@ -102,8 +102,8 @@ const Resume = () => (
         roles={[
           {
             title: 'Senior Developer',
-            start: new Date('2012-01-15T00:00:00-0600'),
-            end: new Date('2013-05-15T00:00:00-0600'),
+            start: new Date('2012-01-15T00:00:00'),
+            end: new Date('2013-05-15T00:00:00'),
             points: [
               'Acted as team\'s Ruby on Rails subject matter expert for the Bloomberg Law product.',
               'Replaced unreliable client architecture with a robust extensible gem solution for use with propriety API services.',
@@ -119,8 +119,8 @@ const Resume = () => (
         roles={[
           {
             title: 'Developer',
-            start: new Date('2010-02-01T00:00:00-0600'),
-            end: new Date('2012-01-05T00:00:00-0600'),
+            start: new Date('2010-02-01T00:00:00'),
+            end: new Date('2012-01-05T00:00:00'),
             points: [
               'Utilized lean startup methodology to implement MVP solutions based upon multivariate testing results and user feedback.',
               'Integrated with Facebook Connect to coordinate viral acquisition efforts.',
@@ -136,8 +136,8 @@ const Resume = () => (
         roles={[
           {
             title: 'Developer',
-            start: new Date('2008-10-01T00:00:00-0600'),
-            end: new Date('2009-08-01T00:00:00-0600'),
+            start: new Date('2008-10-01T00:00:00'),
+            end: new Date('2009-08-01T00:00:00'),
             points: [
               'Led company-wide integration of Facebook Platform into all games, resulting in Zynga acquisition.',
               'Designed and developed reusable cross-game components within the CakePHP MVC framework.',
@@ -153,8 +153,8 @@ const Resume = () => (
         roles={[
           {
             title: 'Applications Developer',
-            start: new Date('2004-06-01T00:00:00-0600'),
-            end: new Date('2006-08-01T00:00:00-0600'),
+            start: new Date('2004-06-01T00:00:00'),
+            end: new Date('2006-08-01T00:00:00'),
             points: [
               'Built Java web services utilizing the Spring Framework for back-end processing.',
               'Designed and developed enterprise solutions within ASP.NET.',
@@ -176,8 +176,8 @@ const Resume = () => (
         roles={[
           {
             title: 'Lead Developer',
-            start: new Date('2018-04-01T00:00:00-0600'),
-            end: new Date('2019-03-01T00:00:00-0600'),
+            start: new Date('2018-04-01T00:00:00'),
+            end: new Date('2019-03-01T00:00:00'),
             points: [
               'Implemented secure API layer for safely interacting with distributed blockchain applications on behalf of cryptocurrency addresses.',
               'Built custom protocol for accessing apps built for and registered on a blockchain in a familiar browser interface.',
@@ -192,8 +192,8 @@ const Resume = () => (
         roles={[
           {
             title: 'Founder',
-            start: new Date('2008-07-01T00:00:00-0600'),
-            end: new Date('2013-12-01T00:00:00-0600'),
+            start: new Date('2008-07-01T00:00:00'),
+            end: new Date('2013-12-01T00:00:00'),
             points: [
               'Individually coordinated the design and development of a free online dating service.',
               'Developed and released Android mobile application.',
@@ -209,16 +209,16 @@ const Resume = () => (
         school="University of Delaware"
         degree="Masters Program"
         program="Business"
-        start={new Date('2004-09-01T00:00:00-0600')}
-        end={new Date('2006-12-01T00:00:00-0600')}
+        start={new Date('2004-09-01T00:00:00')}
+        end={new Date('2006-12-01T00:00:00')}
       />
 
       <Education
         school="University of Delaware"
         degree="Bachelors"
         program="Computer &amp; Information Sciences"
-        start={new Date('2000-09-01T00:00:00-0600')}
-        end={new Date('2004-05-01T00:00:00-0600')}
+        start={new Date('2000-09-01T00:00:00')}
+        end={new Date('2004-05-01T00:00:00')}
       />
     </Section>
   </Page>
