@@ -141,6 +141,8 @@ const Company = ({ location, name, roles, icon = faBuilding }: CompanyProps) => 
           {roles.length > 1 && (
             <Details>
               <DateRange start={role.start} end={role.end} format={{ year: 'numeric', month: 'short' }} />
+              &nbsp;&nbsp;
+              (<Duration start={role.start} end={role.end} />)
             </Details>
           )}
           {role.points.length > 0 && (
