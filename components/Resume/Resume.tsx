@@ -27,11 +27,20 @@ const Resume = () => (
         location="Kirkland, WA"
         roles={[
           {
+            title: 'Staff Engineer',
+            start: new Date('2020-04-15T00:00:00-0600'),
+            points: [
+              'Building cohesive first time user experiences with TypeScript and React.',
+              'Automating common user workflows.',
+            ],
+          },
+          {
             title: 'Principal Engineer',
             start: new Date('2020-01-15T00:00:00-0600'),
+            end: new Date('2020-04-15T00:00:00-0600'),
             points: [
-              'Architecting reusable front-end experiences for security management, enterprise risk, & software management applications with TypeScript and React.',
-              'Coordinating with leadership and engineering to define project scope, team structure, and beneficial process changes.',
+              'Architected reusable front-end experiences for security management, enterprise risk, & software management applications with TypeScript and React.',
+              'Coordinated with leadership and engineering to define project scope, team structure, and beneficial process changes.',
             ],
           },
           {
