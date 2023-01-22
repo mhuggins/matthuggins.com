@@ -5,6 +5,7 @@ import React from 'react';
 import CircularIcon from '../../CircularIcon';
 
 import DateRange from '../DateRange';
+import Duration from '../Duration';
 
 const Container = styled('div')({
   marginBottom: '16px',
@@ -42,17 +43,14 @@ const SubHeading = styled('div')({
   color: '#444',
 });
 
-const Details = styled('div')({
-  display: 'flex',
-  color: '#888',
-  fontSize: '14px',
+const Role = styled('div')({
+  marginBottom: '4px',
 });
 
-const DetailItem = styled('div')({
-  flex: '0 1 auto',
-  ':not(:last-child)': {
-    marginRight: '20px',
-  },
+const Details = styled('div')({
+  color: '#888',
+  fontSize: '14px',
+  marginBottom: '4px',
 });
 
 const Entity = styled('div', { shouldForwardProp: (propName) => propName !== 'showPath' })<{
@@ -113,17 +111,20 @@ const Company = ({ location, name, roles, icon = faBuilding }: CompanyProps) => 
             <Heading>{roles[0].title}</Heading>
             <SubHeading>{name}</SubHeading>
             <Details>
-              <DetailItem>
-                <DateRange start={roles[0].start} end={roles[0].end} format={{ year: 'numeric', month: 'short' }} />
-              </DetailItem>
-              <DetailItem>{location}</DetailItem>
+              <DateRange start={roles[0].start} end={roles[0].end} format={{ year: 'numeric', month: 'short' }} />
+              &nbsp;&nbsp;
+              (<Duration start={roles[0].start} end={roles[0].end} />)
             </Details>
+            <Details>{location}</Details>
           </>
         ) : (
           <>
             <Heading>{name}</Heading>
             <Details>
-              <DetailItem>{location}</DetailItem>
+              <Duration start={roles[roles.length - 1].start} end={roles[0].end} />
+            </Details>
+            <Details>
+              {location}
             </Details>
           </>
         )}
@@ -136,7 +137,7 @@ const Company = ({ location, name, roles, icon = faBuilding }: CompanyProps) => 
       >
         {roles.length > 1 && <Bullet />}
         <div>
-          {roles.length > 1 && <div>{role.title}</div>}
+          {roles.length > 1 && <Role>{role.title}</Role>}
           {roles.length > 1 && (
             <Details>
               <DateRange start={role.start} end={role.end} format={{ year: 'numeric', month: 'short' }} />
