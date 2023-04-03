@@ -7,26 +7,16 @@ import Page from '../Page';
 
 const FormRow = styled('div')({
   display: 'flex',
+  gap: '20px',
   marginBottom: '20px',
-});
-
-const StyledLabeledInput = styled(LabeledInput)({
-  flex: '1 1 auto',
-  margin: '0 10px',
-  ':first-child': {
-    marginLeft: 0,
-  },
-  ':last-child': {
-    marginRight: 0,
-  },
 });
 
 const Contact = () => (
   <Page title="Contact">
     <form action="https://formspree.io/matt.huggins+website@gmail.com" method="POST">
       <FormRow>
-        <StyledLabeledInput label="Name" type="text" name="name" autoFocus />
-        <StyledLabeledInput label="Email" type="email" name="_replyto" />
+        <LabeledInput label="Name" type="text" name="name" autoFocus />
+        <LabeledInput label="Email Address" type="email" name="_replyto" />
       </FormRow>
 
       <FormRow>
