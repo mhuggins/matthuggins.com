@@ -6,7 +6,6 @@ const DEFAULT_FORMAT: Intl.DateTimeFormatOptions = {
 };
 
 interface Props {
-  className?: string;
   start: Date;
   end?: Date;
   format?: Intl.DateTimeFormatOptions;
@@ -14,13 +13,12 @@ interface Props {
 }
 
 const DateRange = ({
-  className,
   start,
   end,
   format = DEFAULT_FORMAT,
   separator = ' - ',
 }: Props) => (
-  <span className={className}>
+  <span>
     {start.toLocaleDateString("en-US", format)}
     {separator}
     {end ? end.toLocaleDateString("en-US", format) : 'Present'}

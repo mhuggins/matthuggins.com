@@ -21,8 +21,8 @@ type Props = InputProps & {
   label: string;
 }
 
-const LabeledInput = ({ className, label, ...props }: Props) => (
-  <Container className={className}>
+const LabeledInput = ({ label, ...props }: Props) => (
+  <Container>
     <Label>{label}</Label>
     <Input {...props} />
   </Container>

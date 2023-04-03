@@ -1,32 +1,36 @@
-// @ts-expect-error -- no type definitions available, look into replacing this package
-import DurationJS from 'duration';
 import pluralize from 'pluralize';
 import React from 'react';
 
+const getMonthCount = (a: Date, b: Date) => {
+  const months = (b.getFullYear() - a.getFullYear()) * 12 - a.getMonth() + b.getMonth() + 1;
+  return months <= 0 ? 0 : months;
+};
+
 const getDuration = (start: Date, end: Date = new Date()) => {
-  const { year, month } = new DurationJS(start, end);
+  const totalMonths = getMonthCount(start, end);
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths - (years * 12);
 
   const parts = []
 
-  if (year > 0) {
-    parts.push(pluralize('yr', year, true));
+  if (years > 0) {
+    parts.push(pluralize('yr', years, true));
   }
 
-  if (month > 0) {
-    parts.push(pluralize('mo', month, true));
+  if (months > 0) {
+    parts.push(pluralize('mo', months, true));
   }
 
   return parts.join(' ');
 }
 
 interface Props {
-  className?: string;
   start: Date;
   end?: Date;
 }
 
-const Duration = ({ className, start, end }: Props) => (
-  <span className={className}>{getDuration(start, end)}</span>
+const Duration = ({ start, end }: Props) => (
+  <span>{getDuration(start, end)}</span>
 );
 
 export default Duration;
