@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { faEnvelope, faIdCard } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faIdCard, faRss } from '@fortawesome/free-solid-svg-icons';
 import { faGithub, faLinkedin } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
@@ -118,6 +118,14 @@ const Layout = ({ children }: Props) => (
             <a>
               <FontAwesomeIcon icon={faIdCard} />
               <span>Resume</span>
+            </a>
+          </Link>
+        </li>
+        <li>
+          <Link href="/blog">
+            <a>
+              <FontAwesomeIcon icon={faRss} />
+              <span>Blog</span>
             </a>
           </Link>
         </li>
