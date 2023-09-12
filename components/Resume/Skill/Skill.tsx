@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import pluralize from "pluralize";
+import pluralize from 'pluralize';
 
 const Container = styled('div')({
   display: 'flex',

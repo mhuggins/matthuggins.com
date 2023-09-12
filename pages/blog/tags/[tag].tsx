@@ -2,14 +2,12 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import { useMemo } from 'react';
 import BlogPosts from '../../../components/BlogPosts';
 import Page from '../../../components/Page/Page';
-import { POSTS } from '../../../constants/posts';
+import { POSTS, TAGS } from '../../../constants/blog';
 import { toArray } from '../../../helpers/toArray';
 
 interface Props {
   tag: string;
 }
-
-const TAGS = Array.from(new Set(POSTS.flatMap((post) => post.tags))).sort();
 
 export const getStaticPaths: GetStaticPaths = () => {
   if (process.env.SKIP_BUILD_STATIC_GENERATION) {

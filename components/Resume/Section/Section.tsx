@@ -1,14 +1,6 @@
 import styled from '@emotion/styled';
+import { Card, CardContent, Typography } from '@mui/material';
 import React from 'react';
-
-const styles = {};
-
-const Container = styled('div')({
-  margin: '0 0 48px',
-  ':last-child': {
-    marginBottom: 0,
-  },
-});
 
 const Title = styled('div')({
   margin: '0 0 24px',
@@ -25,10 +17,14 @@ interface Props {
 }
 
 const Section = ({ children, title }: Props) => (
-  <Container>
-    <Title>{title}</Title>
-    {children}
-  </Container>
+  <Card sx={{ mb: 2 }}>
+    <CardContent>
+      <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+        {title}
+      </Typography>
+      {children}
+    </CardContent>
+  </Card>
 );
 
 export default Section;

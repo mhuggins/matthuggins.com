@@ -1,9 +1,10 @@
+import { Card, CardContent } from '@mui/material';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import React from 'react';
 import Page from '../../components/Page';
 import PostContent from '../../components/PostContent';
 import Tags from '../../components/Tags';
-import { POSTS } from '../../constants/posts';
+import { POSTS } from '../../constants/blog';
 import { getSlug } from '../../helpers/getSlug';
 import { toArray } from '../../helpers/toArray';
 
@@ -44,9 +45,19 @@ export const getStaticProps: GetStaticProps = async (context) => {
 };
 
 const PostBySlug = ({ content, tags, title }: Props) => (
-  <Page title={title}>
-    <Tags tags={tags} />
-    <PostContent content={content} />
+  <Page
+    title={title}
+    breadcrumbs={[
+      { label: 'Matt Huggins', path: '/' },
+      { label: 'Blog', path: '/blog' },
+    ]}
+  >
+    <Card>
+      <CardContent>
+        <Tags tags={tags} />
+        <PostContent content={content} />
+      </CardContent>
+    </Card>
   </Page>
 );
 

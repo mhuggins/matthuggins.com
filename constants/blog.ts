@@ -1,3 +1,6 @@
+import { getSlug } from '../helpers/getSlug';
+import { getTags } from '../helpers/getTags';
+
 export interface Post {
   date: string;
   slug: string;
@@ -43,3 +46,7 @@ export const POSTS: Post[] = [
     content: async () => (await import('../posts/2015-01-02/parsing-domain-names-now-in-gem-form.md')).default,
   },
 ];
+
+export const POSTS_BY_SLUG = Object.fromEntries(POSTS.map((post) => [getSlug(post), post]));
+
+export const TAGS = getTags(POSTS);
