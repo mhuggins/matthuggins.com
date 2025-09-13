@@ -8,9 +8,9 @@ const router = createRouter({
   routeTree,
   defaultPreload: "intent",
   defaultPreloadDelay: 100,
-  // defaultViewTransition: true,
-  // scrollRestoration: true,
-  // scrollToTopSelectors: ["#screen", "#tab"],
+  defaultNotFoundComponent: () => (
+    <div className="mx-auto max-w-3xl p-6">The page you're looking for does not exist.</div>
+  ),
 });
 
 // Register the router instance for type safety

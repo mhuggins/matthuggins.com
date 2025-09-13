@@ -13,13 +13,12 @@ export const getBlogPosts = () => {
 
 export const getBlogPost = (slug: string) => {
   const posts = getBlogPostFiles();
-  const key = Object.keys(posts).find((k) => normalize(k).endsWith(`/${slug}`));
+  const key = Object.keys(posts).find((k) => normalize(k) === slug);
   return posts[key ?? ""];
 };
 
 export const hasBlogPost = (slug: string) => {
-  const posts = getBlogPostFiles();
-  return Object.keys(posts).some((k) => normalize(k).endsWith(`/${slug}`));
+  return !!getBlogPost(slug);
 };
 
 const getBlogPostFiles = () => {
