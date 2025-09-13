@@ -1,15 +1,30 @@
 {
   "name": "matthuggins.com",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "description": "Resume for Matt Huggins, experienced software engineer",
+  "type": "module",
+  "main": "main.tsx",
   "keywords": [],
-  "author": "",
+  "author": "Matt Huggins <matt.huggins@gmail.com>",
   "license": "ISC",
+  "packageManager": "pnpm@9.15.1",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run --passWithNoTests",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "test:lint": "pnpm run lint && pnpm run format && pnpm run typecheck && pnpm run test"
+  },
   "dependencies": {
+    "@tanstack/react-router": "^1.131.41",
+    "@tanstack/react-router-devtools": "^1.131.42",
     "clsx": "^2.1.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -18,7 +33,15 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
+    "@tailwindcss/vite": "^4.1.13",
+    "@tanstack/router-plugin": "^1.131.43",
+    "@types/node": "^24.3.3",
     "@types/react": "^19.1.13",
-    "@types/react-dom": "^19.1.9"
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   }
 }
