@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useMdx } from "@/hooks/useMdx";
 import { hasBlogPost } from "@/utils/getBlogPosts";
 
-export const Route = createFileRoute("/blog/$slug")({
+export const Route = createFileRoute("/posts/$slug")({
   beforeLoad: ({ params }) => {
     if (!hasBlogPost(params.slug)) {
       throw notFound();

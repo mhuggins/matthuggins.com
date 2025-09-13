@@ -1,91 +1,187 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  BriefcaseIcon,
+  DesktopIcon,
+  PackageIcon,
+  UserIcon,
+  WrenchIcon,
+} from "@phosphor-icons/react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Experience } from "@/components/Experience";
+import { Project } from "@/components/Project";
+import { ResumeSection } from "@/components/ResumeSection";
 
 export const Route = createFileRoute("/resume")({
   component: Resume,
 });
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-8">
-      <h2 className="mb-2 font-semibold text-xl tracking-tight">{title}</h2>
-      <div className="space-y-3 text-sm text-zinc-700 leading-6">{children}</div>
-    </section>
-  );
-}
-
 function Resume() {
   return (
-    <div className="mx-auto max-w-3xl p-6">
-      <header className="mb-8">
-        <h1 className="font-bold text-3xl tracking-tight">Matt Huggins</h1>
-        <p className="text-zinc-600">Experienced Software Engineer</p>
-        <nav className="mt-2 flex gap-4 text-blue-700 text-sm">
-          <a href="mailto:matt.huggins@gmail.com" className="hover:underline">
-            matt.huggins@gmail.com
-          </a>
-          <a
-            href="https://github.com/mhuggins"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:underline"
-          >
-            github.com/mhuggins
-          </a>
-          <a
-            href="https://www.linkedin.com/in/matthuggins"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:underline"
-          >
-            linkedin.com/in/matthuggins
-          </a>
-          <Link to="/blog" className="hover:underline">
-            Blog
-          </Link>
-        </nav>
-      </header>
+    <div className="flex flex-col gap-12">
+      <ResumeSection title="Career Profile" icon={UserIcon}>
+        Software engineer with broad experience across frontend, backend, and architectural
+        decision-making. Passionate about building reliable, maintainable systems and intuitive user
+        experiences.
+      </ResumeSection>
 
-      <Section title="Summary">
-        <p>
-          Software engineer with broad experience across frontend, backend, and infrastructure.
-          Passionate about building reliable, maintainable systems and great user experiences.
-        </p>
-      </Section>
+      <ResumeSection title="Skills" icon={WrenchIcon}>
+        React, TypeScript, JavaScript, CSS/SCSS, Ruby/Ruby on Rails, SQL, Java, PHP
+      </ResumeSection>
 
-      <Section title="Skills">
-        <p>
-          JavaScript/TypeScript, React, Node.js, APIs, SQL/NoSQL, Testing, CI/CD, Cloud (AWS/GCP),
-          Containers, Observability, Accessibility.
-        </p>
-      </Section>
-
-      <Section title="Experience">
-        <div>
-          <div className="flex items-baseline justify-between gap-2">
-            <h3 className="font-medium">Senior Software Engineer — Company</h3>
-            <span className="text-xs text-zinc-500">2020-Present</span>
-          </div>
-          <ul className="mt-1 ml-5 list-disc text-sm">
-            <li>Led development of scalable web applications with React and Node.</li>
-            <li>Improved performance and reliability through profiling and observability.</li>
-            <li>Partnered with product/design to deliver user-focused features.</li>
-          </ul>
+      <ResumeSection title="Experience" icon={BriefcaseIcon}>
+        <div className="flex flex-col gap-6">
+          <Experience
+            role="Staff Software Engineer"
+            company="Prelude Security"
+            location="Remote"
+            startDate="Sept. 2024"
+            tasks={[
+              'Building intuitive user experiences to help CISOs answer the question: "am I protected?"',
+            ]}
+          />
+          <Experience
+            role="Staff Software Engineer"
+            company="Tanium"
+            location="Remote"
+            startDate="Aug. 2019"
+            endDate="Aug. 2024"
+            tasks={[
+              "Built cohesive first time user experiences with TypeScript and React.",
+              "Automated common user workflows.",
+              "Architected reusable front-end experiences for security management, enterprise risk, & software management applications.",
+              "Coordinated with leadership and engineering to define project scope, team structure, and beneficial process changes.",
+              "Led a team of 8 to coordinate the implementation of consistent React-based user experiences across 17 products.",
+              "Created endpoint security management & software management applications with React.",
+            ]}
+          />
+          <Experience
+            role="Technical Lead"
+            company="Upload Kapost"
+            location="Boulder CO"
+            startDate="Mar. 2015"
+            endDate="Aug. 2019"
+            tasks={[
+              "Enabled team success through architectural decisions, scope definition, pair programming, code reviews, and general leadership and guidance.",
+              "Architected scalable internal cross-application services using Ruby on Rails.",
+              "Built consumer-grade application front-ends with React, Redux, and Webpack.",
+            ]}
+          />
+          <Experience
+            role="Senior Developer (Consultant)"
+            company="Quick Left"
+            location="Boulder CO"
+            startDate="Jun. 2013"
+            endDate="Mar. 2015"
+            tasks={[
+              "Built MVP mobile app for outdoor social network using Cordova, React, & Ampersand.js.",
+              "Outlined and resolved technical problems preventing a financial startup’s growth by migrating from MongoDB to PostgreSQL, fixing inherent data structure flaws, and replacing custom encryption with an accepted standard.",
+            ]}
+          />
+          <Experience
+            role="Senior Developer"
+            company="Bloomberg Law"
+            location="New York NY"
+            startDate="Jan. 2012"
+            endDate="May 2013"
+            tasks={[
+              "Acted as team’s Ruby on Rails subject matter expert for the Bloomberg Law product.",
+              "Replaced unreliable client architecture with a robust extensible gem solution for use with propriety API services.",
+              "Introduced unit and functional test suites for existing code, and presented an ongoing testing strategy.",
+            ]}
+          />
+          <Experience
+            role="Web & Mobile Developer"
+            company="Food on the Table, Austin TX"
+            location="Austin TX"
+            startDate="Feb. 2010"
+            endDate="Jan. 2012"
+            tasks={[
+              "Utilized lean startup methodology to implement minimum viable product solutions focused on learning what the customer wants and needs from our product.",
+              "Produced Ruby on Rails backend code and HTML, CSS, & jQuery front-ends to manage up to 40 concurrent experiments focused on continuously testing changes and learning user behavior.",
+              "Responsible for Facebook Connect integration and coordination of viral acquisition efforts.",
+              "Concurrently iterated on iPhone and Android mobile apps using data-driven development.",
+            ]}
+          />
+          <Experience
+            role="Game Developer"
+            company="Challenge Online Games"
+            location="Austin TX"
+            startDate="Oct. 2008"
+            endDate="Aug. 2009"
+            tasks={[
+              "Led company-wide integration of Facebook Platform into all games, resulting in Zynga acquisition.",
+              "Designed and developed reusable cross-game components within the CakePHP MVC framework.",
+              "Coordinated the delivery of resources from designers, artists, and programming team members for the duration of an experimental Facebook gaming project.",
+            ]}
+          />
+          <Experience
+            role="Applications Developer"
+            company="QVC"
+            location="West Chester PA"
+            startDate="Jun. 2004"
+            endDate="Aug. 2006"
+            tasks={[
+              "Built Java web services utilizing the Spring Framework for back-end processing.",
+              "Designed and developed enterprise solutions within ASP.NET.",
+              "Enhanced public websites and internal applications using Java, C#, C++, Perl and ASP languages.",
+              "Resolved production issues for QVC.com, QVC.de, and QVC.co.uk via on-call support.",
+              "Produced technical documentation formalizing functionality and semantics of enterprise system application processes.",
+              "Developed enterprise applications utilizing Java-based web services, formatting XML data with XSL style sheets via ASP to present dynamic XHTML to Customer Service representatives.",
+              "Maintained existing applications using ASP and VBScript for presentation and VB COM+ components for data source interaction.",
+            ]}
+          />
         </div>
-        <div>
-          <div className="mt-4 flex items-baseline justify-between gap-2">
-            <h3 className="font-medium">Software Engineer — Company</h3>
-            <span className="text-xs text-zinc-500">2016-2020</span>
-          </div>
-          <ul className="mt-1 ml-5 list-disc text-sm">
-            <li>Built APIs and services; contributed to frontend architecture.</li>
-            <li>Authored tooling, test automation, and CI workflows.</li>
-          </ul>
-        </div>
-      </Section>
+      </ResumeSection>
 
-      <Section title="Education">
-        <p>B.S. in Computer Science — University</p>
-      </Section>
+      <ResumeSection title="Projects" icon={DesktopIcon}>
+        <div className="flex flex-col gap-4">
+          <Project title="SVGConverter.io" role="Creator" url="https://svgconverter.io">
+            Web-app for converting raster images into vectorized SVGs.
+          </Project>
+          <Project title="nOS" role="Lead Developer" url="https://nos.io">
+            Browser, app store, and crypto wallet for the nOS cryptocurrency.
+          </Project>
+          <Project title="Black Book Singles" role="Founder">
+            Free online dating website and mobile application.
+          </Project>
+        </div>
+      </ResumeSection>
+
+      <ResumeSection title="OSS Contributions" icon={PackageIcon}>
+        <div className="flex flex-col gap-4">
+          <Project title="circuitry" url="https://github.com/kapost/circuitry">
+            Ruby gem for decoupling applications via Amazon SNS fanout and SQS processing.
+          </Project>
+          <Project title="ruby-measurement" url="https://github.com/mhuggins/ruby-measurement">
+            Ruby gem for calculating and converting units of measure.
+          </Project>
+          <Project
+            title="@poker-apprentice/hand-evaluator"
+            url="https://github.com/poker-apprentice/hand-evaluator"
+          >
+            TypeScript package for determining the strongest possible poker hand based upon the
+            known cards.
+          </Project>
+          <Project
+            title="@poker-apprentice/hand-history-parser"
+            url="https://github.com/poker-apprentice/hand-history-parser"
+          >
+            TypeScript package for parsing hand histories from online poker sites.
+          </Project>
+          <Project
+            title="@poker-apprentice/hand-history-analyzer"
+            url="https://github.com/poker-apprentice/hand-history-analyzer"
+          >
+            TypeScript package for analyzing hand histories from online poker sites.
+          </Project>
+          <Project
+            title="@poker-apprentice/hand-range-notation"
+            url="https://github.com/poker-apprentice/hand-range-notation"
+          >
+            TypeScript package for converting poker hand range notations to and from actual poker
+            hands.
+          </Project>
+        </div>
+      </ResumeSection>
     </div>
   );
 }
