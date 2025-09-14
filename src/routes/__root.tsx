@@ -19,12 +19,20 @@ function Root() {
           {/* Main Content - Left Column (3/4 width) */}
           <main className="col-span-3">
             {/* Navigation Header */}
-            <nav className="bg-[#358799] px-8 text-white print:hidden">
-              <div className="flex gap-6 text-sm">
-                <Link to="/" className="py-4 font-medium hover:underline">
+            <nav className="bg-[#358799] px-12 text-white print:hidden">
+              <div className="flex text-sm">
+                <Link
+                  to="/"
+                  activeProps={{ className: "bg-[#42A8C0]" }}
+                  className="px-4 py-4 font-medium hover:underline"
+                >
                   Blog
                 </Link>
-                <Link to="/resume" className="py-4 font-medium hover:underline">
+                <Link
+                  to="/resume"
+                  activeProps={{ className: "bg-[#42A8C0]" }}
+                  className="px-4 py-4 font-medium hover:underline active:bg-red"
+                >
                   Resume
                 </Link>
               </div>
