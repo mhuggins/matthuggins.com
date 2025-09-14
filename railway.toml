@@ -2,5 +2,5 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "tsx src/server.ts"
+startCommand = "node dist/server.js"
 restartPolicyType = "always"
