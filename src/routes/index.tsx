@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import React, { useState } from "react";
 import { Link } from "@/components/Link";
+import { Tags } from "@/components/Tags";
 
 export const Route = createFileRoute("/")({
   component: Blog,
@@ -24,33 +25,30 @@ const posts = Object.entries(
 function Blog() {
   const [items, _setItems] = usePosts();
 
+  if (items.length === 0) {
+    return <p className="text-gray-600">No blog posts yet. Check back soon!</p>;
+  }
+
   return (
-    <div className="mx-auto max-w-3xl p-6">
-      <h1 className="mb-4 font-bold text-2xl">Blog</h1>
-      <ul className="space-y-4">
-        {items.map((p) => (
-          <li key={p.slug} className="border-zinc-200 border-b pb-4">
-            <h2 className="font-semibold text-lg">
-              <Link to="/posts/$slug" params={{ slug: p.slug }}>
-                {p.frontmatter.title}
-              </Link>
-            </h2>
-            <div className="text-xs text-zinc-500">{formatDate(p.frontmatter.date)}</div>
-            {p.frontmatter.summary ? (
-              <p className="mt-1 text-sm text-zinc-700">{p.frontmatter.summary}</p>
-            ) : null}
-            {p.frontmatter.tags && p.frontmatter.tags.length ? (
-              <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                {p.frontmatter.tags.map((t) => (
-                  <span key={t} className="rounded bg-zinc-100 px-2 py-0.5 text-zinc-700">
-                    #{t}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+    <div className="flex flex-col gap-6">
+      {items.map((p) => (
+        <article key={p.slug} className="border-gray-200 border-b pb-6 last:border-b-0">
+          <h2 className="font-semibold text-gray-800 text-xl">
+            <Link
+              to="/posts/$slug"
+              params={{ slug: p.slug }}
+              className="transition-colors hover:text-[#358799]"
+            >
+              {p.frontmatter.title}
+            </Link>
+          </h2>
+          <div className="mb-3 text-gray-500 text-sm">{formatDate(p.frontmatter.date)}</div>
+          {p.frontmatter.summary && (
+            <p className="mb-3 text-gray-700 leading-relaxed">{p.frontmatter.summary}</p>
+          )}
+          {p.frontmatter.tags && <Tags tags={p.frontmatter.tags} />}
+        </article>
+      ))}
     </div>
   );
 }
@@ -93,7 +91,10 @@ function usePosts() {
 
 function formatDate(s: string) {
   const d = new Date(s);
-  if (!Number.isNaN(d.getTime()))
+
+  if (!Number.isNaN(d.getTime())) {
     return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  }
+
   return s;
 }

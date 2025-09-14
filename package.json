@@ -24,11 +24,14 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "@shikijs/rehype": "^3.12.2",
+    "@shikijs/transformers": "^3.12.2",
     "@tanstack/react-router": "^1.131.41",
     "@tanstack/react-router-devtools": "^1.131.42",
     "clsx": "^2.1.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "shiki": "^3.12.2",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.13",
     "zod": "^4.1.8"
@@ -36,8 +39,10 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
     "@mdx-js/rollup": "^3.1.1",
+    "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.13",
     "@tanstack/router-plugin": "^1.131.43",
+    "@types/hast": "^3.0.4",
     "@types/node": "^24.3.3",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",

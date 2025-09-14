@@ -1,7 +1,8 @@
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { routeTree } from "./routeTree.gen";
+import { initializeCodeBlocks } from "./utils/codeBlockUtils";
 import "./style.css";
 
 const router = createRouter({
@@ -20,13 +21,22 @@ declare module "@tanstack/react-router" {
   }
 }
 
+// App wrapper component to initialize code blocks
+function App() {
+  useEffect(() => {
+    initializeCodeBlocks();
+  }, []);
+
+  return <RouterProvider router={router} />;
+}
+
 // Render the app
 const rootElement = document.getElementById("root");
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <RouterProvider router={router} />
+      <App />
     </StrictMode>,
   );
 }

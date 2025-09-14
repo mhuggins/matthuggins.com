@@ -1,2 +1,44 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 @source '**/*.{js,jsx,ts,tsx}';
+
+/* Shiki Code Highlighting */
+pre {
+  @apply rounded-lg border border-gray-200 overflow-x-auto text-sm !bg-[#ffffff] relative;
+  padding: 1rem;
+}
+
+/* Code block header styling */
+.code-block-header {
+  @apply absolute top-2 right-2 flex items-center gap-2 bg-gray-50 px-2 py-1 rounded border border-gray-200 z-10;
+}
+
+/* Copy button styling */
+.copy-code-btn {
+  @apply cursor-pointer border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded;
+  transition: all 0.2s ease-in-out;
+  padding: 2px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-code-btn svg {
+  @apply w-4 h-4;
+  flex-shrink: 0;
+}
+
+.copy-code-btn:hover {
+  @apply scale-110;
+}
+
+.copy-code-btn:active {
+  @apply scale-95;
+}
+
+/* Inline code styling */
+:not(pre) > code {
+  @apply rounded bg-gray-100 px-1.5 py-0.5 text-sm font-mono;
+}
