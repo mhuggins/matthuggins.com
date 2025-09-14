@@ -19,6 +19,7 @@ import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import type { ShikiTransformer } from "shiki";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { blogWatcherPlugin } from "./plugins/blog-watcher";
 
 export default defineConfig({
   root: "./src",
@@ -33,6 +34,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    blogWatcherPlugin(),
     tsconfigPaths(),
     tanstackRouter({ target: "react", autoCodeSplitting: false }),
     mdx({

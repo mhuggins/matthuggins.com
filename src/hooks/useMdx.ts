@@ -1,23 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
-import { Frontmatter, getBlogPost } from "@/utils/getBlogPosts";
+import { useEffect, useState } from "react";
+import { BlogPostLoader } from "@/data/blog-metadata";
 
-export function useMdx(slug: string) {
-  const loader = useMemo(() => getBlogPost(slug), [slug]);
+const defaultComponent: React.ComponentType = () => null;
 
-  const [state, setState] = useState<{ Component: React.ComponentType; frontmatter?: Frontmatter }>(
-    {
-      Component: () => null,
-    },
-  );
+export function useMdx(loader?: BlogPostLoader) {
+  const [state, setState] = useState<React.ComponentType>(() => defaultComponent);
 
   useEffect(() => {
     let cancelled = false;
 
-    loader().then((mod) => {
-      if (!cancelled) {
-        setState({ Component: mod.default, frontmatter: mod.frontmatter });
-      }
-    });
+    if (!loader) {
+      setState(defaultComponent);
+      return;
+    }
+
+    loader
+      .then((Component) => {
+        if (!cancelled) {
+          // Ensure we're setting a valid React component
+          setState(() => Component);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error("Failed to load blog post", error);
+          setState(defaultComponent);
+        }
+      });
 
     return () => {
       cancelled = true;

@@ -10,6 +10,7 @@
   "packageManager": "pnpm@9.15.1",
   "scripts": {
     "dev": "vite",
+    "prebuild": "tsx scripts/generate-blog-metadata.ts",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "biome check .",
@@ -32,9 +33,13 @@
     "marked": "^16.3.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
     "shiki": "^3.12.2",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.13",
+    "unified": "^11.0.5",
+    "yaml": "^2.8.1",
     "zod": "^4.1.8"
   },
   "devDependencies": {
@@ -51,6 +56,7 @@
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
     "remark-mdx-frontmatter": "^5.0.0",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "vite": "^7.1.5",
     "vite-tsconfig-paths": "^5.1.4",

@@ -1,9 +1,10 @@
 import { ArrowLeftIcon, PushPinIcon } from "@phosphor-icons/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { Section } from "@/components/Section";
 import { Tags } from "@/components/Tags";
+import { getPostBySlug, hasBlogPost } from "@/data/blog-metadata";
 import { useMdx } from "@/hooks/useMdx";
-import { hasBlogPost } from "@/utils/getBlogPosts";
 
 export const Route = createFileRoute("/posts/$slug")({
   beforeLoad: ({ params }) => {
@@ -27,11 +28,15 @@ export const Route = createFileRoute("/posts/$slug")({
 
 function BlogPost() {
   const { slug } = Route.useParams();
-  const { Component, frontmatter } = useMdx(slug);
 
-  if (!frontmatter) {
+  const post = useMemo(() => getPostBySlug(slug), [slug]);
+  const Component = useMdx(post?.loader);
+
+  if (!post) {
     return <div>Loading...</div>;
   }
+
+  const { metadata } = post;
 
   return (
     <div className="flex flex-col gap-12">
@@ -42,12 +47,12 @@ function BlogPost() {
         </Link>
       </div>
 
-      <Section title={frontmatter.title} icon={PushPinIcon}>
+      <Section title={metadata.title} icon={PushPinIcon}>
         <div className="-mt-2 mb-6 ml-10">
-          {frontmatter.date && (
+          {metadata.date && (
             <div className="text-gray-500 text-sm">
               Published on{" "}
-              {new Date(frontmatter.date).toLocaleDateString(undefined, {
+              {new Date(metadata.date).toLocaleDateString(undefined, {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -55,10 +60,10 @@ function BlogPost() {
             </div>
           )}
 
-          {frontmatter.tags && (
+          {metadata.tags && (
             <div className="mt-1 flex items-start gap-2">
               <span className="text-gray-500 text-sm leading-relaxed">Tags:</span>
-              <Tags tags={frontmatter.tags} />
+              <Tags tags={metadata.tags} />
             </div>
           )}
         </div>
