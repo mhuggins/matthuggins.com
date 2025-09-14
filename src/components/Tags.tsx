@@ -9,7 +9,7 @@ export const Tags = ({ tags }: TagsProps) => (
         key={tag}
         className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 text-xs"
       >
-        #{tag}
+        {tag}
       </span>
     ))}
   </div>

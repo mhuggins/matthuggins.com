@@ -2,7 +2,7 @@
 title: Building an Open-Source Loader for React
 date: 2014-09-16
 tags: [react, javascript]
-# summary: TODO
+summary: Sometimes when building client projects, it quickly becomes clear when some code is going to be used and reused. Such is the case with a loader implementation for Gociety, a mobile app we recently worked on that uses React. When that happens, we like to give back -- and what better way than to open-source some code for others to use?
 ---
 
 While working on a mobile application for [Gociety](https://gociety.com/), we found that there were a handful of screens that needed to fetch data from an API endpoint before showing any details.  Since we knew enough about the state of the app (e.g.: the user is viewing a profile), we were able to show the general screen UI, but we needed a way to indicate to the user that the content is loading.

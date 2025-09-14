@@ -2,7 +2,7 @@
 title: April Fools! How We Converted Our Site to Doge in Just 40 Lines of Code
 date: 2014-04-01
 tags: [ruby]
-# summary: TODO
+summary: I recently wrote a blog post describing how to create your own RubyGem. The sample gem produced, aptly named dogeify, converts English sentences into "Doge" based upon the recently popular meme. For April Fools' Day, we thought it would be fun to implement this gem to convert our entire site into doge. Here's how we did it.
 ---
 
 I recently wrote a blog post describing [how to create your own RubyGem](/blog/2014-03-06/step-by-step-guide-to-building-your-first-ruby-gem).  The sample gem produced, aptly named [dogeify](https://github.com/mhuggins/dogeify), converts English sentences into "Doge" based upon the recently popular meme.  For April Fools' Day, we thought it would be fun to implement this gem to convert our entire site into doge.  Here's how we did it.

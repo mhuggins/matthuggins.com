@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import React, { useState } from "react";
 import { Link } from "@/components/Link";
 import { Tags } from "@/components/Tags";
+import { createHtmlProps, markdownToHtml } from "@/utils/markdown";
 
 export const Route = createFileRoute("/")({
   component: Blog,
@@ -44,7 +45,10 @@ function Blog() {
           </h2>
           <div className="mb-3 text-gray-500 text-sm">{formatDate(p.frontmatter.date)}</div>
           {p.frontmatter.summary && (
-            <p className="mb-3 text-gray-700 leading-relaxed">{p.frontmatter.summary}</p>
+            <div
+              className="prose prose-gray prose-sm mb-3 max-w-none text-gray-700 leading-relaxed"
+              {...createHtmlProps(markdownToHtml(p.frontmatter.summary))}
+            />
           )}
           {p.frontmatter.tags && <Tags tags={p.frontmatter.tags} />}
         </article>

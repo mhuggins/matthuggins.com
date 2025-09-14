@@ -29,6 +29,7 @@
     "@tanstack/react-router": "^1.131.41",
     "@tanstack/react-router-devtools": "^1.131.42",
     "clsx": "^2.1.1",
+    "marked": "^16.3.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "shiki": "^3.12.2",
