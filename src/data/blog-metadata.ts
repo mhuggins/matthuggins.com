@@ -1,5 +1,5 @@
-import type { BlogPostMetadata, BlogTag } from "@/types/blog";
-import { blogMetadata } from "./blog-metadata.gen";
+import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
+import { blogMetadata, blogTags } from "./blog-metadata.gen";
 
 export type BlogPostLoader = Promise<React.ComponentType>;
 
@@ -22,20 +22,18 @@ export function getPostsByTag(tag: BlogTag): BlogPost[] {
   return blogMetadata.filter((post) => post.tags.includes(tag)).map(getBlogPostFromMetadata);
 }
 
-const tagSet = new Set<BlogTag>(blogMetadata.flatMap((p) => p.tags));
-
 /**
  * Get all unique tags from blog posts
  */
 export function getAllTags(): BlogTag[] {
-  return Array.from(tagSet).sort();
+  return Array.from(blogTags).sort();
 }
 
 /**
  * Check if a tag exists
  */
 export function isValidTag(str: string): str is BlogTag {
-  return tagSet.has(str as BlogTag);
+  return blogTags.has(str as BlogTag);
 }
 
 /**

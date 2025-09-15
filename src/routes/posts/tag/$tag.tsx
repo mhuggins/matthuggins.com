@@ -4,7 +4,7 @@ import { Link } from "@/components/Link";
 import { Section } from "@/components/Section";
 import { Tags } from "@/components/Tags";
 import { getPostsByTag, isValidTag } from "@/data/blog-metadata";
-import type { BlogTag } from "@/types/blog";
+import type { BlogTag } from "@/types/blog.gen";
 import { createHtmlProps, markdownToHtml } from "@/utils/markdown";
 
 export const Route = createFileRoute("/posts/tag/$tag")({
