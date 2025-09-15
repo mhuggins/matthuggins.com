@@ -16,18 +16,6 @@ export const blogMetadata: BlogPostMetadata[] = [
     ]
   },
   {
-    "slug": "building-an-open-source-loader-for-react",
-    "filePath": "building-an-open-source-loader-for-react.md",
-    "title": "Building an Open-Source Loader for React",
-    "date": "2014-09-16",
-    "summary": "Sometimes when building client projects, it quickly becomes clear when some code is going to be used and reused. Such is the case with a loader implementation for Gociety, a mobile app we recently worked on that uses React. When that happens, we like to give back -- and what better way than to open-source some code for others to use?",
-    "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
-    "tags": [
-      "react",
-      "javascript"
-    ]
-  },
-  {
     "slug": "april-fools-how-we-converted-our-site-to-doge-in-just-40-lines-of-code",
     "filePath": "april-fools-how-we-converted-our-site-to-doge-in-just-40-lines-of-code.md",
     "title": "April Fools! How We Converted Our Site to Doge in Just 40 Lines of Code",
