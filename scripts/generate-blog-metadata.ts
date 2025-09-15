@@ -83,7 +83,7 @@ function generateBlogMetadata(): void {
       if (!frontmatter?.published) {
         continue;
       }
-      
+
       // Validate required frontmatter fields
       if (!frontmatter?.title || !frontmatter?.date) {
         console.warn(`⚠️  Skipping ${relativePath}: missing title or date`);
