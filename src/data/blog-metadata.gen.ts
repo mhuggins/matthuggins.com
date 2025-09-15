@@ -10,6 +10,7 @@ export const blogMetadata: BlogPostMetadata[] = [
     "title": "Parsing Domain Names - Now in Gem Form!",
     "date": "2015-01-02",
     "summary": "A feature for an internal Ruby project here at Quick Left necessitated parsing the domain from a URL. This seems like a problem for which there must already exist a solution, but it surprisingly turns out that there is no available solution for this seemingly simple task.",
+    "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
     "tags": [
       "ruby"
     ]
@@ -20,6 +21,7 @@ export const blogMetadata: BlogPostMetadata[] = [
     "title": "Building an Open-Source Loader for React",
     "date": "2014-09-16",
     "summary": "Sometimes when building client projects, it quickly becomes clear when some code is going to be used and reused. Such is the case with a loader implementation for Gociety, a mobile app we recently worked on that uses React. When that happens, we like to give back -- and what better way than to open-source some code for others to use?",
+    "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
     "tags": [
       "react",
       "javascript"
@@ -31,8 +33,10 @@ export const blogMetadata: BlogPostMetadata[] = [
     "title": "April Fools! How We Converted Our Site to Doge in Just 40 Lines of Code",
     "date": "2014-04-01",
     "summary": "I recently wrote a blog post describing how to create your own RubyGem. The sample gem produced, aptly named dogeify, converts English sentences into \"Doge\" based upon the recently popular meme. For April Fools' Day, we thought it would be fun to implement this gem to convert our entire site into doge. Here's how we did it.",
+    "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
     "tags": [
-      "ruby"
+      "ruby",
+      "ruby on rails"
     ]
   },
   {
@@ -41,6 +45,7 @@ export const blogMetadata: BlogPostMetadata[] = [
     "title": "Step-by-Step Guide to Building Your First Ruby Gem",
     "date": "2014-03-08",
     "summary": "Building your first Ruby gem may seem like a daunting task, but it's actually not so bad. It's quite rewarding to not only release a gem, but to see its download count climb as others put your hard work to good use, and even still as others offer to contribute new features and bug fixes to your very own gem. And thanks to RubyGems.org and Bundler, the process of creating, releasing, and implementing gems couldn't be easier.",
+    "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
     "tags": [
       "ruby"
     ]
@@ -51,6 +56,7 @@ export const blogMetadata: BlogPostMetadata[] = [
     "title": "Using Faux ActiveRecord Models in Rails 3",
     "date": "2014-01-04",
     "summary": "Implementing forms that are associated with models -- specifically ActiveRecord objects -- is pretty common when developing with Ruby on Rails. In fact, the built-in FormHelper assumes that you're working with some kind of persisted object.\n\nBut what happens when you want to create a form for something that is not persisted by an ActiveRecord model?\n",
+    "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
     "tags": [
       "ruby",
       "ruby on rails"

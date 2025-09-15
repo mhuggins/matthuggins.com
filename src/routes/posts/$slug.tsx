@@ -1,10 +1,11 @@
-import { ArrowLeftIcon, PushPinIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, NoteIcon, PenIcon } from "@phosphor-icons/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { Section } from "@/components/Section";
 import { Tags } from "@/components/Tags";
 import { getPostBySlug, hasBlogPost } from "@/data/blog-metadata";
 import { useMdx } from "@/hooks/useMdx";
+import { formatDate } from "@/utils/formatDate";
 
 export const Route = createFileRoute("/posts/$slug")({
   beforeLoad: ({ params }) => {
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/posts/$slug")({
   component: BlogPost,
   notFoundComponent: () => (
     <div className="flex flex-col gap-12">
-      <Section title="Post Not Found" icon={PushPinIcon}>
+      <Section title="Post Not Found" icon={PenIcon}>
         <p className="text-gray-600">The requested post could not be found.</p>
         <Link to="/" className="mt-4 inline-flex items-center gap-2 text-[#358799] hover:underline">
           <ArrowLeftIcon className="size-4" />
@@ -47,26 +48,22 @@ function BlogPost() {
         </Link>
       </div>
 
-      <Section title={metadata.title} icon={PushPinIcon}>
-        <div className="-mt-2 mb-6 ml-10">
-          {metadata.date && (
-            <div className="text-gray-500 text-sm">
-              Published on{" "}
-              {new Date(metadata.date).toLocaleDateString(undefined, {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </div>
-          )}
-
-          {metadata.tags && (
-            <div className="mt-1 flex items-start gap-2">
-              <span className="text-gray-500 text-sm leading-relaxed">Tags:</span>
-              <Tags tags={metadata.tags} />
-            </div>
-          )}
-        </div>
+      <Section
+        title={metadata.title}
+        subtitle={
+          <div className="flex items-center gap-2">
+            {formatDate(metadata.date)}
+            {metadata.tags.length > 0 && <Tags tags={metadata.tags} />}
+          </div>
+        }
+        icon={PenIcon}
+      >
+        {metadata.note && (
+          <div className="relative mb-4 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-4 pl-16 text-gray-600 text-sm italic">
+            <NoteIcon size={36} className="absolute top-4 left-4 text-gray-400" />
+            Editor's Note: {metadata.note}
+          </div>
+        )}
 
         <div className="prose prose-gray max-w-none">
           <Component />

@@ -6,6 +6,7 @@ summary: |
   Implementing forms that are associated with models -- specifically ActiveRecord objects -- is pretty common when developing with Ruby on Rails. In fact, the built-in FormHelper assumes that you're working with some kind of persisted object.
 
   But what happens when you want to create a form for something that is not persisted by an ActiveRecord model?
+note: This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.
 ---
 
 Implementing forms that are associated with models -- specifically ActiveRecord objects -- is pretty common when developing with Ruby on Rails. In fact, the built-in [form_for](https://api.rubyonrails.org/classes/ActionView/Helpers/FormHelper.html#method-i-form_for) helper method and its associated field helper methods all assume that you're working with some kind of persisted object. This can be seen in the basic syntax and its method signature.

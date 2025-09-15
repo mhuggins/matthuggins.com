@@ -1,7 +1,10 @@
+import { PenIcon } from "@phosphor-icons/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@/components/Link";
+import { Section } from "@/components/Section";
 import { Tags } from "@/components/Tags";
 import { getAllPosts } from "@/data/blog-metadata";
+import { formatDate } from "@/utils/formatDate";
 import { createHtmlProps, markdownToHtml } from "@/utils/markdown";
 
 export const Route = createFileRoute("/")({
@@ -16,38 +19,32 @@ function Blog() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 divide-y divide-gray-200">
       {posts.map((post) => (
-        <article key={post.metadata.slug} className="border-gray-200 border-b pb-6 last:border-b-0">
-          <h2 className="font-semibold text-gray-800 text-xl">
-            <Link
-              to="/posts/$slug"
-              params={{ slug: post.metadata.slug }}
-              className="transition-colors hover:text-[#358799]"
-            >
+        <Section
+          key={post.metadata.slug}
+          title={
+            <Link to="/posts/$slug" params={{ slug: post.metadata.slug }}>
               {post.metadata.title}
             </Link>
-          </h2>
-          <div className="mb-3 text-gray-500 text-sm">{formatDate(post.metadata.date)}</div>
+          }
+          subtitle={
+            <div className="flex items-center gap-2">
+              {formatDate(post.metadata.date)}
+              {post.metadata.tags.length > 0 && <Tags tags={post.metadata.tags} />}
+            </div>
+          }
+          icon={PenIcon}
+          className="pb-6 last:pb-0"
+        >
           {post.metadata.summary && (
             <div
-              className="prose prose-gray prose-sm mb-3 max-w-none text-gray-700 leading-relaxed"
+              className="prose prose-gray prose-sm max-w-none text-gray-700 leading-relaxed"
               {...createHtmlProps(markdownToHtml(post.metadata.summary))}
             />
           )}
-          {post.metadata.tags.length > 0 && <Tags tags={post.metadata.tags} />}
-        </article>
+        </Section>
       ))}
     </div>
   );
-}
-
-function formatDate(s: string) {
-  const d = new Date(s);
-
-  if (!Number.isNaN(d.getTime())) {
-    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-  }
-
-  return s;
 }
