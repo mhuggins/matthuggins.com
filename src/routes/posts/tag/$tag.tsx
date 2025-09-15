@@ -3,13 +3,13 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Link } from "@/components/Link";
 import { Section } from "@/components/Section";
 import { Tags } from "@/components/Tags";
-import { type BlogTag, getAllTags, getPostsByTag } from "@/data/blog-metadata";
+import { getPostsByTag, isValidTag } from "@/data/blog-metadata";
+import type { BlogTag } from "@/types/blog";
 import { createHtmlProps, markdownToHtml } from "@/utils/markdown";
 
 export const Route = createFileRoute("/posts/tag/$tag")({
   beforeLoad: ({ params }) => {
-    const validTags = getAllTags();
-    if (!validTags.includes(params.tag as BlogTag)) {
+    if (!isValidTag(params.tag)) {
       throw notFound();
     }
   },

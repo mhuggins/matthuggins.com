@@ -166,7 +166,7 @@ export interface BlogPostMetadata {
   date: string;
   summary: string | null;
   note: string | null;
-  tags: string[];
+  tags: BlogTag[];
 }
 
 export type BlogTag = ${allTags.length > 0 ? allTags.map((tag) => `"${tag}"`).join(" | ") : "string"};

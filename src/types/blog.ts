@@ -8,7 +8,7 @@ export interface BlogPostMetadata {
   date: string;
   summary: string | null;
   note: string | null;
-  tags: string[];
+  tags: BlogTag[];
 }
 
 export type BlogTag = "ruby" | "react" | "javascript" | "ruby on rails";
