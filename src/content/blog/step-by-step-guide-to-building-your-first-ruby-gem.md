@@ -1,6 +1,7 @@
 ---
 title: Step-by-Step Guide to Building Your First Ruby Gem
 date: 2014-03-08
+published: true
 tags: [ruby]
 summary: Building your first Ruby gem may seem like a daunting task, but it's actually not so bad. It's quite rewarding to not only release a gem, but to see its download count climb as others put your hard work to good use, and even still as others offer to contribute new features and bug fixes to your very own gem. And thanks to RubyGems.org and Bundler, the process of creating, releasing, and implementing gems couldn't be easier.
 note: This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.

@@ -1,6 +1,7 @@
 ---
 title: Parsing Domain Names - Now in Gem Form!
 date: 2015-01-02
+published: true
 tags: [ruby]
 summary: A feature for an internal Ruby project here at Quick Left necessitated parsing the domain from a URL. This seems like a problem for which there must already exist a solution, but it surprisingly turns out that there is no available solution for this seemingly simple task.
 note: This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.

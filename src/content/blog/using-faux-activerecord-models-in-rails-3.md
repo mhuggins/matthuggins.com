@@ -1,6 +1,7 @@
 ---
 title: Using Faux ActiveRecord Models in Rails 3
 date: 2014-01-04
+published: true
 tags: [ruby, ruby on rails]
 summary: |
   Implementing forms that are associated with models -- specifically ActiveRecord objects -- is pretty common when developing with Ruby on Rails. In fact, the built-in FormHelper assumes that you're working with some kind of persisted object.
