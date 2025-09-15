@@ -4,25 +4,11 @@
 import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
 
 export const blogTags: ReadonlySet<BlogTag> = new Set([
-  "react",
-  "forms",
   "ruby",
   "ruby on rails"
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
-  {
-    "slug": "reusable-form-patterns-with-tanstack-form",
-    "filePath": "reusable-form-patterns-with-tanstack-form.md",
-    "title": "Reusable Form Patterns with TanStack Form",
-    "date": "2025-09-15",
-    "summary": "TODO",
-    "note": null,
-    "tags": [
-      "react",
-      "forms"
-    ]
-  },
   {
     "slug": "parsing-domain-names-now-in-gem-form",
     "filePath": "parsing-domain-names-now-in-gem-form.md",

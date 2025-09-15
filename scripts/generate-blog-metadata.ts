@@ -14,6 +14,7 @@ const relativePath = path.join(path.relative(projectRoot, __dirname), __filename
 interface RawFrontmatter {
   title?: string;
   date?: string;
+  published?: boolean;
   tags?: string[];
   summary?: string;
   note?: string;
@@ -78,6 +79,11 @@ function generateBlogMetadata(): void {
         .replace(/\\/g, "/") // Normalize path separators
         .replace(/\/index$/, ""); // Handle index files
 
+      // Validate post is published
+      if (!frontmatter?.published) {
+        continue;
+      }
+      
       // Validate required frontmatter fields
       if (!frontmatter?.title || !frontmatter?.date) {
         console.warn(`⚠️  Skipping ${relativePath}: missing title or date`);
