@@ -7,7 +7,7 @@ import { getPostBySlug, hasBlogPost } from "@/data/blog-metadata";
 import { useMdx } from "@/hooks/useMdx";
 import { formatDate } from "@/utils/formatDate";
 
-export const Route = createFileRoute("/posts/$slug")({
+export const Route = createFileRoute("/blog/posts/$slug")({
   beforeLoad: ({ params }) => {
     if (!hasBlogPost(params.slug)) {
       throw notFound();
@@ -42,7 +42,7 @@ function BlogPost() {
   return (
     <div className="flex flex-col gap-12">
       <div className="flex items-center gap-4 text-sm">
-        <Link to="/" className="inline-flex items-center gap-2 text-[#358799] hover:underline">
+        <Link to="/blog" className="inline-flex items-center gap-2 text-[#358799] hover:underline">
           <ArrowLeftIcon className="size-4" />
           Back to Blog
         </Link>

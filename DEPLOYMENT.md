@@ -37,7 +37,7 @@ This project is configured for easy deployment to Railway.com as a Single Page A
 2. **Server**:
    - TypeScript Express.js server (compiled with `tsx`) serves static files from `dist/`
    - All routes fallback to `index.html` for client-side routing
-   - Supports direct navigation to any route (e.g., `/resume`, `/posts/slug`)
+   - Supports direct navigation to any route (e.g., `/`, `/blog/posts/slug`)
    - Full TypeScript type safety and development experience
 
 ## 🔧 Environment Variables

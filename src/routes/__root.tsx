@@ -1,4 +1,4 @@
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { BackgroundSection } from "@/components/BackgroundSection";
 import { EmailIcon } from "@/components/icons/EmailIcon";
@@ -6,12 +6,16 @@ import { GitHubIcon } from "@/components/icons/GitHubIcon";
 import { LinkedInIcon } from "@/components/icons/LinkedInIcon";
 import { StackOverflowIcon } from "@/components/icons/StackOverflowIcon";
 import { SidebarLink } from "@/components/SidebarLink";
+import { cn } from "@/utils/cn";
 
 export const Route = createRootRoute({
   component: Root,
 });
 
 function Root() {
+  const { location: { pathname } } = useRouterState();
+  const isBlogActive = pathname.split('/')[1] === "blog";
+
   return (
     <div className="min-h-dvh bg-gray-100 font-sans text-gray-900">
       <div className="mx-auto max-w-6xl px-4 py-8 print:p-0">
@@ -24,16 +28,15 @@ function Root() {
                 <Link
                   to="/"
                   activeProps={{ className: "bg-[#42A8C0]" }}
-                  className="px-4 py-4 font-medium hover:underline"
-                >
-                  Blog
-                </Link>
-                <Link
-                  to="/resume"
-                  activeProps={{ className: "bg-[#42A8C0]" }}
                   className="px-4 py-4 font-medium hover:underline active:bg-red"
                 >
                   Resume
+                </Link>
+                <Link
+                  to="/blog"
+                  className={cn("px-4 py-4 font-medium hover:underline", isBlogActive && "bg-[#42A8C0]")}
+                >
+                  Blog
                 </Link>
               </div>
             </nav>

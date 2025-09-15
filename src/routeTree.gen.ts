@@ -9,75 +9,68 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ResumeRouteImport } from './routes/resume'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
-import { Route as PostsTagTagRouteImport } from './routes/posts/tag/$tag'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogTagsTagRouteImport } from './routes/blog.tags.$tag'
+import { Route as BlogPostsSlugRouteImport } from './routes/blog.posts.$slug'
 
-const ResumeRoute = ResumeRouteImport.update({
-  id: '/resume',
-  path: '/resume',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PostsSlugRoute = PostsSlugRouteImport.update({
-  id: '/posts/$slug',
-  path: '/posts/$slug',
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PostsTagTagRoute = PostsTagTagRouteImport.update({
-  id: '/posts/tag/$tag',
-  path: '/posts/tag/$tag',
+const BlogTagsTagRoute = BlogTagsTagRouteImport.update({
+  id: '/blog/tags/$tag',
+  path: '/blog/tags/$tag',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogPostsSlugRoute = BlogPostsSlugRouteImport.update({
+  id: '/blog/posts/$slug',
+  path: '/blog/posts/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/resume': typeof ResumeRoute
-  '/posts/$slug': typeof PostsSlugRoute
-  '/posts/tag/$tag': typeof PostsTagTagRoute
+  '/blog': typeof BlogIndexRoute
+  '/blog/posts/$slug': typeof BlogPostsSlugRoute
+  '/blog/tags/$tag': typeof BlogTagsTagRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/resume': typeof ResumeRoute
-  '/posts/$slug': typeof PostsSlugRoute
-  '/posts/tag/$tag': typeof PostsTagTagRoute
+  '/blog': typeof BlogIndexRoute
+  '/blog/posts/$slug': typeof BlogPostsSlugRoute
+  '/blog/tags/$tag': typeof BlogTagsTagRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/resume': typeof ResumeRoute
-  '/posts/$slug': typeof PostsSlugRoute
-  '/posts/tag/$tag': typeof PostsTagTagRoute
+  '/blog/': typeof BlogIndexRoute
+  '/blog/posts/$slug': typeof BlogPostsSlugRoute
+  '/blog/tags/$tag': typeof BlogTagsTagRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/resume' | '/posts/$slug' | '/posts/tag/$tag'
+  fullPaths: '/' | '/blog' | '/blog/posts/$slug' | '/blog/tags/$tag'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/resume' | '/posts/$slug' | '/posts/tag/$tag'
-  id: '__root__' | '/' | '/resume' | '/posts/$slug' | '/posts/tag/$tag'
+  to: '/' | '/blog' | '/blog/posts/$slug' | '/blog/tags/$tag'
+  id: '__root__' | '/' | '/blog/' | '/blog/posts/$slug' | '/blog/tags/$tag'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ResumeRoute: typeof ResumeRoute
-  PostsSlugRoute: typeof PostsSlugRoute
-  PostsTagTagRoute: typeof PostsTagTagRoute
+  BlogIndexRoute: typeof BlogIndexRoute
+  BlogPostsSlugRoute: typeof BlogPostsSlugRoute
+  BlogTagsTagRoute: typeof BlogTagsTagRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/resume': {
-      id: '/resume'
-      path: '/resume'
-      fullPath: '/resume'
-      preLoaderRoute: typeof ResumeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -85,18 +78,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/posts/$slug': {
-      id: '/posts/$slug'
-      path: '/posts/$slug'
-      fullPath: '/posts/$slug'
-      preLoaderRoute: typeof PostsSlugRouteImport
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/posts/tag/$tag': {
-      id: '/posts/tag/$tag'
-      path: '/posts/tag/$tag'
-      fullPath: '/posts/tag/$tag'
-      preLoaderRoute: typeof PostsTagTagRouteImport
+    '/blog/tags/$tag': {
+      id: '/blog/tags/$tag'
+      path: '/blog/tags/$tag'
+      fullPath: '/blog/tags/$tag'
+      preLoaderRoute: typeof BlogTagsTagRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/posts/$slug': {
+      id: '/blog/posts/$slug'
+      path: '/blog/posts/$slug'
+      fullPath: '/blog/posts/$slug'
+      preLoaderRoute: typeof BlogPostsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -104,9 +104,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ResumeRoute: ResumeRoute,
-  PostsSlugRoute: PostsSlugRoute,
-  PostsTagTagRoute: PostsTagTagRoute,
+  BlogIndexRoute: BlogIndexRoute,
+  BlogPostsSlugRoute: BlogPostsSlugRoute,
+  BlogTagsTagRoute: BlogTagsTagRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

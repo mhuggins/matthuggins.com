@@ -9,7 +9,7 @@ export const Tags = ({ tags }: TagsProps) => (
     {tags.map((tag) => (
       <Link
         key={tag}
-        to="/posts/tag/$tag"
+        to="/blog/tags/$tag"
         params={{ tag }}
         className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 text-xs transition-colors hover:bg-gray-200 hover:text-gray-800"
       >

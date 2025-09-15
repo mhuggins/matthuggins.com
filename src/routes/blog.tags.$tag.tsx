@@ -7,7 +7,7 @@ import { getPostsByTag, isValidTag } from "@/data/blog-metadata";
 import type { BlogTag } from "@/types/blog.gen";
 import { createHtmlProps, markdownToHtml } from "@/utils/markdown";
 
-export const Route = createFileRoute("/posts/tag/$tag")({
+export const Route = createFileRoute("/blog/tags/$tag")({
   beforeLoad: ({ params }) => {
     if (!isValidTag(params.tag)) {
       throw notFound();
@@ -34,7 +34,7 @@ function TagPage() {
   return (
     <div className="flex flex-col gap-12">
       <div className="flex items-center gap-4 text-sm">
-        <Link to="/" className="inline-flex items-center gap-2 text-[#358799] hover:underline">
+        <Link to="/blog" className="inline-flex items-center gap-2 text-[#358799] hover:underline">
           <ArrowLeftIcon className="size-4" />
           Back to Blog
         </Link>
@@ -49,7 +49,7 @@ function TagPage() {
             >
               <h2 className="font-semibold text-gray-800 text-xl">
                 <Link
-                  to="/posts/$slug"
+                  to="/blog/posts/$slug"
                   params={{ slug: post.metadata.slug }}
                   className="transition-colors hover:text-[#358799]"
                 >

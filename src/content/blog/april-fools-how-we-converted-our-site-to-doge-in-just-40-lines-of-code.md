@@ -6,7 +6,7 @@ summary: I recently wrote a blog post describing how to create your own RubyGem.
 note: This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.
 ---
 
-I recently wrote a blog post describing [how to create your own RubyGem](/posts/step-by-step-guide-to-building-your-first-ruby-gem).  The sample gem produced, aptly named [dogeify](https://github.com/mhuggins/dogeify), converts English sentences into "Doge" based upon the recently popular meme.  For April Fools' Day, we thought it would be fun to implement this gem to convert our entire site into doge.  Here's how we did it.
+I recently wrote a blog post describing [how to create your own RubyGem](/blog/posts/step-by-step-guide-to-building-your-first-ruby-gem).  The sample gem produced, aptly named [dogeify](https://github.com/mhuggins/dogeify), converts English sentences into "Doge" based upon the recently popular meme.  For April Fools' Day, we thought it would be fun to implement this gem to convert our entire site into doge.  Here's how we did it.
 
 Approaching this project, we knew that we wanted to covert most, if not all, pages on the site.  There are a few options in terms of where and how to hook into our Rails code to do this.  The place that jumped out as the most convenient in terms of both simplicity and separation of concern is to create a simple Rack middleware.  This middleware could parse HTML responses, find text nodes, and convert the text from English to Doge.
 
