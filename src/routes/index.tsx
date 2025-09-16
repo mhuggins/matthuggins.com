@@ -1,6 +1,7 @@
 import {
   BriefcaseIcon,
   DesktopIcon,
+  GraduationCapIcon,
   PackageIcon,
   UserIcon,
   WrenchIcon,
@@ -129,6 +130,13 @@ function Resume() {
               "Maintained existing applications using ASP and VBScript for presentation and VB COM+ components for data source interaction.",
             ]}
           />
+        </div>
+      </ResumeSection>
+
+      <ResumeSection title="Education" icon={GraduationCapIcon}>
+        <div className="flex flex-col gap-4">
+          <Project title="Masters Program, Business">University of Delaware (2004 - 2006)</Project>
+          <Project title="BS in Computer Science">University of Delaware (2000 - 2004)</Project>
         </div>
       </ResumeSection>
 

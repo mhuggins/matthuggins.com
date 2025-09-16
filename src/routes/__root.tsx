@@ -5,6 +5,8 @@ import { BackgroundSection } from "@/components/BackgroundSection";
 import { ContactLinks } from "@/components/ContactLinks";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { Profile } from "@/components/Profile";
+import { Tags } from "@/components/Tags";
+import { getAllTags } from "@/data/blog-metadata";
 import { cn } from "@/utils/cn";
 
 export const Route = createRootRoute({
@@ -80,7 +82,7 @@ function Root() {
           <aside className="hidden bg-[#42A8C0] text-white md:block md:w-64 print:text-gray-900">
             <Profile />
 
-            <div className="flex flex-col gap-16 p-6">
+            <div className="flex flex-col gap-12 p-6">
               <ContactLinks />
 
               <BackgroundSection
@@ -102,27 +104,9 @@ function Root() {
                 ]}
               />
 
-              <BackgroundSection
-                title="Education"
-                entries={[
-                  {
-                    name: "Masters Program, Business",
-                    metadata: ["University of Delaware", "2004 - 2006"],
-                  },
-                  {
-                    name: "BS in Computer Science",
-                    metadata: ["University of Delaware", "2000 - 2004"],
-                  },
-                ]}
-              />
-
-              <BackgroundSection
-                title="Languages"
-                entries={[
-                  { name: "English", metadata: ["Native"] },
-                  { name: "French", metadata: ["Novice"] },
-                ]}
-              />
+              <BackgroundSection title="Blog Topics">
+                <Tags tags={getAllTags()} />
+              </BackgroundSection>
             </div>
           </aside>
         </div>

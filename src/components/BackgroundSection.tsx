@@ -2,7 +2,8 @@ import { ReactNode } from "react";
 
 export interface BackgroundSectionProps {
   title: string;
-  entries: BackgroundEntry[];
+  entries?: BackgroundEntry[];
+  children?: ReactNode;
 }
 
 interface BackgroundEntry {
@@ -10,10 +11,10 @@ interface BackgroundEntry {
   metadata: string[];
 }
 
-export const BackgroundSection = ({ title, entries }: BackgroundSectionProps) => (
+export const BackgroundSection = ({ title, entries, children }: BackgroundSectionProps) => (
   <div className="flex flex-col gap-3">
     <div className="font-semibold uppercase">{title}</div>
-    {entries.map((entry, i) => (
+    {entries?.map((entry, i) => (
       <div key={i} className="text-sm">
         <div className="mb-1 font-semibold">{entry.name}</div>
         {entry.metadata.map((datum, j) => (
@@ -23,5 +24,6 @@ export const BackgroundSection = ({ title, entries }: BackgroundSectionProps) =>
         ))}
       </div>
     ))}
+    {children && <div>{children}</div>}
   </div>
 );
