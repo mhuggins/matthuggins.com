@@ -11,8 +11,9 @@ interface DropdownProps {
 }
 
 interface Position {
-  top: number;
-  right: number;
+  placement: "left" | "right";
+  x: number;
+  y: number;
 }
 
 export const Dropdown = ({
@@ -25,15 +26,21 @@ export const Dropdown = ({
 }: DropdownProps) => {
   const [position, setPosition] = useState<Position | null>(null);
 
-  const calculatePosition = useCallback(() => {
+  const calculatePosition = useCallback((): Position => {
     if (triggerRef?.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      return {
-        top: rect.bottom + gap,
-        right: window.innerWidth - rect.right,
-      };
+      const screenWidth = window.innerWidth;
+      const triggerCenter = rect.left + rect.width / 2;
+
+      // Align dropdown to the left or right depending on trigger position
+      const placement = triggerCenter > screenWidth / 2 ? "left" : "right";
+      const x = placement === "left" ? screenWidth - rect.right : rect.left;
+      const y = rect.bottom + gap;
+
+      return { placement, x, y };
     }
-    return { top: 0, right: 0 };
+
+    return { placement: "right", x: 0, y: 0 };
   }, [triggerRef, gap]);
 
   useEffect(() => {
@@ -61,15 +68,18 @@ export const Dropdown = ({
 
   return (
     <Portal isOpen={shouldRenderDropdown} onClose={onClose} preventScroll={preventScroll}>
-      <div
-        className="fixed"
-        style={{
-          top: `${position?.top ?? 0}px`,
-          right: `${position?.right ?? 0}px`,
-        }}
-      >
-        {children}
-      </div>
+      {position && (
+        <div
+          className="fixed"
+          style={
+            position.placement === "left"
+              ? { top: `${position.y}px`, right: `${position.x}px` }
+              : { top: `${position.y}px`, left: `${position.x}px` }
+          }
+        >
+          {children}
+        </div>
+      )}
     </Portal>
   );
 };
