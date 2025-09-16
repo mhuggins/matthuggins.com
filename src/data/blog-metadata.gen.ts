@@ -4,11 +4,23 @@
 import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
 
 export const blogTags: ReadonlySet<BlogTag> = new Set([
+  "javascript",
   "ruby",
   "ruby on rails"
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
+  {
+    "slug": "pnpm-makes-monorepos-effortless",
+    "filePath": "pnpm-makes-monorepos-effortless.md",
+    "title": "pnpm Makes Monorepo Management Effortless",
+    "date": "2025-09-15",
+    "summary": "After years of struggling with challenges imposed by npm and yarn workspaces, pnpm demonstrates its ability to maintain monorepos effortlessly.",
+    "note": null,
+    "tags": [
+      "javascript"
+    ]
+  },
   {
     "slug": "parsing-domain-names-now-in-gem-form",
     "filePath": "parsing-domain-names-now-in-gem-form.md",
