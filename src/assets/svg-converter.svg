@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 32 32">
+  <defs>
+    <!-- Define mask for center hole -->
+    <mask id="center-hole">
+      <rect x="0" y="0" width="32" height="32" fill="white" />
+      <circle cx="16" cy="16" r="3" fill="black" />
+    </mask>
+
+    <!-- Define circle masks for each segment -->
+    <mask id="circle-mask-0">
+      <rect x="0" y="0" width="32" height="32" fill="white" />
+      <circle cx="22.47213595499958" cy="11.297717981660215" r="8" fill="black" />
+    </mask>
+    <mask id="circle-mask-1">
+      <rect x="0" y="0" width="32" height="32" fill="white" />
+      <circle cx="22.47213595499958" cy="20.702282018339787" r="8" fill="black" />
+    </mask>
+    <mask id="circle-mask-2">
+      <rect x="0" y="0" width="32" height="32" fill="white" />
+      <circle cx="13.52786404500042" cy="23.60845213036123" r="8" fill="black" />
+    </mask>
+    <mask id="circle-mask-3">
+      <rect x="0" y="0" width="32" height="32" fill="white" />
+      <circle cx="8" cy="16" r="8" fill="black" />
+    </mask>
+    <mask id="circle-mask-4">
+      <rect x="0" y="0" width="32" height="32" fill="white" />
+      <circle cx="13.52786404500042" cy="8.39154786963877" r="8" fill="black" />
+    </mask>
+  </defs>
+  
+  <g mask="url(#center-hole)">
+    <!-- Red -->
+    <g mask="url(#circle-mask-0)">
+      <circle cx="22.47213595499958" cy="20.702282018339787" r="8" fill="#EF4444" />
+    </g>
+    <!-- Orange -->
+    <g mask="url(#circle-mask-1)">
+      <circle cx="13.52786404500042" cy="23.60845213036123" r="8" fill="#F59E0B" />
+    </g>
+    <!-- Green -->
+    <g mask="url(#circle-mask-2)">
+      <circle cx="8" cy="16" r="8" fill="#22C55E" />
+    </g>
+    <!-- Cyan -->
+    <g mask="url(#circle-mask-3)">
+      <circle cx="13.52786404500042" cy="8.39154786963877" r="8" fill="#06B6D4" />
+    </g>
+    <!-- Purple -->
+    <g mask="url(#circle-mask-4)">
+      <circle cx="22.47213595499958" cy="11.297717981660213" r="8" fill="#8B5CF6" />
+    </g>
+  </g>
+</svg>

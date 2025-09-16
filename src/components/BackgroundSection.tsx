@@ -1,10 +1,12 @@
+import { ReactNode } from "react";
+
 export interface BackgroundSectionProps {
   title: string;
   entries: BackgroundEntry[];
 }
 
 interface BackgroundEntry {
-  name: string;
+  name: ReactNode;
   metadata: string[];
 }
 

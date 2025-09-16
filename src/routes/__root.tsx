@@ -1,5 +1,6 @@
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import SvgConverter from "@/assets/svg-converter.svg";
 import { BackgroundSection } from "@/components/BackgroundSection";
 import { ContactLinks } from "@/components/ContactLinks";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
@@ -81,6 +82,25 @@ function Root() {
 
             <div className="flex flex-col gap-16 p-6">
               <ContactLinks />
+
+              <BackgroundSection
+                title="Projects"
+                entries={[
+                  {
+                    name: (
+                      <a
+                        href="https://svgconverter.io"
+                        target="_blank"
+                        className="inline-flex items-center gap-2 hover:underline"
+                      >
+                        <img src={SvgConverter} className="size-4 drop-shadow-md" />
+                        SVGConverter.io
+                      </a>
+                    ),
+                    metadata: ["Vectorize raster images"],
+                  },
+                ]}
+              />
 
               <BackgroundSection
                 title="Education"
