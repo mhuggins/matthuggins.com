@@ -23,6 +23,7 @@ import { blogWatcherPlugin } from "./plugins/blog-watcher";
 
 export default defineConfig({
   root: "./src",
+  publicDir: "../public",
   build: {
     outDir: "../dist",
     minify: false,
