@@ -37,12 +37,30 @@ function TagPage() {
   // For some reason, trying to assign this value inline within the <title> tag does not work.
   // Setting the desired value to a string variable first seems to address the issue.
   const title = `"${tag}" Blog Posts - Matt Huggins`;
+  const description = `Blog posts tagged under topic "${tag}"`;
+  const url = `https://matthuggins.com/blog/tags/${encodeURIComponent(tag)}`;
 
   return (
     <>
       <title>{title}</title>
-      <meta name="description" content={`Blog posts tagged under topic "${tag}"`} />
+      <meta name="description" content={description} />
       <meta name="keywords" content={tag} />
+
+      {/* Canonical URL */}
+      <link rel="canonical" href={url} />
+
+      {/* Open Graph */}
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="Matt Huggins" />
+
+      {/* Twitter Card */}
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+
       <Tag tag={tag as BlogTag} posts={posts} />
     </>
   );

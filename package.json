@@ -12,7 +12,7 @@
     "dev": "vite",
     "build": "pnpm build:web && pnpm build:server",
     "build:web": "pnpm build:data && vite build",
-    "build:data": "tsx scripts/generate-blog-metadata.ts",
+    "build:data": "tsx scripts/generate-blog-metadata.ts && tsx scripts/generate-sitemap.ts",
     "build:server": "tsc --project tsconfig.server.json",
     "start": "node dist/server.js",
     "preview": "vite preview",

@@ -6,14 +6,60 @@ export const Route = createFileRoute("/blog/")({
 });
 
 function BlogPage() {
+  const title = "Web Development Blog - Matt Huggins";
+  const description = "Software Development Blog covering web and mobile development";
+  const url = "https://matthuggins.com/blog";
+  const keywords = [
+    "web",
+    "development",
+    "react",
+    "typescript",
+    "javascript",
+    "ruby",
+    "ruby on rails",
+    "css",
+    "html",
+    "mobile",
+  ].join(", ");
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Web Development Blog of Matt Huggins",
+    description,
+    keywords,
+    url,
+    author: {
+      "@type": "Person",
+      name: "Matt Huggins",
+      url: "https://matthuggins.com",
+    },
+  };
+
   return (
     <>
-      <title>Web Development Blog - Matt Huggins</title>
-      <meta name="description" content="Matt Huggins' Software Development Blog" />
-      <meta
-        name="keywords"
-        content="web, development, react, typescript, javascript, ruby, ruby on rails, css, html"
-      />
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta name="keywords" content={keywords} />
+
+      {/* Canonical URL */}
+      <link rel="canonical" href={url} />
+
+      {/* Open Graph */}
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="Matt Huggins" />
+
+      {/* Twitter Card */}
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+
+      {/* Structured Data */}
+      <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+
       <BlogPosts />
     </>
   );
