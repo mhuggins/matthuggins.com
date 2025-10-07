@@ -26,7 +26,9 @@ export default defineConfig({
   publicDir: "../public",
   build: {
     outDir: "../dist",
-    minify: false,
+    minify: "esbuild",
+    sourcemap: false,
+    target: "es2018",
     emptyOutDir: true,
     rollupOptions: {
       input: {
