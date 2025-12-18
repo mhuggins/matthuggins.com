@@ -24,7 +24,7 @@ function Root() {
       <div className="mx-auto max-w-6xl px-4 py-8 md:px-4 md:py-8 print:p-0">
         <div className="min-h-screen overflow-hidden bg-white shadow-lg md:flex">
           {/* Main Content */}
-          <main className="md:flex-1">
+          <main className="overflow-hidden md:flex-1">
             {/* Navigation Header */}
             <nav className="bg-[#358799] px-4 text-white md:px-12 print:hidden">
               <div className="flex items-center justify-between text-sm">
@@ -79,7 +79,7 @@ function Root() {
           </main>
 
           {/* Sidebar - Hidden on mobile, visible on desktop */}
-          <aside className="hidden bg-[#42A8C0] text-white md:block md:w-64 print:text-gray-900">
+          <aside className="hidden shrink-0 bg-[#42A8C0] text-white md:block md:w-64 print:text-gray-900">
             <Profile />
 
             <div className="flex flex-col gap-12 p-6">
