@@ -4,12 +4,28 @@
 import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
 
 export const blogTags: ReadonlySet<BlogTag> = new Set([
+  "react",
+  "typescript",
+  "form management",
   "javascript",
   "ruby",
   "ruby on rails"
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
+  {
+    "slug": "building-a-reusable-form-component-library-with-tanstack-form",
+    "filePath": "building-a-reusable-form-component-library-with-tanstack-form.md",
+    "title": "Building a Reusable Form Component Library with TanStack Form",
+    "date": "2025-12-18",
+    "summary": "After years of working with react-hook-form, I made the switch to TanStack Form and built a reusable component library around it on top of my company's existing form components. Here are the patterns I landed on for binding these components to form state, creating intelligent buttons with automated loading states, and lazy-loading fields for better performance.",
+    "note": null,
+    "tags": [
+      "react",
+      "typescript",
+      "form management"
+    ]
+  },
   {
     "slug": "pnpm-makes-monorepos-effortless",
     "filePath": "pnpm-makes-monorepos-effortless.md",

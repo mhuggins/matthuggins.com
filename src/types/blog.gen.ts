@@ -11,4 +11,4 @@ export interface BlogPostMetadata {
   tags: BlogTag[];
 }
 
-export type BlogTag = "javascript" | "ruby" | "ruby on rails";
+export type BlogTag = "react" | "typescript" | "form management" | "javascript" | "ruby" | "ruby on rails";
