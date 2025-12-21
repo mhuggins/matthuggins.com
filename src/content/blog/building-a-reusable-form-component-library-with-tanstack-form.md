@@ -2,7 +2,7 @@
 title: Building a Reusable Form Component Library with TanStack Form
 date: 2025-12-18
 published: true
-tags: [react, typescript, form management]
+tags: [react, typescript, form management, user experience]
 summary: After years of working with react-hook-form, I made the switch to TanStack Form and built a reusable component library around it on top of my company's existing form components. Here are the patterns I landed on for binding these components to form state, creating intelligent buttons with automated loading states, and lazy-loading fields for better performance.
 ---
 

@@ -7,6 +7,7 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
   "react",
   "typescript",
   "form management",
+  "user experience",
   "javascript",
   "ruby",
   "ruby on rails"
@@ -23,7 +24,8 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "tags": [
       "react",
       "typescript",
-      "form management"
+      "form management",
+      "user experience"
     ]
   },
   {

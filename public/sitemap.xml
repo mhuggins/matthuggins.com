@@ -62,6 +62,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://matthuggins.com/blog/tags/user%20experience</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://matthuggins.com/blog/tags/javascript</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
