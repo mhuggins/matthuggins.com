@@ -22,7 +22,7 @@ Consider a chart tracking regional sales over time. Each column represents a dif
 
 This data is represented in our system hierarchically:
 
-```
+```bash
 ├── United States
 │   ├── West Coast
 │   │   └── California
