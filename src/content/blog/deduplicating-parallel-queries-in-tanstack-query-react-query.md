@@ -1,7 +1,7 @@
 ---
 title: Deduplicating Parallel Queries in TanStack Query (React Query)
 date: 2025-12-21
-published: false
+published: true
 tags: [react, typescript, react-query, tanstack query, data fetching]
 summary: When building time series charts that display percentages, you often need to fetch both numerator and denominator values for each data series. But what happens when multiple series share the same denominator? Here's how I used TanStack Query's `hashKey` function to deduplicate overlapping queries and map the results back to the original data structure.
 ---
