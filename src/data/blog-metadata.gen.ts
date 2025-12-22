@@ -4,19 +4,35 @@
 import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
 
 export const blogTags: ReadonlySet<BlogTag> = new Set([
-  "react",
   "typescript",
+  "javascript",
+  "node.js",
+  "security",
+  "react",
   "tanstack query",
   "data fetching",
   "tanstack form",
   "form management",
   "user experience",
-  "javascript",
   "ruby",
   "ruby on rails"
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
+  {
+    "slug": "building-a-secure-javascript-sandbox-for-player-bot-scripts",
+    "filePath": "building-a-secure-javascript-sandbox-for-player-bot-scripts.md",
+    "title": "Building a Secure JavaScript Sandbox for Player Bot Scripts",
+    "date": "2025-12-29",
+    "summary": "How I built a secure sandbox for running untrusted player scripts using V8 isolates, a two-layer API architecture, and runtime code generation.",
+    "note": null,
+    "tags": [
+      "typescript",
+      "javascript",
+      "node.js",
+      "security"
+    ]
+  },
   {
     "slug": "deduplicating-parallel-queries-in-tanstack-query-react-query",
     "filePath": "deduplicating-parallel-queries-in-tanstack-query-react-query.md",

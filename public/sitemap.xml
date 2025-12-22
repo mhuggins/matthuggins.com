@@ -11,6 +11,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://matthuggins.com/blog/posts/building-a-secure-javascript-sandbox-for-player-bot-scripts</loc>
+    <lastmod>2025-12-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://matthuggins.com/blog/posts/deduplicating-parallel-queries-in-tanstack-query-react-query</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>yearly</changefreq>
@@ -53,12 +59,27 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://matthuggins.com/blog/tags/react</loc>
+    <loc>https://matthuggins.com/blog/tags/typescript</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://matthuggins.com/blog/tags/typescript</loc>
+    <loc>https://matthuggins.com/blog/tags/javascript</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://matthuggins.com/blog/tags/node.js</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://matthuggins.com/blog/tags/security</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://matthuggins.com/blog/tags/react</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -84,11 +105,6 @@
   </url>
   <url>
     <loc>https://matthuggins.com/blog/tags/user%20experience</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://matthuggins.com/blog/tags/javascript</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
