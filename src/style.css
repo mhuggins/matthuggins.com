@@ -42,3 +42,14 @@ pre {
 :not(pre) > code {
   @apply rounded bg-gray-100 px-1.5 py-0.5 text-sm font-mono;
 }
+
+/* Override Tailwind Typography prose styles for inline code */
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+  content: none;
+}
+
+/* Inherit font-size for inline code in headings */
+.prose :where(h1, h2, h3, h4, h5, h6) :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  font-size: inherit;
+}
