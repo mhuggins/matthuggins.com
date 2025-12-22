@@ -6,9 +6,9 @@ import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
 export const blogTags: ReadonlySet<BlogTag> = new Set([
   "react",
   "typescript",
-  "react-query",
   "tanstack query",
   "data fetching",
+  "tanstack form",
   "form management",
   "user experience",
   "javascript",
@@ -27,7 +27,6 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "tags": [
       "react",
       "typescript",
-      "react-query",
       "tanstack query",
       "data fetching"
     ]
@@ -42,6 +41,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "tags": [
       "react",
       "typescript",
+      "tanstack form",
       "form management",
       "user experience"
     ]

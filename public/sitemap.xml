@@ -63,17 +63,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://matthuggins.com/blog/tags/react-query</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://matthuggins.com/blog/tags/tanstack%20query</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://matthuggins.com/blog/tags/data%20fetching</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://matthuggins.com/blog/tags/tanstack%20form</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
