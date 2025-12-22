@@ -11,8 +11,9 @@ export interface BlogPost {
 /**
  * Get all blog posts sorted by date (newest first)
  */
-export function getAllPosts(): BlogPost[] {
-  return blogMetadata.map(getBlogPostFromMetadata);
+export function getAllPosts({ limit }: { limit?: number } = {}): BlogPost[] {
+  const metadataItems = limit === undefined ? blogMetadata : blogMetadata.slice(0, limit);
+  return metadataItems.map(getBlogPostFromMetadata);
 }
 
 /**

@@ -6,6 +6,9 @@ import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
 export const blogTags: ReadonlySet<BlogTag> = new Set([
   "react",
   "typescript",
+  "react-query",
+  "tanstack query",
+  "data fetching",
   "form management",
   "user experience",
   "javascript",
@@ -14,6 +17,21 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
+  {
+    "slug": "deduplicating-parallel-queries-in-tanstack-query-react-query",
+    "filePath": "deduplicating-parallel-queries-in-tanstack-query-react-query.md",
+    "title": "Deduplicating Parallel Queries in TanStack Query (React Query)",
+    "date": "2025-12-21",
+    "summary": "When building time series charts that display percentages, you often need to fetch both numerator and denominator values for each data series. But what happens when multiple series share the same denominator? Here's how I used TanStack Query's `hashKey` function to deduplicate overlapping queries and map the results back to the original data structure.",
+    "note": null,
+    "tags": [
+      "react",
+      "typescript",
+      "react-query",
+      "tanstack query",
+      "data fetching"
+    ]
+  },
   {
     "slug": "building-a-reusable-form-component-library-with-tanstack-form",
     "filePath": "building-a-reusable-form-component-library-with-tanstack-form.md",

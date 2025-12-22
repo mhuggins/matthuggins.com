@@ -1,3 +1,4 @@
+import { PenIcon } from "@phosphor-icons/react";
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import SvgConverter from "@/assets/svg-converter.svg";
@@ -6,8 +7,9 @@ import { ContactLinks } from "@/components/ContactLinks";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { Profile } from "@/components/Profile";
 import { Tags } from "@/components/Tags";
-import { getAllTags } from "@/data/blog-metadata";
+import { getAllPosts, getAllTags } from "@/data/blog-metadata";
 import { cn } from "@/utils/cn";
+import { formatDate } from "@/utils/formatDate";
 
 export const Route = createRootRoute({
   component: Root,
@@ -102,6 +104,22 @@ function Root() {
                     metadata: ["Vectorize raster images"],
                   },
                 ]}
+              />
+
+              <BackgroundSection
+                title="Recent Blog Posts"
+                entries={getAllPosts({ limit: 3 }).map((post) => ({
+                  name: (
+                    <Link
+                      to="/blog/posts/$slug"
+                      params={{ slug: post.metadata.slug }}
+                      className="hover:underline"
+                    >
+                      {post.metadata.title}
+                    </Link>
+                  ),
+                  metadata: [formatDate(post.metadata.date)],
+                }))}
               />
 
               <BackgroundSection title="Blog Topics">
