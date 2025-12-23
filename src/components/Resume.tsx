@@ -29,9 +29,14 @@ export function Resume() {
             role="Staff Software Engineer"
             company="Prelude Security"
             location="Remote"
+            description='Building intuitive user experiences to help CISOs answer the question: "am I protected?"'
             startDate="Sept. 2024"
             tasks={[
-              'Building intuitive user experiences to help CISOs answer the question: "am I protected?"',
+              "Architected an interactive security control visualization using React Flow, providing real-time insight into EDR, Endpoint Management, Vulnerability Management, Email, and Identity security posture with animated node states and drill-down capabilities.",
+              "Built a comprehensive custom reporting system with time series, number, percentage, bar, column, and pie chart visualizations, including PDF export, JSON import/export, and advanced filtering.",
+              "Designed and implemented a robust OData filter architecture featuring a custom lexer/parser and predictive autocomplete, enabling consistent data querying across all platform surfaces.",
+              "Created a reusable form component library, migrating the entire application from react-hook-form to TanStack Form for improved type safety, performance, and developer experience.",
+              "Established E2E testing infrastructure with Playwright and Storybook, improving release confidence and component documentation.",
             ]}
           />
           <Experience

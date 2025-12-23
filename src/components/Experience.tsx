@@ -2,6 +2,7 @@ interface ExperienceProps {
   role: string;
   company: string;
   location: string;
+  description?: string;
   startDate: string;
   endDate?: string;
   tasks: string[];
@@ -11,6 +12,7 @@ export const Experience = ({
   role,
   company,
   location,
+  description,
   startDate,
   endDate,
   tasks,
@@ -26,6 +28,7 @@ export const Experience = ({
     <div className="text-[#97AAC3]">
       {company}, {location}
     </div>
+    {description && <div>{description}</div>}
     <ul className="my-2 ml-6 list-disc">
       {tasks.map((task, i) => (
         <li key={i}>{task}</li>
