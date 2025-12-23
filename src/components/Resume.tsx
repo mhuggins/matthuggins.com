@@ -145,10 +145,10 @@ export function Resume() {
           <Project title="SVGConverter.io" role="Creator" url="https://svgconverter.io">
             Web-app for converting raster images into vectorized SVGs.
           </Project>
-          <Project title="nOS" role="Lead Developer" url="https://nos.io">
+          <Project title="nOS" role="Lead Developer" past url="https://nos.io">
             Browser, app store, and crypto wallet for the nOS cryptocurrency.
           </Project>
-          <Project title="Black Book Singles" role="Founder">
+          <Project title="Black Book Singles" role="Founder" past>
             Free online dating website and mobile application.
           </Project>
         </div>
