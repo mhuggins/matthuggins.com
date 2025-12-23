@@ -2,9 +2,18 @@
 @plugin "@tailwindcss/typography";
 @source '**/*.{js,jsx,ts,tsx}';
 
+@theme {
+  --color-primary: #358799;
+  --color-primary-light: #42a8c0;
+  --color-primary-dark: #2d7788;
+  --color-primary-darker: #1a454f;
+  --color-muted: #97aac3;
+  --color-secondary-foreground: #545e6c;
+}
+
 /* Shiki Code Highlighting */
 pre {
-  @apply rounded-lg border border-gray-200 overflow-x-auto text-sm !bg-[#ffffff] relative;
+  @apply rounded-lg border border-gray-200 overflow-x-auto text-sm !bg-white relative;
   padding: 1rem;
 }
 
@@ -50,6 +59,7 @@ pre {
 }
 
 /* Inherit font-size for inline code in headings */
-.prose :where(h1, h2, h3, h4, h5, h6) :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+.prose :where(h1, h2, h3, h4, h5, h6)
+  :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
   font-size: inherit;
 }

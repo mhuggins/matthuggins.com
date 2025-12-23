@@ -1,4 +1,3 @@
-import { PenIcon } from "@phosphor-icons/react";
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import SvgConverter from "@/assets/svg-converter.svg";
@@ -28,13 +27,13 @@ function Root() {
           {/* Main Content */}
           <main className="overflow-hidden md:flex-1">
             {/* Navigation Header */}
-            <nav className="bg-[#358799] px-4 text-white md:px-12 print:hidden">
+            <nav className="bg-primary px-4 text-white md:px-12 print:hidden">
               <div className="flex items-center justify-between text-sm">
                 {/* Mobile: Navigation Links on left */}
                 <div className="flex text-sm md:hidden">
                   <Link
                     to="/"
-                    activeProps={{ className: "bg-[#42A8C0]" }}
+                    activeProps={{ className: "bg-primary-light" }}
                     className="px-4 py-4 font-medium hover:underline"
                   >
                     Resume
@@ -43,7 +42,7 @@ function Root() {
                     to="/blog"
                     className={cn(
                       "px-4 py-4 font-medium hover:underline",
-                      isBlogActive && "bg-[#42A8C0]",
+                      isBlogActive && "bg-primary-light",
                     )}
                   >
                     Blog
@@ -54,7 +53,7 @@ function Root() {
                 <div className="hidden text-sm md:flex">
                   <Link
                     to="/"
-                    activeProps={{ className: "bg-[#42A8C0]" }}
+                    activeProps={{ className: "bg-primary-light" }}
                     className="px-4 py-4 font-medium hover:underline active:bg-red"
                   >
                     Resume
@@ -63,7 +62,7 @@ function Root() {
                     to="/blog"
                     className={cn(
                       "px-4 py-4 font-medium hover:underline",
-                      isBlogActive && "bg-[#42A8C0]",
+                      isBlogActive && "bg-primary-light",
                     )}
                   >
                     Blog
@@ -81,7 +80,7 @@ function Root() {
           </main>
 
           {/* Sidebar - Hidden on mobile, visible on desktop */}
-          <aside className="hidden shrink-0 bg-[#42A8C0] text-white md:block md:w-64 print:text-gray-900">
+          <aside className="hidden shrink-0 bg-primary-light text-white md:block md:w-64 print:text-gray-900">
             <Profile />
 
             <div className="flex flex-col gap-12 p-6">

@@ -10,7 +10,7 @@ export function Tag({ tag, posts }: { tag: BlogTag; posts: BlogPostType[] }) {
   return (
     <div className="flex flex-col gap-12">
       <div className="flex items-center gap-4 text-sm">
-        <Link to="/blog" className="inline-flex items-center gap-2 text-[#358799] hover:underline">
+        <Link to="/blog" className="inline-flex items-center gap-2 text-primary hover:underline">
           <ArrowLeftIcon className="size-4" />
           Back to Blog
         </Link>
@@ -27,7 +27,7 @@ export function Tag({ tag, posts }: { tag: BlogTag; posts: BlogPostType[] }) {
                 <Link
                   to="/blog/posts/$slug"
                   params={{ slug: post.metadata.slug }}
-                  className="transition-colors hover:text-[#358799]"
+                  className="transition-colors hover:text-primary"
                 >
                   {post.metadata.title}
                 </Link>

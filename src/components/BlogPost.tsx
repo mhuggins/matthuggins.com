@@ -14,7 +14,7 @@ export function BlogPost({ post }: { post: BlogPostType }) {
   return (
     <div className="flex flex-col gap-12">
       <div className="flex items-center gap-4 text-sm">
-        <Link to="/blog" className="inline-flex items-center gap-2 text-[#358799] hover:underline">
+        <Link to="/blog" className="inline-flex items-center gap-2 text-primary hover:underline">
           <ArrowLeftIcon className="size-4" />
           Back to Blog
         </Link>

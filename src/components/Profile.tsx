@@ -5,7 +5,7 @@ export interface ProfileProps {
 }
 
 export const Profile = ({ className }: ProfileProps) => (
-  <div className={cn("bg-[#358799] p-6 text-center text-white print:py-0", className)}>
+  <div className={cn("bg-primary p-6 text-center text-white print:py-0", className)}>
     <div className="mx-auto mt-2 mb-4 size-16 overflow-hidden rounded-full border-2 border-gray-100 bg-gray-100 shadow-md md:mt-0 md:size-32 md:border-4">
       <img
         src="https://github.com/mhuggins.png"

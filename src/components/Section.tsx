@@ -14,7 +14,7 @@ export interface SectionProps {
 export const Section = ({ title, subtitle, icon, children, className }: SectionProps) => (
   <section className={cn("flex flex-col gap-4", className)}>
     <div className="flex flex-col gap-1">
-      <h2 className="flex items-center gap-2 font-normal text-[#2D7788] text-xl uppercase tracking-wide">
+      <h2 className="flex items-center gap-2 font-normal text-primary-dark text-xl uppercase tracking-wide">
         <CircleIcon icon={icon} size={18} />
         {title}
       </h2>

@@ -43,7 +43,7 @@ export const HamburgerMenu = () => {
       </button>
 
       <Dropdown isOpen={isOpen} onClose={handleClose} triggerRef={buttonRef}>
-        <div className="w-64 rounded-lg bg-[#42A8C0] opacity-100 shadow-lg">
+        <div className="w-64 rounded-lg bg-primary-light opacity-100 shadow-lg">
           <Profile className="rounded-t-lg p-4" />
           <ContactLinks className="p-4" />
         </div>

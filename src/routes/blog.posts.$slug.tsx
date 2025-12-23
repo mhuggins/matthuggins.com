@@ -20,7 +20,7 @@ function NotFound() {
     <div className="flex flex-col gap-12">
       <Section title="Post Not Found" icon={PenIcon}>
         <p className="text-gray-600">The requested post could not be found.</p>
-        <Link to="/" className="mt-4 inline-flex items-center gap-2 text-[#358799] hover:underline">
+        <Link to="/" className="mt-4 inline-flex items-center gap-2 text-primary hover:underline">
           <ArrowLeftIcon className="size-4" />
           Return Home
         </Link>

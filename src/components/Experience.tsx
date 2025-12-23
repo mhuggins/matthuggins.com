@@ -21,11 +21,11 @@ export const Experience = ({
   <div {...props}>
     <div className="flex items-center justify-between gap-3">
       <div className="text-base">{role}</div>
-      <div className="text-[#97AAC3]">
+      <div className="text-muted">
         {startDate} - {endDate ?? "Present"}
       </div>
     </div>
-    <div className="text-[#97AAC3]">
+    <div className="text-muted">
       {company}, {location}
     </div>
     {description && <div>{description}</div>}

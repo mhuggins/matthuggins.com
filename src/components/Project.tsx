@@ -15,11 +15,11 @@ export const Project = ({ title, role, url, past, children }: ProjectProps) => (
       {url ? (
         <ExternalLink href={url}>{title}</ExternalLink>
       ) : (
-        <span className="text-[#2D7788]">{title}</span>
+        <span className="text-primary-dark">{title}</span>
       )}
       {role && <span> - {role}</span>}
-      {past && <span className="text-[#97AAC3] text-sm italic"> (Past)</span>}
+      {past && <span className="text-muted text-sm italic"> (Past)</span>}
     </div>
-    <p className="text-[#545E6C] text-sm leading-relaxed">{children}</p>
+    <p className="text-secondary-foreground text-sm leading-relaxed">{children}</p>
   </div>
 );

@@ -7,6 +7,6 @@ export interface ResumeSectionProps extends Omit<SectionProps, "children"> {
 
 export const ResumeSection = ({ children, ...props }: ResumeSectionProps) => (
   <Section {...props}>
-    <div className="text-[#545E6C] text-sm leading-relaxed">{children}</div>
+    <div className="text-secondary-foreground text-sm leading-relaxed">{children}</div>
   </Section>
 );
