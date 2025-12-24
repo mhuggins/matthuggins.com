@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, PenIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, FileXIcon } from "@phosphor-icons/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { BlogPost } from "@/components/BlogPost";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/blog/posts/$slug")({
 function NotFound() {
   return (
     <div className="flex flex-col gap-12">
-      <Section title="Post Not Found" icon={PenIcon}>
+      <Section title="Post Not Found" icon={FileXIcon}>
         <p className="text-gray-600">The requested post could not be found.</p>
         <Link to="/" className="mt-4 inline-flex items-center gap-2 text-primary hover:underline">
           <ArrowLeftIcon className="size-4" />

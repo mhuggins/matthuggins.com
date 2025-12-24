@@ -1,8 +1,8 @@
 import { ArrowLeftIcon, TagIcon } from "@phosphor-icons/react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { BlogPosts } from "@/components/BlogPosts";
 import { Link } from "@/components/Link";
 import { Section } from "@/components/Section";
-import { Tag } from "@/components/Tag";
 import { getPostsByTag, isValidTag } from "@/data/blog-metadata";
 import type { BlogTag } from "@/types/blog.gen";
 
@@ -61,7 +61,20 @@ function TagPage() {
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
 
-      <Tag tag={tag as BlogTag} posts={posts} />
+      <Section
+        title={`Posts Tagged \u201C${tag}\u201D`}
+        subtitle={
+          <Link to="/blog" className="inline-flex items-center gap-2 text-primary hover:underline">
+            <ArrowLeftIcon className="size-4" />
+            Back to Blog
+          </Link>
+        }
+        icon={TagIcon}
+        headingClassName="uppercase"
+        className="gap-8"
+      >
+        <BlogPosts posts={posts} />
+      </Section>
     </>
   );
 }
