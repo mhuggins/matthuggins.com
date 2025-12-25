@@ -117,70 +117,17 @@ export default defineConfig({
                         type: "element",
                         tagName: "button",
                         properties: {
-                          className: [
-                            "copy-code-btn",
-                            "ml-2",
-                            "opacity-0",
-                            "group-hover:opacity-100",
-                            "transition-opacity",
-                            "text-gray-400",
-                            "hover:text-gray-600",
-                          ],
+                          className: ["copy-code-btn", "ml-2"],
                           title: "Copy code",
                           "data-code": codeText,
                         },
-                        children: [
-                          {
-                            type: "element",
-                            tagName: "svg",
-                            properties: {
-                              width: "16",
-                              height: "16",
-                              viewBox: "0 0 24 24",
-                              fill: "none",
-                              stroke: "currentColor",
-                              strokeWidth: "2",
-                            },
-                            children: [
-                              {
-                                type: "element",
-                                tagName: "rect",
-                                properties: {
-                                  x: "9",
-                                  y: "9",
-                                  width: "13",
-                                  height: "13",
-                                  rx: "2",
-                                  ry: "2",
-                                },
-                                children: [],
-                              },
-                              {
-                                type: "element",
-                                tagName: "path",
-                                properties: {
-                                  d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",
-                                },
-                                children: [],
-                              },
-                            ],
-                          },
-                        ],
+                        children: [],
                       },
                     ],
                   };
 
                   // Add the header as first child
                   node.children.unshift(labelElement);
-
-                  // Add group class to pre for hover effects
-                  if (!node.properties) node.properties = {};
-                  if (!node.properties.className) node.properties.className = [];
-                  const classNames = Array.isArray(node.properties.className)
-                    ? node.properties.className
-                    : [node.properties.className as string];
-                  classNames.push("group", "relative");
-                  node.properties.className = classNames;
                 },
               } satisfies ShikiTransformer,
             ],
