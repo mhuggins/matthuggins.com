@@ -1,3 +1,4 @@
+import dedent from "dedent";
 import type { ReactNode } from "react";
 
 interface DocumentProps {
@@ -10,6 +11,16 @@ export function Document({ children, scripts = [], styles = [] }: DocumentProps)
   return (
     <html lang="en" dir="ltr">
       <head>
+        {/* REF: https://github.com/vitejs/vite/issues/1984 */}
+        {!import.meta.env.PROD && (
+          <script type="module">{dedent`
+          import RefreshRuntime from "/@react-refresh";
+          RefreshRuntime.injectIntoGlobalHook(window);
+          window.$RefreshReg$ = () => {};
+          window.$RefreshSig$ = () => (type) => type;
+          window.__vite_plugin_react_preamble_installed__ = true;
+          `}</script>
+        )}
         <meta charSet="UTF-8" />
         <meta
           name="viewport"

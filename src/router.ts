@@ -16,7 +16,7 @@ export function createRouter(opts?: { history?: RouterHistory }) {
   // React.Suspense for route boundaries. This matches server behavior and prevents
   // hydration mismatch with React 19's metadata hoisting.
   if (typeof document !== "undefined") {
-    (router as unknown as { ssr: boolean }).ssr = true;
+    router.ssr = { manifest: undefined };
   }
 
   return router;
