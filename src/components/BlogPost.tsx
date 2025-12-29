@@ -2,6 +2,7 @@ import { ArrowLeftIcon, BookOpenTextIcon, NoteIcon } from "@phosphor-icons/react
 import { Link } from "@tanstack/react-router";
 import type { BlogPost as BlogPostType } from "@/data/blog-metadata";
 import { formatDate } from "@/utils/formatDate";
+import { Comments } from "./Comments";
 import { Section } from "./Section";
 import { Tags } from "./Tags";
 
@@ -44,6 +45,11 @@ export function BlogPost({ post, Component }: BlogPostProps) {
 
         <div className="prose prose-gray max-w-none">
           <Component />
+        </div>
+
+        <div className="mt-12 border-gray-200 border-t pt-8">
+          <h2 className="mb-4 font-semibold text-lg">Comments</h2>
+          <Comments pageId={metadata.slug} pageTitle={metadata.title} />
         </div>
       </Section>
     </div>

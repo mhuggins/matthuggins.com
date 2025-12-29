@@ -83,3 +83,78 @@ pnpm start
 - **Automatic blog updates** - Content changes trigger rebuilds
 
 Your blog will be live and ready to handle direct navigation to any route!
+
+---
+
+## 💬 Remark42 Comments Setup
+
+Blog comments are powered by [Remark42](https://remark42.com/), a self-hosted commenting system running as a separate Railway service.
+
+### Deploy Remark42 Service
+
+1. **Add a new service** in your Railway project:
+   - Click "New" → "Docker Image"
+   - Enter image: `umputun/remark42:latest`
+
+2. **Attach a volume** for persistent storage:
+   - In the Remark42 service settings, add a Volume
+   - Mount path: `/srv/var`
+
+3. **Configure environment variables** for Remark42:
+
+   | Variable | Description |
+   |----------|-------------|
+   | `REMARK_URL` | Full URL where Remark42 is hosted (e.g., `https://comments.matthuggins.com`) |
+   | `SECRET` | Random string for JWT signing (generate with `openssl rand -base64 32`) |
+   | `SITE` | Site identifier: `matthuggins` |
+   | `AUTH_ANON` | `true` to allow anonymous comments |
+   | `AUTH_GITHUB_CID` | GitHub OAuth App Client ID |
+   | `AUTH_GITHUB_CSEC` | GitHub OAuth App Client Secret |
+   | `AUTH_GOOGLE_CID` | Google OAuth Client ID |
+   | `AUTH_GOOGLE_CSEC` | Google OAuth Client Secret |
+
+4. **Set up a custom domain** (optional but recommended):
+   - Add domain like `comments.matthuggins.com` in Railway
+   - Or use the Railway-provided domain
+
+### Create OAuth Applications
+
+**GitHub OAuth App:**
+1. Go to GitHub → Settings → Developer settings → OAuth Apps
+2. Create new OAuth App
+3. Set callback URL: `https://comments.matthuggins.com/auth/github/callback`
+4. Copy Client ID and Client Secret to Railway env vars
+
+**Google OAuth:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) → APIs & Credentials
+2. Create OAuth 2.0 Client ID (Web application)
+3. Add authorized redirect URI: `https://comments.matthuggins.com/auth/google/callback`
+4. Copy Client ID and Client Secret to Railway env vars
+
+### Configure Main Site
+
+Add these environment variables to your **main site's** Railway service:
+
+| Variable | Value |
+|----------|-------|
+| `VITE_REMARK42_HOST` | Remark42 URL (e.g., `https://comments.matthuggins.com`) |
+| `VITE_REMARK42_SITE_ID` | `matthuggins` |
+
+### Verify Installation
+
+After deploying Remark42:
+1. Visit [https://comments.matthuggins.com/web] to see the demo page
+2. Test authentication with each OAuth provider
+3. Leave a test comment on a blog post
+
+### Remark42 Admin Access
+
+To become an admin, find your user ID by:
+1. Log in to Remark42 on any blog post
+2. Check browser dev tools → Network → look for your user ID in API responses
+3. Add `ADMIN_SHARED_ID=<your-user-id>` to Remark42 env vars
+
+### Useful Links
+
+- [Remark42 Documentation](https://remark42.com/docs/)
+- [Remark42 Docker Hub](https://hub.docker.com/r/umputun/remark42)
