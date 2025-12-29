@@ -29,14 +29,14 @@ export function BlogPosts({ posts }: { posts: BlogPost[] }) {
           className="pb-6 last:pb-0"
         >
           <div className="flex items-start gap-4">
-            {post.metadata.image && (
+            {post.metadata.thumbnail && (
               <Link
                 to="/blog/posts/$slug"
                 params={{ slug: post.metadata.slug }}
                 className="shrink-0"
               >
                 <img
-                  src={post.metadata.image}
+                  src={post.metadata.thumbnail}
                   alt={post.metadata.title}
                   className="w-32 rounded-sm border border-slate-200 shadow-md"
                 />

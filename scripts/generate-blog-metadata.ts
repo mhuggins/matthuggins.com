@@ -18,6 +18,7 @@ interface RawFrontmatter {
   tags?: string[];
   summary?: string;
   image?: string;
+  thumbnail?: string;
   note?: string;
   [key: string]: unknown;
 }
@@ -29,6 +30,7 @@ interface ProcessedPost {
   date: string;
   summary: string | null;
   image: string | null;
+  thumbnail: string | null;
   note: string | null;
   tags: string[];
 }
@@ -99,6 +101,7 @@ function generateBlogMetadata(): void {
         date: frontmatter.date,
         summary: frontmatter.summary || null,
         image: frontmatter.image || null,
+        thumbnail: frontmatter.thumbnail || null,
         note: frontmatter.note || null,
         tags: frontmatter.tags || [],
       });
@@ -181,6 +184,7 @@ export interface BlogPostMetadata {
   date: string;
   summary: string | null;
   image: string | null;
+  thumbnail: string | null;
   note: string | null;
   tags: BlogTag[];
 }

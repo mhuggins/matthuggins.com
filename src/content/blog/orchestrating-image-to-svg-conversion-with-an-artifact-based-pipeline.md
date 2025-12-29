@@ -5,6 +5,7 @@ published: false
 tags: [typescript, javascript, graphics]
 summary: Converting raster images to vector graphics involves multiple processing stages, each feeding into the next. Here's how I designed an artifact-based pipeline architecture that tracks provenance, enforces type safety, and makes debugging complex transformations straightforward.
 image: /blog/orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline.jpg
+thumbnail: /blog/orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline.thumb.jpg
 ---
 
 I've been working on a tool that converts raster images to scalable vector graphics—a process that involves multiple stages: segmentation, region detection, topology construction, and curve fitting. Each stage produces intermediate data that feeds into the next, and the transformations can be computationally expensive.

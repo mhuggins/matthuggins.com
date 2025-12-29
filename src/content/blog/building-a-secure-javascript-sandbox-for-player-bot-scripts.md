@@ -5,6 +5,7 @@ published: true
 tags: [typescript, javascript, node.js, security]
 summary: How I built a secure sandbox for running untrusted player scripts using V8 isolates, a two-layer API architecture, and runtime code generation.
 image: /blog/building-a-secure-javascript-sandbox-for-player-bot-scripts.jpg
+thumbnail: /blog/building-a-secure-javascript-sandbox-for-player-bot-scripts.thumb.jpg
 ---
 
 In my upcoming collectible card game, [Codebound](https://codebound.io), players don't just pick cards and click buttons. They write TypeScript (or JavaScript) code that controls their deck. These scripts analyze the board state, make decisions, and execute actions autonomously. This creates a unique challenge: how do I let users run arbitrary code on my servers without compromising security?
