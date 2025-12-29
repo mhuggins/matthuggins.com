@@ -1,5 +1,5 @@
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { lazy, Suspense, useEffect, useState } from "react";
 import SvgConverter from "@/assets/svg-converter.svg";
 import { BackgroundSection } from "@/components/BackgroundSection";
 import { ContactLinks } from "@/components/ContactLinks";
@@ -9,6 +9,31 @@ import { Tags } from "@/components/Tags";
 import { getAllPosts, getAllTags } from "@/data/blog-metadata";
 import { cn } from "@/utils/cn";
 import { formatDate } from "@/utils/formatDate";
+
+const TanStackRouterDevtools = import.meta.env.PROD
+  ? () => null
+  : lazy(() =>
+      import("@tanstack/react-router-devtools").then((res) => ({
+        default: res.TanStackRouterDevtools,
+      })),
+    );
+
+// Only render DevTools on client to avoid SSR hydration issues
+function ClientOnlyDevtools() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return null;
+  }
+
+  return (
+    <Suspense>
+      <TanStackRouterDevtools />
+    </Suspense>
+  );
+}
 
 export const Route = createRootRoute({
   component: Root,
@@ -129,7 +154,7 @@ function Root() {
         </div>
       </div>
 
-      <TanStackRouterDevtools />
+      <ClientOnlyDevtools />
     </div>
   );
 }

@@ -10,7 +10,7 @@
     "types": ["node", "react", "vite/client"],
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "lib": ["DOM", "ESNext"],
     "jsx": "react-jsx",
     "strict": true,

@@ -1,15 +1,22 @@
 import { ArrowLeftIcon, FileXIcon } from "@phosphor-icons/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useMemo } from "react";
 import { BlogPost } from "@/components/BlogPost";
 import { Section } from "@/components/Section";
-import { getPostBySlug, hasBlogPost } from "@/data/blog-metadata";
+import { getPostBySlug, hasBlogPost, loadBlogPostContent } from "@/data/blog-metadata";
 
 export const Route = createFileRoute("/blog/posts/$slug")({
   beforeLoad: ({ params }) => {
     if (!hasBlogPost(params.slug)) {
       throw notFound();
     }
+  },
+  loader: async ({ params }) => {
+    const post = getPostBySlug(params.slug);
+    if (!post) {
+      throw notFound();
+    }
+    const Component = await loadBlogPostContent(params.slug);
+    return { post, Component };
   },
   component: BlogPostPage,
   notFoundComponent: NotFound,
@@ -30,18 +37,13 @@ function NotFound() {
 }
 
 function BlogPostPage() {
-  const { slug } = Route.useParams();
-  const post = useMemo(() => getPostBySlug(slug), [slug]);
-
-  if (!post) {
-    return <div>Loading...</div>;
-  }
+  const { post, Component } = Route.useLoaderData();
 
   // For some reason, trying to assign this value inline within the <title> tag does not work.
   // Setting the desired value to a string variable first seems to address the issue.
   const title = `${post.metadata.title} - Matt Huggins`;
   const description = post.metadata.summary || post.metadata.title;
-  const url = `https://matthuggins.com/blog/posts/${slug}`;
+  const url = `https://matthuggins.com/blog/posts/${post.metadata.slug}`;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -88,7 +90,7 @@ function BlogPostPage() {
       {/* Structured Data */}
       <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
 
-      <BlogPost post={post} />
+      <BlogPost post={post} Component={Component} />
     </>
   );
 }

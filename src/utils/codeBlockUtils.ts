@@ -1,6 +1,11 @@
 // Utility functions for code block enhancements
 
 export function initializeCodeBlocks() {
+  // Skip on server
+  if (typeof document === "undefined") {
+    return;
+  }
+
   // Add click handlers for copy buttons
   document.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;

@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface PortalProps {
@@ -9,8 +9,19 @@ interface PortalProps {
 }
 
 export const Portal = ({ isOpen, onClose, children, preventScroll = true }: PortalProps) => {
+  const [mounted, setMounted] = useState(false);
+
+  // Only render portal on client after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Prevent body scroll when portal is open
   useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
     if (isOpen && preventScroll) {
       document.body.style.overflow = "hidden";
     } else {
@@ -22,7 +33,8 @@ export const Portal = ({ isOpen, onClose, children, preventScroll = true }: Port
     };
   }, [isOpen, preventScroll]);
 
-  if (!isOpen) return null;
+  // Don't render portal on server or before mount
+  if (!isOpen || !mounted) return null;
 
   return createPortal(
     <>

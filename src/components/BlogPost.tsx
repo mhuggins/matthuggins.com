@@ -1,14 +1,16 @@
 import { ArrowLeftIcon, BookOpenTextIcon, NoteIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
-import { BlogPost as BlogPostType } from "@/data/blog-metadata";
-import { useMdx } from "@/hooks/useMdx";
+import type { BlogPost as BlogPostType } from "@/data/blog-metadata";
 import { formatDate } from "@/utils/formatDate";
 import { Section } from "./Section";
 import { Tags } from "./Tags";
 
-export function BlogPost({ post }: { post: BlogPostType }) {
-  const Component = useMdx(post?.loader);
+interface BlogPostProps {
+  post: BlogPostType;
+  Component: React.ComponentType;
+}
 
+export function BlogPost({ post, Component }: BlogPostProps) {
   const { metadata } = post;
 
   return (

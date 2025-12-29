@@ -5,22 +5,24 @@ export type BlogPostLoader = Promise<React.ComponentType>;
 
 export interface BlogPost {
   metadata: BlogPostMetadata;
-  loader: BlogPostLoader;
+  loader?: BlogPostLoader;
 }
 
 /**
  * Get all blog posts sorted by date (newest first)
+ * Returns metadata only (no loaders) - SSR safe
  */
 export function getAllPosts({ limit }: { limit?: number } = {}): BlogPost[] {
   const metadataItems = limit === undefined ? blogMetadata : blogMetadata.slice(0, limit);
-  return metadataItems.map(getBlogPostFromMetadata);
+  return metadataItems.map((metadata) => ({ metadata }));
 }
 
 /**
  * Get posts filtered by tag
+ * Returns metadata only (no loaders) - SSR safe
  */
 export function getPostsByTag(tag: BlogTag): BlogPost[] {
-  return blogMetadata.filter((post) => post.tags.includes(tag)).map(getBlogPostFromMetadata);
+  return blogMetadata.filter((post) => post.tags.includes(tag)).map((metadata) => ({ metadata }));
 }
 
 /**
@@ -39,13 +41,14 @@ export function isValidTag(str: string): str is BlogTag {
 
 /**
  * Get post by slug
+ * Returns metadata only (no loader) - SSR safe
  */
 export function getPostBySlug(slug: string): BlogPost | undefined {
   const metadata = blogMetadata.find((post) => post.slug === slug);
   if (!metadata) {
     return undefined;
   }
-  return getBlogPostFromMetadata(metadata);
+  return { metadata };
 }
 
 /**
@@ -56,10 +59,11 @@ export function hasBlogPost(slug: string): boolean {
 }
 
 // Pre-built map of all blog post loaders
+// Use eager mode for SSR to ensure modules are available synchronously
 const blogPostLoaders = import.meta.glob<{
   frontmatter?: BlogPostMetadata;
   default: React.ComponentType;
-}>("/content/blog/**/*.{md,mdx}");
+}>("../content/blog/**/*.{md,mdx}");
 
 /**
  * Get blog post content loader for individual post (for MDX loading)
@@ -72,17 +76,22 @@ function getBlogPostLoader(slug: string) {
   }
 
   // Find the loader in our pre-built map
-  const loaderKey = `/content/blog/${metadata.filePath}`;
+  // The key matches the relative glob pattern from this file's location
+  const loaderKey = `../content/blog/${metadata.filePath}`;
   const loader = blogPostLoaders[loaderKey];
 
   return loader || null;
 }
 
-function getBlogPostFromMetadata(metadata: BlogPostMetadata): BlogPost {
-  const rawLoader = getBlogPostLoader(metadata.slug);
-  if (!rawLoader) {
-    throw new Error(`Loader not found for post: ${metadata.slug}`);
+/**
+ * Load blog post content (MDX component) - works on both server and client
+ * Use this in route loaders for SSR support
+ */
+export async function loadBlogPostContent(slug: string): Promise<React.ComponentType> {
+  const loader = getBlogPostLoader(slug);
+  if (!loader) {
+    throw new Error(`Loader not found for post: ${slug}`);
   }
-  const loader = rawLoader().then((mod) => mod.default);
-  return { metadata, loader };
+  const mod = await loader();
+  return mod.default;
 }

@@ -25,7 +25,6 @@ export default defineConfig({
   root: "./src",
   publicDir: "../public",
   build: {
-    outDir: "../dist",
     minify: "esbuild",
     sourcemap: false,
     target: "es2018",
@@ -35,6 +34,9 @@ export default defineConfig({
         main: resolve(dirname(fileURLToPath(import.meta.url)), "src/index.html"),
       },
     },
+  },
+  ssr: {
+    noExternal: ["@tanstack/react-router", "@phosphor-icons/react"],
   },
   plugins: [
     blogWatcherPlugin(),
