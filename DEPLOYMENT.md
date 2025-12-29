@@ -154,7 +154,19 @@ To become an admin, find your user ID by:
 2. Check browser dev tools → Network → look for your user ID in API responses
 3. Add `ADMIN_SHARED_ID=<your-user-id>` to Remark42 env vars
 
+### Updating Remark42
+
+To update to a newer version of Remark42:
+
+1. Check for new releases at [Remark42 Releases](https://github.com/umputun/remark42/releases)
+2. In Railway, go to the Remark42 service settings
+3. Update the Docker image tag (e.g., `umputun/remark42:v1.13.0`)
+4. Redeploy the service
+
+**Tip:** Using a specific version tag (e.g., `v1.13.0`) instead of `latest` gives you more control over when updates happen and avoids unexpected changes.
+
 ### Useful Links
 
 - [Remark42 Documentation](https://remark42.com/docs/)
 - [Remark42 Docker Hub](https://hub.docker.com/r/umputun/remark42)
+- [Remark42 Releases](https://github.com/umputun/remark42/releases)

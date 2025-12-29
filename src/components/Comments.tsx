@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
 interface CommentsProps {
   pageId: string;
@@ -15,11 +15,21 @@ declare global {
   }
 }
 
-export function Comments({ pageId, pageTitle }: CommentsProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+const useIsMounted = () => {
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (typeof document === "undefined") {
+    setIsMounted(true);
+  }, []);
+
+  return isMounted;
+};
+
+export function Comments({ pageId, pageTitle }: CommentsProps) {
+  const isMounted = useIsMounted();
+
+  useEffect(() => {
+    if (!isMounted) {
       return;
     }
 
@@ -37,6 +47,7 @@ export function Comments({ pageId, pageTitle }: CommentsProps) {
       page_title: pageTitle,
       theme: "light",
       locale: "en",
+      no_footer: true,
     };
 
     window.remark_config = config;
@@ -53,7 +64,11 @@ export function Comments({ pageId, pageTitle }: CommentsProps) {
       }
       script.remove();
     };
-  }, [pageId, pageTitle]);
+  }, [isMounted, pageId, pageTitle]);
 
-  return <div ref={containerRef} id="remark42" />;
+  if (!isMounted) {
+    return null;
+  }
+
+  return <div id="remark42" />;
 }

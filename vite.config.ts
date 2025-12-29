@@ -23,6 +23,7 @@ import { blogWatcherPlugin } from "./plugins/blog-watcher";
 
 export default defineConfig({
   root: "./src",
+  envDir: "..",
   publicDir: "../public",
   server: {
     allowedHosts: ["matthuggins.com", "localhost"],
