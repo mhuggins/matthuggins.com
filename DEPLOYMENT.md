@@ -147,12 +147,28 @@ After deploying Remark42:
 2. Test authentication with each OAuth provider
 3. Leave a test comment on a blog post
 
-### Remark42 Admin Access
+### Remark42 Admin & Moderation
 
-To become an admin, find your user ID by:
-1. Log in to Remark42 on any blog post
-2. Check browser dev tools → Network → look for your user ID in API responses
-3. Add `ADMIN_SHARED_ID=<your-user-id>` to Remark42 env vars
+**Setting up admin access:**
+
+1. Log in to Remark42 on any blog post (via GitHub or Google)
+2. Open browser dev tools → Network tab
+3. Look for API requests to `comments.matthuggins.com` - your user ID will be in the response (e.g., `github_abc123`)
+4. Add `ADMIN_SHARED_ID=<your-user-id>` to Remark42 env vars in Railway
+5. Redeploy the Remark42 service
+
+To add multiple admins, comma-separate the IDs:
+```
+ADMIN_SHARED_ID=github_abc123,google_xyz789
+```
+
+**Moderation capabilities:**
+
+Once you're an admin, you can:
+- **On blog posts:** Admin controls appear next to each comment (edit, delete, pin, block user)
+- **Admin panel:** Visit `https://comments.matthuggins.com/web` for the admin interface
+- **Block users:** Prevent specific users from commenting
+- **Pin comments:** Highlight important comments at the top
 
 ### Updating Remark42
 
