@@ -7,6 +7,7 @@ export interface BlogPostMetadata {
   title: string;
   date: string;
   summary: string | null;
+  image: string | null;
   note: string | null;
   tags: BlogTag[];
 }

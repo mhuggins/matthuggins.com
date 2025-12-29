@@ -4,6 +4,7 @@ date: 2025-12-18
 published: true
 tags: [react, typescript, tanstack form, form management, user experience]
 summary: After years of working with react-hook-form, I made the switch to TanStack Form and built a reusable component library around it on top of my company's existing form components. Here are the patterns I landed on for binding these components to form state, creating intelligent buttons with automated loading states, and lazy-loading fields for better performance.
+image: /blog/building-a-reusable-form-component-library-with-tanstack-form.jpg
 ---
 
 For years, [react-hook-form](https://react-hook-form.com/) was my go-to for form state management. It worked well enough, but I'd regularly hit friction points -- unexpected re-renders, confusing ref forwarding, and type gymnastics that left me wanting something better. When [TanStack Form](https://tanstack.com/form) came along, offering fine-grained control over form state, validation, and submission, I decided to give it a shot.

@@ -17,6 +17,7 @@ interface RawFrontmatter {
   published?: boolean;
   tags?: string[];
   summary?: string;
+  image?: string;
   note?: string;
   [key: string]: unknown;
 }
@@ -27,6 +28,7 @@ interface ProcessedPost {
   title: string;
   date: string;
   summary: string | null;
+  image: string | null;
   note: string | null;
   tags: string[];
 }
@@ -96,6 +98,7 @@ function generateBlogMetadata(): void {
         title: frontmatter.title,
         date: frontmatter.date,
         summary: frontmatter.summary || null,
+        image: frontmatter.image || null,
         note: frontmatter.note || null,
         tags: frontmatter.tags || [],
       });
@@ -177,6 +180,7 @@ export interface BlogPostMetadata {
   title: string;
   date: string;
   summary: string | null;
+  image: string | null;
   note: string | null;
   tags: BlogTag[];
 }

@@ -28,12 +28,27 @@ export function BlogPosts({ posts }: { posts: BlogPost[] }) {
           }
           className="pb-6 last:pb-0"
         >
-          {post.metadata.summary && (
-            <div
-              className="prose prose-gray prose-sm max-w-none text-gray-700 leading-relaxed"
-              {...createHtmlProps(markdownToHtml(post.metadata.summary))}
-            />
-          )}
+          <div className="flex items-start gap-4">
+            {post.metadata.image && (
+              <Link
+                to="/blog/posts/$slug"
+                params={{ slug: post.metadata.slug }}
+                className="shrink-0"
+              >
+                <img
+                  src={post.metadata.image}
+                  alt={post.metadata.title}
+                  className="w-32 rounded-sm border border-slate-200 shadow-md"
+                />
+              </Link>
+            )}
+            {post.metadata.summary && (
+              <div
+                className="prose prose-gray prose-sm max-w-none text-gray-700 leading-relaxed"
+                {...createHtmlProps(markdownToHtml(post.metadata.summary))}
+              />
+            )}
+          </div>
         </Section>
       ))}
     </div>

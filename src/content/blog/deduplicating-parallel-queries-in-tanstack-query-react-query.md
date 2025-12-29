@@ -4,6 +4,7 @@ date: 2025-12-21
 published: true
 tags: [react, typescript, tanstack query, data fetching]
 summary: When building time series charts that display percentages, you often need to fetch both numerator and denominator values for each data series. But what happens when multiple series share the same denominator? Here's how I used TanStack Query's `hashKey` function to deduplicate overlapping queries and map the results back to the original data structure.
+image: /blog/deduplicating-parallel-queries-in-tanstack-query.jpg
 ---
 
 During a recent project related to visualizing data over time, I needed to make a separate request for each data set that was to appear as a series in the generated line chart. This straightforward feature became a little bit more complex as soon as I was tasked with displaying the data for any given point in time as not just a pure numeric piece of data, but also as a percentage based upon a relative denominator.

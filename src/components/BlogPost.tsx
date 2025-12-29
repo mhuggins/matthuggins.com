@@ -36,6 +36,13 @@ export function BlogPost({ post, Component }: BlogPostProps) {
         icon={BookOpenTextIcon}
         headingClassName="uppercase"
       >
+        {metadata.image && (
+          <img
+            src={metadata.image}
+            alt={metadata.title}
+            className="mx-auto mt-4 mb-8 rounded-lg border-2 border-slate-200 shadow-lg"
+          />
+        )}
         {metadata.note && (
           <div className="relative mb-4 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-4 pl-16 text-gray-600 text-sm italic">
             <NoteIcon size={36} className="absolute top-4 left-4 text-gray-400" />

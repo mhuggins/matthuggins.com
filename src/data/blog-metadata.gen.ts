@@ -25,6 +25,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "title": "Building a Secure JavaScript Sandbox for Player Bot Scripts",
     "date": "2025-12-29",
     "summary": "How I built a secure sandbox for running untrusted player scripts using V8 isolates, a two-layer API architecture, and runtime code generation.",
+    "image": "/blog/building-a-secure-javascript-sandbox-for-player-bot-scripts.jpg",
     "note": null,
     "tags": [
       "typescript",
@@ -39,6 +40,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "title": "Deduplicating Parallel Queries in TanStack Query (React Query)",
     "date": "2025-12-21",
     "summary": "When building time series charts that display percentages, you often need to fetch both numerator and denominator values for each data series. But what happens when multiple series share the same denominator? Here's how I used TanStack Query's `hashKey` function to deduplicate overlapping queries and map the results back to the original data structure.",
+    "image": "/blog/deduplicating-parallel-queries-in-tanstack-query.jpg",
     "note": null,
     "tags": [
       "react",
@@ -53,6 +55,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "title": "Building a Reusable Form Component Library with TanStack Form",
     "date": "2025-12-18",
     "summary": "After years of working with react-hook-form, I made the switch to TanStack Form and built a reusable component library around it on top of my company's existing form components. Here are the patterns I landed on for binding these components to form state, creating intelligent buttons with automated loading states, and lazy-loading fields for better performance.",
+    "image": "/blog/building-a-reusable-form-component-library-with-tanstack-form.jpg",
     "note": null,
     "tags": [
       "react",
@@ -68,6 +71,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "title": "pnpm Makes Monorepo Management Effortless",
     "date": "2025-09-15",
     "summary": "After years of struggling with challenges imposed by npm and yarn workspaces, pnpm demonstrates its ability to maintain monorepos effortlessly.",
+    "image": "/blog/pnpm-makes-monorepos-effortless.jpg",
     "note": null,
     "tags": [
       "javascript"
@@ -79,6 +83,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "title": "Parsing Domain Names - Now in Gem Form!",
     "date": "2015-01-02",
     "summary": "A feature for an internal Ruby project here at Quick Left necessitated parsing the domain from a URL. This seems like a problem for which there must already exist a solution, but it surprisingly turns out that there is no available solution for this seemingly simple task.",
+    "image": null,
     "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
     "tags": [
       "ruby"
@@ -90,6 +95,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "title": "April Fools! How We Converted Our Site to Doge in Just 40 Lines of Code",
     "date": "2014-04-01",
     "summary": "I recently wrote a blog post describing how to create your own RubyGem. The sample gem produced, aptly named dogeify, converts English sentences into \"Doge\" based upon the recently popular meme. For April Fools' Day, we thought it would be fun to implement this gem to convert our entire site into doge. Here's how we did it.",
+    "image": null,
     "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
     "tags": [
       "ruby",
@@ -102,6 +108,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "title": "Step-by-Step Guide to Building Your First Ruby Gem",
     "date": "2014-03-08",
     "summary": "Building your first Ruby gem may seem like a daunting task, but it's actually not so bad. It's quite rewarding to not only release a gem, but to see its download count climb as others put your hard work to good use, and even still as others offer to contribute new features and bug fixes to your very own gem. And thanks to RubyGems.org and Bundler, the process of creating, releasing, and implementing gems couldn't be easier.",
+    "image": null,
     "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
     "tags": [
       "ruby"
@@ -113,6 +120,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "title": "Using Faux ActiveRecord Models in Rails 3",
     "date": "2014-01-04",
     "summary": "Implementing forms that are associated with models -- specifically ActiveRecord objects -- is pretty common when developing with Ruby on Rails. In fact, the built-in FormHelper assumes that you're working with some kind of persisted object.\n\nBut what happens when you want to create a form for something that is not persisted by an ActiveRecord model?\n",
+    "image": null,
     "note": "This article was originally published as part of the QuickLeft blog while employeed there. Given that the company has been acquired and the site no longer exists, I've rehosted the content here.",
     "tags": [
       "ruby",

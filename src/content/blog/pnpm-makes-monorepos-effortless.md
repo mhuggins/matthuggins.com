@@ -4,6 +4,7 @@ date: 2025-09-15
 published: true
 tags: [javascript]
 summary: After years of struggling with challenges imposed by npm and yarn workspaces, pnpm demonstrates its ability to maintain monorepos effortlessly.
+image: /blog/pnpm-makes-monorepos-effortless.jpg
 ---
 
 The concept of building within monorepos has been prevolent throughout the last decade of my career. I used npm in the early years and yarn for the years that followed. Most recently, though, I've been introduced to [pnpm workspaces](https://pnpm.io/workspaces) -- and I'm in love!

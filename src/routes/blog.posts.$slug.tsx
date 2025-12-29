@@ -74,6 +74,7 @@ function BlogPostPage() {
       {/* Open Graph */}
       <meta property="og:title" content={post.metadata.title} />
       <meta property="og:description" content={description} />
+      {post.metadata.image && <meta property="og:image" content={post.metadata.image} />}
       <meta property="og:url" content={url} />
       <meta property="og:type" content="article" />
       <meta property="og:site_name" content="Matt Huggins" />
