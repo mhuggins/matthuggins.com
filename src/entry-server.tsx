@@ -1,9 +1,16 @@
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { renderToPipeableStream } from "react-dom/server";
+import { Document } from "./components/Document";
 import { createRouter } from "./router";
 
-export async function render(url: string): Promise<string> {
+interface RenderOptions {
+  scripts?: string[];
+  styles?: string[];
+}
+
+export async function render(url: string, options: RenderOptions = {}): Promise<string> {
+  const { scripts = [], styles = [] } = options;
   const history = createMemoryHistory({ initialEntries: [url] });
   const router = createRouter({ history });
 
@@ -14,7 +21,9 @@ export async function render(url: string): Promise<string> {
 
     const { pipe } = renderToPipeableStream(
       <StrictMode>
-        <RouterProvider router={router} />
+        <Document scripts={scripts} styles={styles}>
+          <RouterProvider router={router} />
+        </Document>
       </StrictMode>,
       {
         async onAllReady() {
@@ -25,7 +34,7 @@ export async function render(url: string): Promise<string> {
               callback();
             },
           });
-          writable.on("finish", () => resolve(html));
+          writable.on("finish", () => resolve("<!DOCTYPE html>" + html));
           writable.on("error", reject);
           pipe(writable);
         },

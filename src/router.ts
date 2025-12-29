@@ -3,18 +3,23 @@ import { NotFound } from "./components/NotFound";
 import { routeTree } from "./routeTree.gen";
 
 export function createRouter(opts?: { history?: RouterHistory }) {
-  return createTanStackRouter({
+  const router = createTanStackRouter({
     routeTree,
     defaultPreload: "intent",
     defaultPreloadDelay: 100,
     defaultNotFoundComponent: NotFound,
     scrollRestoration: true,
-    // Force SSR mode on both server and client to ensure consistent rendering.
-    // This prevents hydration mismatch where server uses SafeFragment but client
-    // uses React.Suspense for route boundaries.
-    isServer: true,
     ...opts,
   });
+
+  // On client, set ssr to truthy so TanStack Router uses SafeFragment instead of
+  // React.Suspense for route boundaries. This matches server behavior and prevents
+  // hydration mismatch with React 19's metadata hoisting.
+  if (typeof document !== "undefined") {
+    (router as unknown as { ssr: boolean }).ssr = true;
+  }
+
+  return router;
 }
 
 declare module "@tanstack/react-router" {

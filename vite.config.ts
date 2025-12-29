@@ -32,9 +32,10 @@ export default defineConfig({
     sourcemap: false,
     target: "es2018",
     emptyOutDir: true,
+    manifest: true,
     rollupOptions: {
       input: {
-        main: resolve(dirname(fileURLToPath(import.meta.url)), "src/index.html"),
+        main: resolve(dirname(fileURLToPath(import.meta.url)), "src/entry-client.tsx"),
       },
     },
   },

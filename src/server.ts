@@ -8,6 +8,25 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProd = process.env.NODE_ENV === "production";
 const port = process.env.PORT || 3000;
 
+interface ManifestEntry {
+  file: string;
+  css?: string[];
+}
+
+// Read Vite manifest to get the hashed asset filenames
+function getProductionAssets(): { scripts: string[]; styles: string[] } {
+  const manifestPath = path.join(__dirname, "client", ".vite", "manifest.json");
+  const manifest: Record<string, ManifestEntry> = JSON.parse(
+    fs.readFileSync(manifestPath, "utf-8"),
+  );
+  const entry = manifest["entry-client.tsx"] || manifest["src/entry-client.tsx"];
+
+  const scripts = entry ? [`/${entry.file}`] : [];
+  const styles = entry?.css?.map((css) => `/${css}`) ?? [];
+
+  return { scripts, styles };
+}
+
 async function createServer() {
   const app = express();
   let vite: ViteDevServer | null = null;
@@ -21,7 +40,7 @@ async function createServer() {
     });
     app.use(vite.middlewares);
   } else {
-    // Production: Serve static assets (but not index.html - that goes through SSR)
+    // Production: Serve static assets
     app.use(
       "/assets",
       express.static(path.join(__dirname, "client", "assets"), {
@@ -31,7 +50,7 @@ async function createServer() {
     );
     app.use(
       express.static(path.join(__dirname, "client"), {
-        index: false, // Don't serve index.html for / - let SSR handle it
+        index: false,
       }),
     );
   }
@@ -41,26 +60,30 @@ async function createServer() {
     const url = req.originalUrl;
 
     try {
-      let template: string;
-      let render: (url: string) => Promise<string>;
+      let render: (
+        url: string,
+        options: { scripts: string[]; styles: string[] },
+      ) => Promise<string>;
+      let scripts: string[];
+      let styles: string[];
 
       if (!isProd && vite) {
-        // Dev: load template and entry on the fly
-        template = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf-8");
-        template = await vite.transformIndexHtml(url, template);
+        // Dev: load entry on the fly, include Vite client scripts
         const entryServer = await vite.ssrLoadModule("/entry-server.tsx");
         render = entryServer.render;
+        scripts = ["/@vite/client", "/entry-client.tsx"];
+        styles = ["/style.css"];
       } else {
         // Prod: use built assets
-        template = fs.readFileSync(path.join(__dirname, "client", "index.html"), "utf-8");
         const entryServerPath = path.join(__dirname, "server", "entry-server.js");
         const entryServer = await import(entryServerPath);
         render = entryServer.render;
+        const assets = getProductionAssets();
+        scripts = assets.scripts;
+        styles = assets.styles;
       }
 
-      const appHtml = await render(url);
-      const html = template.replace("<!--ssr-outlet-->", appHtml);
-
+      const html = await render(url, { scripts, styles });
       res.status(200).set({ "Content-Type": "text/html" }).send(html);
     } catch (e) {
       console.error("SSR Error:", e);

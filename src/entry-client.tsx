@@ -1,8 +1,10 @@
 import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode, useEffect } from "react";
 import { hydrateRoot } from "react-dom/client";
+import { Document } from "./components/Document";
 import { createRouter } from "./router";
 import { initializeCodeBlocks } from "./utils/codeBlockUtils";
+import "./style.css";
 
 const router = createRouter();
 
@@ -11,17 +13,18 @@ function App() {
     initializeCodeBlocks();
   }, []);
 
-  return <RouterProvider router={router} />;
+  return (
+    <Document>
+      <RouterProvider router={router} />
+    </Document>
+  );
 }
 
 router.load().then(() => {
-  const rootElement = document.getElementById("root");
-  if (rootElement) {
-    hydrateRoot(
-      rootElement,
-      <StrictMode>
-        <App />
-      </StrictMode>,
-    );
-  }
+  hydrateRoot(
+    document,
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
 });

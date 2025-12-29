@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Resume for Matt Huggins, experienced software engineer",
   "type": "module",
-  "main": "main.tsx",
   "keywords": [],
   "author": "Matt Huggins <matt.huggins@gmail.com>",
   "license": "ISC",
