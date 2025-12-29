@@ -18,11 +18,11 @@ Here's how I approached building a sandboxed execution environment using V8 isol
 
 When you accept code from users and run it on your servers, you're opening yourself up to several categories of attacks:
 
-[**Resource exhaustion**](https://en.wikipedia.org/wiki/Resource_exhaustion_attack): A simple `while(true) {}` can peg the CPU. Allocating massive arrays can exhaust memory. Without limits, a single malicious script can take down the service.
+- [**Resource exhaustion**](https://en.wikipedia.org/wiki/Resource_exhaustion_attack): A simple `while(true) {}` can peg the CPU. Allocating massive arrays can exhaust memory. Without limits, a single malicious script can take down the service.
 
-[**Escape attacks**](https://en.wikipedia.org/wiki/Virtual_machine_escape): If user code can access Node.js globals like `require`, `process`, or `fs`, they can read environment variables, access the database, or worse.
+- [**Escape attacks**](https://en.wikipedia.org/wiki/Virtual_machine_escape): If user code can access Node.js globals like `require`, `process`, or `fs`, they can read environment variables, access the database, or worse.
 
-**State pollution**: If global variables persist between executions, one player's script could interfere with another's. Or a script could set up state on turn 1 that gives it an unfair advantage on turn 10.
+- **State pollution**: If global variables persist between executions, one player's script could interfere with another's. Or a script could set up state on turn 1 that gives it an unfair advantage on turn 10.
 
 Despite all these restrictions, I still needed to expose a rich API. Players should be able to write code like the following:
 
