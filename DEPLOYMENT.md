@@ -157,7 +157,7 @@ After deploying Remark42:
 4. Add `ADMIN_SHARED_ID=<your-user-id>` to Remark42 env vars in Railway
 5. Redeploy the Remark42 service
 
-To add multiple admins, comma-separate the IDs:
+To add multiple admins, comma-separate the IDs (no spaces):
 ```
 ADMIN_SHARED_ID=github_abc123,google_xyz789
 ```
