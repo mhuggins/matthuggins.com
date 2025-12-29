@@ -142,6 +142,9 @@ export function Resume() {
 
       <ResumeSection title="Projects" icon={DesktopIcon}>
         <div className="flex flex-col gap-4">
+          <Project title="Codebound" role="Creator" url="https://codebound.io">
+            Programmable collectible card game. <em>(In development.)</em>
+          </Project>
           <Project title="SVGConverter.io" role="Creator" url="https://svgconverter.io">
             Web-app for converting raster images into vectorized SVGs.
           </Project>

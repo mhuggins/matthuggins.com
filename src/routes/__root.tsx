@@ -1,5 +1,6 @@
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
+import Codebound from "@/assets/codebound.png";
 import SvgConverter from "@/assets/svg-converter.svg";
 import { BackgroundSection } from "@/components/BackgroundSection";
 import { ContactLinks } from "@/components/ContactLinks";
@@ -114,6 +115,19 @@ function Root() {
               <BackgroundSection
                 title="Projects"
                 entries={[
+                  {
+                    name: (
+                      <a
+                        href="https://codebound.io"
+                        target="_blank"
+                        className="inline-flex items-center gap-2 hover:underline"
+                      >
+                        <img src={Codebound} className="size-4 drop-shadow-md" />
+                        Codebound
+                      </a>
+                    ),
+                    metadata: ["Collectible card game"],
+                  },
                   {
                     name: (
                       <a
