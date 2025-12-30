@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useIsMounted } from "@/hooks/useIsMounted";
 
 interface CommentsProps {
   pageId: string;
@@ -14,16 +15,6 @@ declare global {
     remark_config?: Record<string, unknown>;
   }
 }
-
-const useIsMounted = () => {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  return isMounted;
-};
 
 export function Comments({ pageId, pageTitle }: CommentsProps) {
   const isMounted = useIsMounted();

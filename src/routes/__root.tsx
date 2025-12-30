@@ -1,5 +1,5 @@
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense } from "react";
 import Codebound from "@/assets/codebound.png";
 import SvgConverter from "@/assets/svg-converter.svg";
 import { BackgroundSection } from "@/components/BackgroundSection";
@@ -8,6 +8,7 @@ import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { Profile } from "@/components/Profile";
 import { Tags } from "@/components/Tags";
 import { getAllPosts, getAllTags } from "@/data/blog-metadata";
+import { useIsMounted } from "@/hooks/useIsMounted";
 import { cn } from "@/utils/cn";
 import { formatDate } from "@/utils/formatDate";
 
@@ -21,11 +22,9 @@ const TanStackRouterDevtools = import.meta.env.PROD
 
 // Only render DevTools on client to avoid SSR hydration issues
 function ClientOnlyDevtools() {
-  const [mounted, setMounted] = useState(false);
+  const isMounted = useIsMounted();
 
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
+  if (!isMounted) {
     return null;
   }
 
