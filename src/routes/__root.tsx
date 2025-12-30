@@ -117,27 +117,17 @@ function Root() {
                 entries={[
                   {
                     name: (
-                      <a
-                        href="https://codebound.io"
-                        target="_blank"
-                        className="inline-flex items-center gap-2 hover:underline"
-                      >
-                        <img src={Codebound} className="size-4 drop-shadow-md" />
-                        Codebound
-                      </a>
+                      <ProjectLink name="Codebound" image={Codebound} href="https://codebound.io" />
                     ),
                     metadata: ["Collectible card game"],
                   },
                   {
                     name: (
-                      <a
+                      <ProjectLink
+                        name="SVGConverter.io"
+                        image={SvgConverter}
                         href="https://svgconverter.io"
-                        target="_blank"
-                        className="inline-flex items-center gap-2 hover:underline"
-                      >
-                        <img src={SvgConverter} className="size-4 drop-shadow-md" />
-                        SVGConverter.io
-                      </a>
+                      />
                     ),
                     metadata: ["Vectorize raster images"],
                   },
@@ -170,5 +160,14 @@ function Root() {
 
       <ClientOnlyDevtools />
     </div>
+  );
+}
+
+function ProjectLink({ name, href, image }: { name: string; href: string; image: string }) {
+  return (
+    <a href={href} target="_blank" className="inline-flex items-center gap-2 hover:underline">
+      <img src={image} className="size-4 drop-shadow-md" />
+      {name}
+    </a>
   );
 }
