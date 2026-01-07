@@ -38,11 +38,7 @@ export function Document({ children, scripts = [], styles = [] }: DocumentProps)
         {scripts.map((src) => (
           <script key={src} type="module" src={src} />
         ))}
-        <script
-          async
-          src="https://scripts.simpleanalyticscdn.com/latest.js"
-          data-hostname="matthuggins.com"
-        />
+        <script async src="https://scripts.simpleanalyticscdn.com/latest.js" />
       </body>
     </html>
   );
