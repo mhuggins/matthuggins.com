@@ -23,7 +23,7 @@ const form = useAppForm({
 });
 ```
 
-This seems straightforward enough. But here's the trap: **the synchronous validators accept `async` functions without TypeScript errors**.
+This seems straightforward enough. But here's the trap: the synchronous validators accept `async` functions without TypeScript errors.
 
 Looking at TanStack Form's type definitions, the synchronous validator options like `onSubmit` have a return type that includes `unknown`. This means you can pass an async function (which returns a `Promise`) and TypeScript won't complain:
 
@@ -151,7 +151,7 @@ export const useForm = <
 };
 ```
 
-Because TanStack Form's types have so many generic parameters, the change may look a bit intimidating due to the sheer number of lines of code. However, the basis of the change is rather simple if we hide all the parameters. It becomes clearer that we're simply omitting the `validators` key from `useForm`'s options, then replacing it with a version of the same object type that removes the synchronous validator functions as options:
+Because TanStack Form's types have so many generic parameters, the change may look a bit intimidating due to the sheer number of lines of code. However, the basis of the change is rather simple if we hide all the parameters. It becomes clearer that we're simply omitting the `validators` key from `useAppForm`'s options, then replacing it with a version of the same object type that removes the synchronous validator functions as options:
 
 ```typescript
 export type UseFormOptions<TFormData, /* ... */> = Except<
