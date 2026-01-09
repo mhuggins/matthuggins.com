@@ -1,8 +1,8 @@
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { DOMAIN } from "../src/constants/site";
 import { blogMetadata } from "../src/data/blog-metadata.gen";
 
-const DOMAIN = "https://matthuggins.com";
 const SITEMAP_PATH = resolve(process.cwd(), "public/sitemap.xml");
 
 interface SitemapUrl {

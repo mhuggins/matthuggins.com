@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { BlogPosts } from "@/components/BlogPosts";
 import { Section } from "@/components/Section";
+import { DOMAIN } from "@/constants/site";
 import { getAllPosts } from "@/data/blog-metadata";
 
 export const Route = createFileRoute("/blog/")({
@@ -14,7 +15,7 @@ function BlogPage() {
 
   const title = "Web Development Blog - Matt Huggins";
   const description = "Software Development Blog covering web and mobile development";
-  const url = "https://matthuggins.com/blog";
+  const url = `${DOMAIN}/blog`;
   const keywords = [
     "web",
     "development",
@@ -38,7 +39,7 @@ function BlogPage() {
     author: {
       "@type": "Person",
       name: "Matt Huggins",
-      url: "https://matthuggins.com",
+      url: DOMAIN,
     },
   };
 

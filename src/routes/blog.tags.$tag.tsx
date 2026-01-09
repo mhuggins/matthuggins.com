@@ -3,6 +3,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { BlogPosts } from "@/components/BlogPosts";
 import { Link } from "@/components/Link";
 import { Section } from "@/components/Section";
+import { DOMAIN } from "@/constants/site";
 import { getPostsByTag, isValidTag } from "@/data/blog-metadata";
 import type { BlogTag } from "@/types/blog.gen";
 
@@ -38,7 +39,7 @@ function TagPage() {
   // Setting the desired value to a string variable first seems to address the issue.
   const title = `"${tag}" Blog Posts - Matt Huggins`;
   const description = `Blog posts tagged under topic "${tag}"`;
-  const url = `https://matthuggins.com/blog/tags/${encodeURIComponent(tag)}`;
+  const url = `${DOMAIN}/blog/tags/${encodeURIComponent(tag)}`;
 
   return (
     <>

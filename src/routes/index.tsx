@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Resume } from "@/components/Resume";
+import { DOMAIN } from "@/constants/site";
 
 export const Route = createFileRoute("/")({
   component: ResumePage,
@@ -9,7 +10,7 @@ function ResumePage() {
   const title = "Resume - Matt Huggins";
   const description =
     "Experienced web and mobile developer specializing in React, TypeScript, JavaScript, and Ruby on Rails";
-  const url = "https://matthuggins.com/";
+  const url = `${DOMAIN}/`;
 
   const structuredData = {
     "@context": "https://schema.org",

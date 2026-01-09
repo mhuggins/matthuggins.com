@@ -2,6 +2,7 @@ import { ArrowLeftIcon, FileXIcon } from "@phosphor-icons/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { BlogPost } from "@/components/BlogPost";
 import { Section } from "@/components/Section";
+import { DOMAIN } from "@/constants/site";
 import { getPostBySlug, hasBlogPost, loadBlogPostContent } from "@/data/blog-metadata";
 
 export const Route = createFileRoute("/blog/posts/$slug")({
@@ -43,7 +44,7 @@ function BlogPostPage() {
   // Setting the desired value to a string variable first seems to address the issue.
   const title = `${post.metadata.title} - Matt Huggins`;
   const description = post.metadata.summary || post.metadata.title;
-  const url = `https://matthuggins.com/blog/posts/${post.metadata.slug}`;
+  const url = `${DOMAIN}/blog/posts/${post.metadata.slug}`;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -56,7 +57,7 @@ function BlogPostPage() {
     author: {
       "@type": "Person",
       name: "Matt Huggins",
-      url: "https://matthuggins.com",
+      url: DOMAIN,
     },
   };
 
@@ -74,7 +75,9 @@ function BlogPostPage() {
       {/* Open Graph */}
       <meta property="og:title" content={post.metadata.title} />
       <meta property="og:description" content={description} />
-      {post.metadata.image && <meta property="og:image" content={post.metadata.image} />}
+      {post.metadata.image && (
+        <meta property="og:image" content={`${DOMAIN}${post.metadata.image}`} />
+      )}
       <meta property="og:url" content={url} />
       <meta property="og:type" content="article" />
       <meta property="og:site_name" content="Matt Huggins" />
