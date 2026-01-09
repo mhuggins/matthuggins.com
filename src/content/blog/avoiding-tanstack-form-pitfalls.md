@@ -1,7 +1,7 @@
 ---
 title: Avoiding TanStack Form Pitfalls
 date: 2026-01-08
-published: false
+published: true
 tags: [react, typescript, tanstack form, form management]
 summary: While integrating TanStack Form with schema validation libraries like Zod, I ran into a subtle type system gap that caused validation errors to silently fail. Here's how I diagnosed the issue and built a type-safe wrapper to prevent it from happening again.
 image: /blog/avoiding-tanstack-form-pitfalls.jpg

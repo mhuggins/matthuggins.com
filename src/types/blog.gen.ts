@@ -13,4 +13,4 @@ export interface BlogPostMetadata {
   tags: BlogTag[];
 }
 
-export type BlogTag = "typescript" | "javascript" | "node.js" | "security" | "react" | "tanstack query" | "data fetching" | "tanstack form" | "form management" | "user experience" | "ruby" | "ruby on rails";
+export type BlogTag = "react" | "typescript" | "tanstack form" | "form management" | "javascript" | "node.js" | "security" | "tanstack query" | "data fetching" | "user experience" | "ruby" | "ruby on rails";

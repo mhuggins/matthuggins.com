@@ -4,21 +4,37 @@
 import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
 
 export const blogTags: ReadonlySet<BlogTag> = new Set([
+  "react",
   "typescript",
+  "tanstack form",
+  "form management",
   "javascript",
   "node.js",
   "security",
-  "react",
   "tanstack query",
   "data fetching",
-  "tanstack form",
-  "form management",
   "user experience",
   "ruby",
   "ruby on rails"
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
+  {
+    "slug": "avoiding-tanstack-form-pitfalls",
+    "filePath": "avoiding-tanstack-form-pitfalls.md",
+    "title": "Avoiding TanStack Form Pitfalls",
+    "date": "2026-01-08",
+    "summary": "While integrating TanStack Form with schema validation libraries like Zod, I ran into a subtle type system gap that caused validation errors to silently fail. Here's how I diagnosed the issue and built a type-safe wrapper to prevent it from happening again.",
+    "image": "/blog/avoiding-tanstack-form-pitfalls.jpg",
+    "thumbnail": "/blog/avoiding-tanstack-form-pitfalls.thumb.jpg",
+    "note": null,
+    "tags": [
+      "react",
+      "typescript",
+      "tanstack form",
+      "form management"
+    ]
+  },
   {
     "slug": "building-a-secure-javascript-sandbox-for-player-bot-scripts",
     "filePath": "building-a-secure-javascript-sandbox-for-player-bot-scripts.md",
