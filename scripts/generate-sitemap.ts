@@ -40,8 +40,8 @@ function generateSitemap(): string {
   }
 
   // Blog tags
-  const tags = new Set(blogMetadata.flatMap((post) => post.tags));
-  for (const tag of Array.from(tags).sort()) {
+  const tags = Array.from(new Set(blogMetadata.flatMap((post) => post.tags))).sort();
+  for (const tag of tags) {
     urls.push({
       loc: `${DOMAIN}/blog/tags/${encodeURIComponent(tag)}`,
       changefreq: "weekly",
