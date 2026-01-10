@@ -20,9 +20,9 @@ export function BlogPost({ post, Component }: BlogPostProps) {
       <Section
         title={metadata.title}
         subtitle={
-          <div className="flex flex-col items-start gap-2">
-            <div className="flex items-center gap-2">
-              {formatDate(metadata.date)}
+          <div className="flex flex-col items-start justify-start gap-2">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+              <span className="whitespace-nowrap">{formatDate(metadata.date)}</span>
               {metadata.tags.length > 0 && <Tags tags={metadata.tags} />}
             </div>
             <Link

@@ -21,8 +21,8 @@ export function BlogPosts({ posts }: { posts: BlogPost[] }) {
             </Link>
           }
           subtitle={
-            <div className="flex items-center gap-2">
-              {formatDate(post.metadata.date)}
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+              <span className="whitespace-nowrap">{formatDate(post.metadata.date)}</span>
               {post.metadata.tags.length > 0 && <Tags tags={post.metadata.tags} />}
             </div>
           }
