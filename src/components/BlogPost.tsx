@@ -47,10 +47,9 @@ export function BlogPost({ post, Component }: BlogPostProps) {
         {metadata.note && (
           <div className="relative mb-4 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-4 pl-16 text-gray-600 text-sm italic">
             <NoteIcon size={36} className="absolute top-4 left-4 text-gray-400" />
-            <span>Author's Note: </span>
             <span
               className="prose prose-sm prose-gray inline"
-              {...createHtmlProps(markdownToHtml(metadata.note))}
+              {...createHtmlProps(markdownToHtml(`Author's Note: ${metadata.note}`))}
             />
           </div>
         )}
