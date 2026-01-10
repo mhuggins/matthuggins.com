@@ -2,6 +2,7 @@ import { ArrowLeftIcon, BookOpenTextIcon, NoteIcon } from "@phosphor-icons/react
 import { Link } from "@tanstack/react-router";
 import type { BlogPost as BlogPostType } from "@/data/blog-metadata";
 import { formatDate } from "@/utils/formatDate";
+import { createHtmlProps, markdownToHtml } from "@/utils/markdown";
 import { Comments } from "./Comments";
 import { Section } from "./Section";
 import { Tags } from "./Tags";
@@ -46,7 +47,11 @@ export function BlogPost({ post, Component }: BlogPostProps) {
         {metadata.note && (
           <div className="relative mb-4 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-4 pl-16 text-gray-600 text-sm italic">
             <NoteIcon size={36} className="absolute top-4 left-4 text-gray-400" />
-            Author's Note: {metadata.note}
+            <span>Author's Note: </span>
+            <span
+              className="prose prose-sm prose-gray inline"
+              {...createHtmlProps(markdownToHtml(metadata.note))}
+            />
           </div>
         )}
 
