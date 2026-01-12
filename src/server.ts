@@ -63,7 +63,7 @@ async function createServer() {
       let render: (
         url: string,
         options: { scripts: string[]; styles: string[] },
-      ) => Promise<string>;
+      ) => Promise<{ html: string; statusCode: number }>;
       let scripts: string[];
       let styles: string[];
 
@@ -83,8 +83,8 @@ async function createServer() {
         styles = assets.styles;
       }
 
-      const html = await render(url, { scripts, styles });
-      res.status(200).set({ "Content-Type": "text/html" }).send(html);
+      const { html, statusCode } = await render(url, { scripts, styles });
+      res.status(statusCode).set({ "Content-Type": "text/html" }).send(html);
     } catch (e) {
       console.error("SSR Error:", e);
       if (!isProd && vite) {

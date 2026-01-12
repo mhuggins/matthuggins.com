@@ -9,12 +9,19 @@ interface RenderOptions {
   styles?: string[];
 }
 
-export async function render(url: string, options: RenderOptions = {}): Promise<string> {
+interface RenderResult {
+  html: string;
+  statusCode: number;
+}
+
+export async function render(url: string, options: RenderOptions = {}): Promise<RenderResult> {
   const { scripts = [], styles = [] } = options;
   const history = createMemoryHistory({ initialEntries: [url] });
   const router = createRouter({ history });
 
   await router.load();
+
+  const statusCode = router.state.statusCode;
 
   return new Promise((resolve, reject) => {
     let html = "";
@@ -34,7 +41,7 @@ export async function render(url: string, options: RenderOptions = {}): Promise<
               callback();
             },
           });
-          writable.on("finish", () => resolve("<!DOCTYPE html>" + html));
+          writable.on("finish", () => resolve({ html: "<!DOCTYPE html>" + html, statusCode }));
           writable.on("error", reject);
           pipe(writable);
         },
