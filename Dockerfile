@@ -4,8 +4,9 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# Copy workspace manifest files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/website/package.json apps/website/
 
 # Install pnpm
 RUN npm install -g pnpm

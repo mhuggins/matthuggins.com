@@ -1,0 +1,30 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "preview": {
+      "cache": false
+    },
+    "build": {
+      "cache": false
+    },
+    "test": {
+      "cache": false
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:lint": {
+      "cache": false,
+      "outputs": []
+    },
+    "typecheck": {
+      "cache": false,
+      "outputs": []
+    }
+  }
+}

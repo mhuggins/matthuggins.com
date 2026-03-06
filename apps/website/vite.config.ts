@@ -1,5 +1,8 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 import mdx from "@mdx-js/rollup";
 import rehypeShiki from "@shikijs/rehype";
 import {
@@ -36,7 +39,7 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       input: {
-        main: resolve(dirname(fileURLToPath(import.meta.url)), "src/entry-client.tsx"),
+        main: resolve(__dirname, "src/entry-client.tsx"),
       },
     },
   },
@@ -46,7 +49,12 @@ export default defineConfig({
   plugins: [
     blogWatcherPlugin(),
     tsconfigPaths(),
-    tanstackRouter({ target: "react", autoCodeSplitting: false }),
+    tanstackRouter({
+      target: "react",
+      autoCodeSplitting: false,
+      routesDirectory: resolve(__dirname, "src/routes"),
+      generatedRouteTree: resolve(__dirname, "src/routeTree.gen.ts"),
+    }),
     mdx({
       mdExtensions: [".md"],
       remarkPlugins: [

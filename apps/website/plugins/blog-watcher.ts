@@ -1,10 +1,17 @@
 import { exec } from "node:child_process";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import type { Plugin } from "vite";
 
 const execAsync = promisify(exec);
+const scriptPath = resolve(dirname(fileURLToPath(import.meta.url)), "../scripts/generate-blog-metadata.ts");
 
 export function blogWatcherPlugin(): Plugin {
+  if (process.env.VITEST) {
+    return { name: "blog-watcher" };
+  }
+
   let isBuilding = false;
   let hasInitialized = false;
 
@@ -15,7 +22,7 @@ export function blogWatcherPlugin(): Plugin {
     console.log(`🔄 ${reason}, regenerating metadata...`);
 
     try {
-      await execAsync("tsx scripts/generate-blog-metadata.ts");
+      await execAsync(`tsx ${scriptPath}`);
       console.log("✅ Blog metadata regenerated");
     } catch (error) {
       console.error("❌ Error regenerating blog metadata:", error);
