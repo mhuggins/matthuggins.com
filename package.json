@@ -20,12 +20,11 @@
     "typecheck": "turbo run typecheck",
     "test": "vitest --run",
     "test:watch": "vitest --watch",
-    "test:coverage": "vitest run --coverage",
     "test:lint": "turbo run test:lint"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
-    "jsdom": "^27.0.1",
+    "jsdom": "catalog:",
     "turbo": "^2.5.8",
     "vitest": "catalog:"
   }

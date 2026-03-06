@@ -1,13 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": ".",
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"]
-    },
-    "types": ["node", "react", "vite/client"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
@@ -35,6 +28,5 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "src/**/*.gen.ts"]
+  "exclude": ["dist", "node_modules", "**/*.stories.ts", "**/*.stories.tsx"]
 }
