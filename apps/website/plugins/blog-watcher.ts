@@ -5,7 +5,10 @@ import { promisify } from "node:util";
 import type { Plugin } from "vite";
 
 const execAsync = promisify(exec);
-const scriptPath = resolve(dirname(fileURLToPath(import.meta.url)), "../scripts/generate-blog-metadata.ts");
+const scriptPath = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../scripts/generate-blog-metadata.ts",
+);
 
 export function blogWatcherPlugin(): Plugin {
   if (process.env.VITEST) {
