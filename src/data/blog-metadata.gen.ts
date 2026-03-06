@@ -20,6 +20,22 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
   {
+    "slug": "multi-step-form-validation-with-tanstack-form",
+    "filePath": "multi-step-form-validation-with-tanstack-form.md",
+    "title": "Multi-Step Form Validation with TanStack Form",
+    "date": "2026-03-06",
+    "summary": "There's a moment in every sufficiently complex form where a Zod schema isn't enough. The email is valid. The password meets requirements. And yet, there's still a bot check to run, an API to hit, an error to map back to the right field. Here's what that looks like in practice.",
+    "image": "/blog/multi-step-form-validation-with-tanstack-form.jpg",
+    "thumbnail": "/blog/multi-step-form-validation-with-tanstack-form.thumb.jpg",
+    "note": null,
+    "tags": [
+      "react",
+      "typescript",
+      "tanstack form",
+      "form management"
+    ]
+  },
+  {
     "slug": "avoiding-tanstack-form-pitfalls",
     "filePath": "avoiding-tanstack-form-pitfalls.md",
     "title": "Avoiding TanStack Form Pitfalls",
