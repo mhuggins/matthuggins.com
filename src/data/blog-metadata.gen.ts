@@ -20,6 +20,38 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
   {
+    "slug": "fixing-tanstack-form-default-values-type-discrepancies",
+    "filePath": "fixing-tanstack-form-default-values-type-discrepancies.md",
+    "title": "Fixing TanStack Form `defaultValues` Type Discrepancies",
+    "date": "2026-03-05",
+    "summary": "When TanStack Form's `defaultValues` object narrows a union type to a more specific type than a given validation schema, TypeScript complains. However, there's a clean way to resolve it without sacrificing type safety.",
+    "image": "/blog/fixing-tanstack-form-default-values-type-discrepancies.jpg",
+    "thumbnail": "/blog/fixing-tanstack-form-default-values-type-discrepancies.thumb.jpg",
+    "note": null,
+    "tags": [
+      "react",
+      "typescript",
+      "tanstack form",
+      "form management"
+    ]
+  },
+  {
+    "slug": "reusing-form-sections-with-tanstack-forms-withfieldgroup",
+    "filePath": "reusing-form-sections-with-tanstack-forms-withfieldgroup.md",
+    "title": "Reusing Form Sections with TanStack Form's `withFieldGroup`",
+    "date": "2026-03-05",
+    "summary": "TanStack Form's `withFieldGroup` HOC is commonly shown being used with nested objects. Though it's not as well documented, it's also possible to extract reusable form sections from flat, non-nested data shapes.",
+    "image": "/blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.jpg",
+    "thumbnail": "/blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.thumb.jpg",
+    "note": null,
+    "tags": [
+      "react",
+      "typescript",
+      "tanstack form",
+      "form management"
+    ]
+  },
+  {
     "slug": "avoiding-tanstack-form-pitfalls",
     "filePath": "avoiding-tanstack-form-pitfalls.md",
     "title": "Avoiding TanStack Form Pitfalls",
