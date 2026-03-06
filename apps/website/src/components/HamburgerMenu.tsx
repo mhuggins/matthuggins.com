@@ -1,5 +1,5 @@
+import { cn } from "@matthuggins/ui";
 import { useCallback, useRef, useState } from "react";
-import { cn } from "@/utils/cn";
 import { ContactLinks } from "./ContactLinks";
 import { Dropdown } from "./Dropdown";
 import { Profile } from "./Profile";
@@ -17,12 +17,12 @@ export const HamburgerMenu = () => {
   }, []);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         ref={buttonRef}
         onClick={handleToggle}
-        className="flex flex-col gap-1 p-2"
+        className="flex cursor-pointer flex-col gap-1 p-2"
         aria-label="Toggle menu"
       >
         <span

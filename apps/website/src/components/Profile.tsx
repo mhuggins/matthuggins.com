@@ -1,4 +1,4 @@
-import { cn } from "@/utils/cn";
+import { cn } from "@matthuggins/ui";
 
 export interface ProfileProps {
   className?: string;

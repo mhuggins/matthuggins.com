@@ -67,7 +67,7 @@ function BlogPage() {
       {/* Structured Data */}
       <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
 
-      <Section title="All Blog Posts" icon={BookIcon} headingClassName="mb-4 uppercase">
+      <Section title="Blog Posts" icon={BookIcon} headingClassName="mb-4 uppercase">
         <BlogPosts posts={posts} />
       </Section>
     </>

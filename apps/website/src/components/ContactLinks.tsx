@@ -1,4 +1,4 @@
-import { cn } from "@/utils/cn";
+import { cn } from "@matthuggins/ui";
 import { EmailIcon } from "./icons/EmailIcon";
 import { GitHubIcon } from "./icons/GitHubIcon";
 import { LinkedInIcon } from "./icons/LinkedInIcon";

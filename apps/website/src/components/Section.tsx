@@ -1,6 +1,6 @@
+import { cn } from "@matthuggins/ui";
 import { Icon } from "@phosphor-icons/react";
 import { ReactNode } from "react";
-import { cn } from "@/utils/cn";
 import { CircleIcon } from "./CircleIcon";
 
 export interface SectionProps {

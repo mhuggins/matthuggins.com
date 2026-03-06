@@ -1,0 +1,12 @@
+{
+  "name": "@matthuggins/tsconfig",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "keywords": [],
+  "author": "Matt Huggins",
+  "license": "UNLICENSED",
+  "files": [
+    "base.json"
+  ]
+}

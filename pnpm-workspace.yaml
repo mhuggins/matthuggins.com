@@ -3,10 +3,15 @@ packages:
   - packages/*
 
 catalog:
+  "@phosphor-icons/react": ^2.1.10
+  "@types/node": ^24.3.3
   "@types/react": ^19.1.13
   "@types/react-dom": ^19.1.9
+  jsdom: ^27.0.1
   react: ^19.1.1
   react-dom: ^19.1.1
+  typescript: ^5.9.2
+  vite: ^7.1.5
   vitest: ^3.2.4
 
 catalogMode: strict

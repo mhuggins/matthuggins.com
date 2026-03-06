@@ -63,7 +63,7 @@ function TagPage() {
       <meta name="twitter:description" content={description} />
 
       <Section
-        title={`Posts Tagged \u201C${tag}\u201D`}
+        title={`Blog Posts Tagged \u201C${tag}\u201D`}
         subtitle={
           <Link to="/blog" className="inline-flex items-center gap-2 text-primary hover:underline">
             <ArrowLeftIcon className="size-4" />

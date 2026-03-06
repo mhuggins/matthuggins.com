@@ -7,11 +7,6 @@ export default defineConfig({
   test: {
     passWithNoTests: true,
     environment: "jsdom",
-    coverage: {
-      excludeAfterRemap: true,
-      reporter: ["html", "json-summary", "json"],
-      include: ["apps/**/src", "packages/**/src"],
-    },
     projects: ["apps/*", "packages/*"],
   },
 });
