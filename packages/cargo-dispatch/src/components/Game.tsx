@@ -2,6 +2,7 @@ import { cn } from "@matthuggins/ui";
 import type * as Monaco from "monaco-editor";
 import { HTMLAttributes, useCallback, useRef, useState } from "react";
 import { transform } from "sucrase";
+import { DEFAULT_CODE } from "../constants/code";
 import { LEVELS } from "../constants/level";
 import { GAME_API_TYPES } from "../generated/api";
 import { useWorkerGameLoop } from "../hooks/useWorkerGameLoop";
@@ -16,41 +17,6 @@ import { GameView } from "./GameView";
 import { LevelTimeline } from "./LevelTimeline";
 import { StatusBar } from "./StatusBar";
 import { StrategyEditor } from "./StrategyEditor";
-
-const DEFAULT_CODE = `function init(robots: RobotController[], world: WorldAPI): void {
-  robots.forEach((robot, index) => {
-    robot.setLabel(\`Bot \${index + 1}\`);
-
-    robot.onIdle(() => assignWork(robot));
-
-    robot.onStop((stop) => {
-      robot.dropOff();
-      robot.pickUp();
-      assignWork(robot);
-    });
-
-    world.onCargoReady((_cargo) => {
-      if (robot.isIdle()) {
-        assignWork(robot);
-      }
-    });
-
-    function assignWork(robot: RobotController): void {
-      if (robot.hasCargo()) {
-        const next = robot.nextDeliveryStop();
-        if (next !== null) {
-          robot.goTo(next);
-          return;
-        }
-      }
-
-      const aisle = world.getNearestAisleWithWaiting(robot.getCurrentStop() ?? 0);
-      if (aisle) {
-        robot.goTo(aisle.stop);
-      }
-    }
-  });
-}`;
 
 export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   const [status, setStatus] = useState<GameStatus>("idle");

@@ -1,6 +1,7 @@
 import { cn } from "@matthuggins/ui";
 import {
   ClockIcon,
+  HandCoinsIcon,
   type Icon,
   PackageIcon,
   RobotIcon,
@@ -27,6 +28,9 @@ export const StatusBar = memo(function StatusBar({ world, className }: StatusBar
         </Metric>
         <Metric icon={TruckIcon} label="Trucks">
           {world.level.truckCount}
+        </Metric>
+        <Metric icon={HandCoinsIcon} label="Robot cargo capacity">
+          {world.level.robotCapacity}
         </Metric>
       </div>
       <div className="flex items-center gap-4 text-[13px] text-gray-700">

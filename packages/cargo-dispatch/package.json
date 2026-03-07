@@ -29,6 +29,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@phosphor-icons/react": "catalog:",
     "assert-never": "^1.4.0",
+    "framer-motion": "^12.35.1",
     "sucrase": "^3.35.1"
   },
   "devDependencies": {

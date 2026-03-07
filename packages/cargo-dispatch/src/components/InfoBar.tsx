@@ -9,7 +9,7 @@ export function InfoBar({ world }: InfoBarProps) {
   const { robots } = world;
 
   return (
-    <div className="flex flex-col gap-2 border-gray-300 border-t-2 px-4 py-2.5 text-gray-600 text-xs">
+    <div className="flex flex-col gap-2 border-gray-300 border-t-2 bg-gray-100 px-4 py-2.5 text-gray-600 text-xs">
       {/* Robot states */}
       <div className="flex flex-wrap items-center justify-evenly gap-x-4 gap-y-1">
         {robots.map((robot) => {
