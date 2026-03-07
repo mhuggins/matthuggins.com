@@ -1,5 +1,6 @@
 import type * as Monaco from "monaco-editor";
-import { useCallback, useRef, useState } from "react";
+import { HTMLAttributes, useCallback, useRef, useState } from "react";
+import { transform } from "sucrase";
 import { GAME_API_TYPES } from "../generated/api";
 import { useGameLoop } from "../hooks/useGameLoop";
 import { calculateScore } from "../lib/calculateScore";
@@ -45,23 +46,21 @@ const DEFAULT_CODE = `function init(robots: RobotController[], world: WorldAPI):
   });
 }`;
 
-export function CargoDispatch() {
+export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
   const [status, setStatus] = useState<GameStatus>("idle");
-  const [world, setWorld] = useState<WorldState | null>(null);
+  const [world, setWorld] = useState<WorldState>(() => createWorld(LEVEL_1));
   const [errors, setErrors] = useState<string[]>([]);
   const [speed, setSpeed] = useState(1);
-  const [isMonacoReady, setIsMonacoReady] = useState(false);
+  const [view, setView] = useState<"game" | "code">("game");
+  const [code, setCode] = useState(DEFAULT_CODE);
 
-  const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof Monaco | null>(null);
   const worldRef = useRef<WorldState | null>(null);
   const sandboxRef = useRef<Sandbox | null>(null);
 
   const handleMount = useCallback(
-    (editor: Monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof Monaco) => {
-      editorRef.current = editor;
+    (_editor: Monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof Monaco) => {
       monacoRef.current = monacoInstance;
-      setIsMonacoReady(true);
     },
     [],
   );
@@ -102,17 +101,18 @@ export function CargoDispatch() {
 
   const { start, pause, resume, stop } = useGameLoop(speed, onTick);
 
-  const handleRun = useCallback(async () => {
-    const editor = editorRef.current;
-    const monacoInstance = monacoRef.current;
-    if (!editor || !monacoInstance) {
+  const handleRun = useCallback(() => {
+    let runCode: string;
+    try {
+      runCode = transpile(code);
+    } catch (err) {
+      setErrors([err instanceof Error ? err.message : String(err)]);
       return;
     }
 
-    const runCode = await transpileSource(editor, monacoInstance);
-
     const newWorld = createWorld(LEVEL_1);
     const sandbox = new Sandbox();
+
     sandbox.boot(runCode, newWorld);
 
     const bootErrors = sandbox.getErrors();
@@ -123,11 +123,13 @@ export function CargoDispatch() {
 
     worldRef.current = newWorld;
     sandboxRef.current = sandbox;
+
     setErrors([]);
     setWorld({ ...newWorld });
     setStatus("running");
+    setView("game");
     start();
-  }, [start]);
+  }, [code, start]);
 
   const handlePause = useCallback(() => {
     pause();
@@ -141,77 +143,74 @@ export function CargoDispatch() {
 
   const handleReset = useCallback(() => {
     stop();
+    const freshWorld = createWorld(LEVEL_1);
     worldRef.current = null;
     sandboxRef.current = null;
-    setWorld(null);
+    setWorld(freshWorld);
     setErrors([]);
     setStatus("idle");
   }, [stop]);
 
-  const score = world ? calculateScore(world) : null;
+  const handleViewChange = useCallback((nextView: "game" | "code") => {
+    setView(nextView);
+  }, []);
+
+  const handleEditCode = useCallback(() => {
+    if (status === "running" || status === "paused") {
+      handleReset();
+    }
+    handleViewChange("code");
+  }, [status, handleReset, handleViewChange]);
+
+  const score = calculateScore(world);
   const isEditorDisabled = status === "running" || status === "paused";
-  const canRun = (status === "idle" || status === "completed") && isMonacoReady;
+  const canRun = status === "idle" || status === "completed";
 
   return (
-    <div>
+    <div {...props}>
       <ControlsBar
         status={status}
         speed={speed}
         world={world}
         canRun={canRun}
-        onRun={() => void handleRun()}
+        onRun={handleRun}
         onPause={handlePause}
         onResume={handleResume}
         onReset={handleReset}
         onSpeedChange={setSpeed}
+        onEdit={view === "game" ? handleEditCode : undefined}
       />
-
-      {world && <GameView world={world} />}
-
-      {status === "completed" && score && <CompletionPanel score={score} />}
 
       <ErrorPanel errors={errors} />
 
-      {!world && (
-        <StrategyEditor
-          defaultValue={DEFAULT_CODE}
-          disabled={isEditorDisabled}
-          onBeforeMount={handleBeforeMount}
-          onMount={handleMount}
-        />
+      {view === "game" && (
+        <>
+          <GameView world={world} />
+          {status === "completed" && score && <CompletionPanel score={score} />}
+        </>
       )}
 
-      {!world && <APIReference />}
+      {view === "code" && (
+        <>
+          <StrategyEditor
+            value={code}
+            disabled={isEditorDisabled}
+            onChange={setCode}
+            onBeforeMount={handleBeforeMount}
+            onMount={handleMount}
+          />
+          <APIReference />
+        </>
+      )}
     </div>
   );
 }
 
-async function transpileSource(
-  editor: Monaco.editor.IStandaloneCodeEditor,
-  monacoInstance: typeof Monaco,
-) {
-  const runCode = editor.getValue();
-  const model = editor.getModel();
-
-  if (!model) {
-    return runCode;
-  }
-
-  try {
-    const getWorker = await monacoInstance.languages.typescript.getTypeScriptWorker();
-    const tsWorker = await getWorker(model.uri);
-    const output = await tsWorker.getEmitOutput(model.uri.toString());
-    const jsFile = output.outputFiles.find((f) => f.name.endsWith(".js"));
-    if (!jsFile) {
-      throw new Error("TypeScript compilation produced no output");
-    }
-    return jsFile.text;
-  } catch (err) {
-    throw new Error(`TypeScript compilation error: ${err instanceof Error ? err.message : err}`);
-  }
+function transpile(code: string): string {
+  return transform(code, { transforms: ["typescript"], disableESTransforms: true }).code;
 }
 
-const handleBeforeMount = (monacoInstance: typeof Monaco) => {
+function handleBeforeMount(monacoInstance: typeof Monaco) {
   monacoInstance.languages.typescript.typescriptDefaults.setCompilerOptions({
     target: monacoInstance.languages.typescript.ScriptTarget.ES2020,
     module: monacoInstance.languages.typescript.ModuleKind.None,
@@ -233,4 +232,4 @@ const handleBeforeMount = (monacoInstance: typeof Monaco) => {
     GAME_API_TYPES,
     "file:///api.d.ts",
   );
-};
+}

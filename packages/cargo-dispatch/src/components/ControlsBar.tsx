@@ -3,7 +3,8 @@ import {
   ArrowCounterClockwiseIcon,
   CalendarBlankIcon,
   ClockIcon,
-  Icon,
+  CodeIcon,
+  type Icon,
   PackageIcon,
   PauseIcon,
   PlayIcon,
@@ -11,22 +12,24 @@ import {
   TruckIcon,
   WarehouseIcon,
 } from "@phosphor-icons/react";
-import { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import type { GameStatus, WorldState } from "../types";
+import { Button } from "./Button";
 
 interface ControlsBarProps {
   status: GameStatus;
   speed: number;
-  world: WorldState | null;
+  world: WorldState;
   canRun: boolean;
   onRun: () => void;
   onPause: () => void;
   onResume: () => void;
   onReset: () => void;
   onSpeedChange: (speed: number) => void;
+  onEdit?: () => void;
 }
 
-export function ControlsBar({
+export const ControlsBar = memo(function ControlsBar({
   status,
   speed,
   world,
@@ -36,50 +39,44 @@ export function ControlsBar({
   onResume,
   onReset,
   onSpeedChange,
+  onEdit,
 }: ControlsBarProps) {
   return (
-    <div className="mb-4 flex flex-col justify-between gap-2">
+    <div className="mb-4 flex flex-col justify-between gap-4">
       <div className="flex items-center gap-2">
-        <div className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 items-stretch gap-2">
           {(status === "idle" || status === "completed") && (
-            <button
-              onClick={onRun}
-              disabled={!canRun}
-              className={cn(
-                "flex items-center gap-1.5 rounded-md border-none px-4 py-1.5 font-semibold text-[13px] text-white",
-                canRun ? "cursor-pointer bg-blue-600" : "cursor-default bg-blue-300",
-              )}
-            >
+            <Button intent="primary" onClick={onRun} disabled={!canRun}>
               <PlayIcon weight="fill" size={13} />
               Run
-            </button>
+            </Button>
           )}
           {status === "running" && (
-            <button
+            <Button
+              intent="primary"
               onClick={onPause}
-              className="flex cursor-pointer items-center gap-1.5 rounded-md border-none bg-amber-400 px-4 py-1.5 font-semibold text-[13px] text-white"
+              className="bg-amber-400 text-white disabled:bg-amber-200"
             >
               <PauseIcon weight="fill" size={13} />
               Pause
-            </button>
+            </Button>
           )}
           {status === "paused" && (
-            <button
-              onClick={onResume}
-              className="flex cursor-pointer items-center gap-1.5 rounded-md border-none bg-blue-600 px-4 py-1.5 font-semibold text-[13px] text-white"
-            >
+            <Button intent="primary" onClick={onResume}>
               <PlayIcon weight="fill" size={13} />
               Resume
-            </button>
+            </Button>
           )}
           {status !== "idle" && (
-            <button
-              onClick={onReset}
-              title="Reset"
-              className="flex cursor-pointer items-center rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1.5 text-gray-700"
-            >
+            <Button title="Reset" onClick={onReset}>
               <ArrowCounterClockwiseIcon size={15} />
-            </button>
+            </Button>
+          )}
+          {onEdit && (
+            <Button onClick={onEdit} title="Edit code">
+              <CodeIcon size={15} />
+              Edit
+            </Button>
           )}
         </div>
 
@@ -87,54 +84,50 @@ export function ControlsBar({
           <div className="flex items-center gap-1.5">
             <span className="text-gray-500 text-xs">Speed:</span>
             {[0.5, 1, 2, 4].map((s) => (
-              <button
+              <Button
                 key={s}
                 onClick={() => onSpeedChange(s)}
                 className={cn(
-                  "cursor-pointer rounded border px-2 py-0.5 text-xs",
-                  speed === s
-                    ? "border-[#1e3a5f] bg-[#1e3a5f] text-white"
-                    : "border-gray-300 bg-gray-100 text-gray-700",
+                  "px-2 py-0.5 text-xs",
+                  speed === s && "bg-[#1e3a5f] text-white ring-[#1e3a5f]",
                 )}
               >
                 {s}&#x00d7;
-              </button>
+              </Button>
             ))}
           </div>
         )}
       </div>
 
-      {world && (
-        <div className="flex items-center gap-2">
-          <div className="flex flex-1 items-center gap-4 text-[13px] text-gray-700">
-            <Metric icon={CalendarBlankIcon} label="Day number">
-              Day <strong>{world.level.day}</strong>
-            </Metric>
-            <Metric icon={RobotIcon} label="Robots">
-              {world.level.robotCount}
-            </Metric>
-            <Metric icon={WarehouseIcon} label="Aisles">
-              {world.level.aisleCount}
-            </Metric>
-            <Metric icon={TruckIcon} label="Trucks">
-              {world.level.truckCount}
-            </Metric>
-          </div>
-          <div className="flex items-center gap-4 text-[13px] text-gray-700">
-            <Metric icon={ClockIcon} label="Time remaining">
-              <strong className={cn(world.level.time - world.time <= 0 && "text-red-800")}>
-                {(world.level.time - world.time).toFixed(1)}s
-              </strong>
-            </Metric>
-            <Metric icon={PackageIcon} label="Packages delivered">
-              <strong>{world.deliveredCount}</strong> of {world.level.totalPackages}
-            </Metric>
-          </div>
+      <div className="flex items-center gap-2">
+        <div className="flex flex-1 items-center gap-4 text-[13px] text-gray-700">
+          <Metric icon={CalendarBlankIcon} label="Day number">
+            Day <strong>{world.level.day}</strong>
+          </Metric>
+          <Metric icon={RobotIcon} label="Robots">
+            {world.level.robotCount}
+          </Metric>
+          <Metric icon={WarehouseIcon} label="Aisles">
+            {world.level.aisleCount}
+          </Metric>
+          <Metric icon={TruckIcon} label="Trucks">
+            {world.level.truckCount}
+          </Metric>
         </div>
-      )}
+        <div className="flex items-center gap-4 text-[13px] text-gray-700">
+          <Metric icon={ClockIcon} label="Time remaining">
+            <strong className={cn(world.level.time - world.time <= 0 && "text-red-800")}>
+              {(world.level.time - world.time).toFixed(1)}s
+            </strong>
+          </Metric>
+          <Metric icon={PackageIcon} label="Packages delivered">
+            <strong>{world.deliveredCount}</strong> of {world.level.totalPackages}
+          </Metric>
+        </div>
+      </div>
     </div>
   );
-}
+});
 
 const Metric = ({
   icon: MetricIcon,

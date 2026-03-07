@@ -1,6 +1,7 @@
 import { cn } from "@matthuggins/ui";
 import { PackageIcon, RobotIcon, TruckIcon, WarningIcon } from "@phosphor-icons/react";
-import type { WorldState } from "../types";
+import { memo } from "react";
+import type { RobotData, WorldState } from "../types";
 
 const ROW_HEIGHT = 64;
 const ROBOT_LANE_WIDTH = 110;
@@ -91,97 +92,119 @@ export function GameRenderer({ world }: Props) {
         className="relative shrink-0 border-gray-300 border-x-2 bg-gray-100"
         style={{ width: ROBOT_LANE_WIDTH }}
       >
-        {/* Robot labels header */}
-        <div className="absolute top-0 right-0 left-0 z-20 flex justify-evenly border-gray-300 border-b bg-gray-200 px-1 py-0.5">
-          {robots.map((robot) => (
-            <span
-              key={robot.id}
-              className="overflow-hidden text-ellipsis whitespace-nowrap text-[9px] text-gray-500"
-            >
-              {robot.label}
-            </span>
-          ))}
-        </div>
-
-        {/* Per-robot column tracks */}
-        {robots.map((robot, idx) => {
-          const colCenter = ((idx + 0.5) * ROBOT_LANE_WIDTH) / robots.length;
-          return (
-            <div
-              key={robot.id}
-              className="-translate-x-1/2 absolute top-0 bottom-0 w-0.5 bg-gray-300"
-              style={{ left: colCenter }}
-            />
-          );
-        })}
-
-        {/* Stop markers */}
-        {robots.map((robot, robotIdx) => {
-          const colCenter = ((robotIdx + 0.5) * ROBOT_LANE_WIDTH) / robots.length;
-          return Array.from({ length: totalStops }, (_, i) => (
-            <div
-              key={`${robot.id}-${i}`}
-              className="-translate-x-1/2 -translate-y-1/2 absolute h-1.5 w-1.5 rounded-full bg-gray-400"
-              style={{ left: colCenter, top: i * ROW_HEIGHT + ROW_HEIGHT / 2 }}
-            />
-          ));
-        })}
+        <RobotLane robots={robots} totalStops={totalStops} />
 
         {/* Robots */}
         {robots.map((robot, idx) => {
           const colWidth = ROBOT_LANE_WIDTH / robots.length;
           const colCenter = (idx + 0.5) * colWidth;
           const iconSize = Math.min(32, Math.floor(colWidth * 0.55));
-          const yPx = robot.position * ROW_HEIGHT + ROW_HEIGHT / 2;
-
-          // Group cargo by color, preserving insertion order of first occurrence
-          const cargoGroups: { color: string; count: number }[] = [];
-          const seen = new Map<string, number>();
-          for (const pkg of robot.cargo) {
-            const existing = seen.get(pkg.color);
-            if (existing !== undefined) {
-              cargoGroups[existing]!.count++;
-            } else {
-              seen.set(pkg.color, cargoGroups.length);
-              cargoGroups.push({ color: pkg.color, count: 1 });
-            }
-          }
-
-          const atCapacity = robot.cargo.length >= robot.capacity;
-
           return (
-            <div
-              key={robot.id}
-              title={`${robot.label} | ${robot.cargo.length}/${robot.capacity} packages`}
-              className="-translate-x-1/2 -translate-y-1/2 absolute z-10"
-              style={{ left: colCenter, top: yPx, width: iconSize, height: iconSize }}
-            >
-              {atCapacity && (
-                <div className="-translate-x-1/2 absolute bottom-full left-1/2 pb-0.5">
-                  <WarningIcon weight="fill" size={12} className="text-red-500" />
-                </div>
-              )}
-              <RobotIcon
-                weight="duotone"
-                size={iconSize}
-                className="text-[#1e3a5f] transition-colors duration-100"
-              />
-              {cargoGroups.length > 0 && (
-                <div className="-translate-x-1/2 absolute top-full left-1/2 mt-0.5 flex flex-wrap justify-center gap-x-1.5 gap-y-0.5 rounded bg-white/80 px-1 py-0.5 shadow-sm ring-1 ring-gray-200">
-                  {cargoGroups.map(({ color, count }) => (
-                    <span key={color} className="flex items-center gap-[3px]">
-                      <PackageIcon size={14} weight="fill" style={{ color }} />
-                      <span className="font-medium text-gray-600 text-sm leading-none">
-                        {count}
-                      </span>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            <RobotMarker key={robot.id} robot={robot} colCenter={colCenter} iconSize={iconSize} />
           );
         })}
       </div>
+    </div>
+  );
+}
+
+// Static lane infrastructure: labels, tracks, stop markers — never changes during play
+const RobotLane = memo(function RobotLane({
+  robots,
+  totalStops,
+}: {
+  robots: RobotData[];
+  totalStops: number;
+}) {
+  return (
+    <>
+      <div className="absolute top-0 right-0 left-0 z-20 flex border-gray-300 border-b bg-gray-200 py-0.5">
+        {robots.map((robot) => (
+          <span
+            key={robot.id}
+            className="overflow-hidden text-ellipsis whitespace-nowrap text-center text-[9px] text-gray-500"
+            style={{ width: ROBOT_LANE_WIDTH }}
+          >
+            {robot.label}
+          </span>
+        ))}
+      </div>
+
+      {robots.map((robot, idx) => {
+        const colCenter = ((idx + 0.5) * ROBOT_LANE_WIDTH) / robots.length;
+        return (
+          <div
+            key={robot.id}
+            className="-translate-x-1/2 absolute top-0 bottom-0 w-0.5 bg-gray-300"
+            style={{ left: colCenter }}
+          />
+        );
+      })}
+
+      {robots.map((robot, robotIdx) => {
+        const colCenter = ((robotIdx + 0.5) * ROBOT_LANE_WIDTH) / robots.length;
+        return Array.from({ length: totalStops }, (_, i) => (
+          <div
+            key={`${robot.id}-${i}`}
+            className="-translate-x-1/2 -translate-y-1/2 absolute h-1.5 w-1.5 rounded-full bg-gray-400"
+            style={{ left: colCenter, top: i * ROW_HEIGHT + ROW_HEIGHT / 2 }}
+          />
+        ));
+      })}
+    </>
+  );
+});
+
+function RobotMarker({
+  robot,
+  colCenter,
+  iconSize,
+}: {
+  robot: RobotData;
+  colCenter: number;
+  iconSize: number;
+}) {
+  const yPx = robot.position * ROW_HEIGHT + ROW_HEIGHT / 2;
+  const atCapacity = robot.cargo.length >= robot.capacity;
+
+  const cargoGroups: { color: string; count: number }[] = [];
+  const seen = new Map<string, number>();
+  for (const pkg of robot.cargo) {
+    const existing = seen.get(pkg.color);
+    if (existing !== undefined) {
+      cargoGroups[existing]!.count++;
+    } else {
+      seen.set(pkg.color, cargoGroups.length);
+      cargoGroups.push({ color: pkg.color, count: 1 });
+    }
+  }
+
+  return (
+    <div
+      title={`${robot.label} | ${robot.cargo.length}/${robot.capacity} packages`}
+      className="-translate-x-1/2 -translate-y-1/2 absolute z-10"
+      style={{ left: colCenter, top: yPx, width: iconSize, height: iconSize }}
+    >
+      {atCapacity && (
+        <div className="-translate-x-1/2 absolute bottom-full left-1/2 pb-0.5">
+          <WarningIcon weight="fill" size={12} className="text-red-500" />
+        </div>
+      )}
+      <RobotIcon
+        weight="duotone"
+        size={iconSize}
+        className="text-[#1e3a5f] transition-colors duration-100"
+      />
+      {cargoGroups.length > 0 && (
+        <div className="-translate-x-1/2 absolute top-full left-1/2 mt-0.5 flex flex-wrap justify-center gap-x-1.5 gap-y-0.5 rounded bg-white/80 px-1 py-0.5 shadow-sm ring-1 ring-gray-200">
+          {cargoGroups.map(({ color, count }) => (
+            <span key={color} className="flex items-center gap-[3px]">
+              <PackageIcon size={14} weight="fill" style={{ color }} />
+              <span className="font-medium text-gray-600 text-sm leading-none">{count}</span>
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

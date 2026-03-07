@@ -3,15 +3,17 @@ import Editor from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
 
 interface StrategyEditorProps {
-  defaultValue: string;
+  value: string;
   disabled: boolean;
+  onChange: (value: string) => void;
   onBeforeMount: (monaco: typeof Monaco) => void;
   onMount: (editor: Monaco.editor.IStandaloneCodeEditor, monaco: typeof Monaco) => void;
 }
 
 export function StrategyEditor({
-  defaultValue,
+  value,
   disabled,
+  onChange,
   onBeforeMount,
   onMount,
 }: StrategyEditorProps) {
@@ -26,7 +28,8 @@ export function StrategyEditor({
         height="420px"
         path="file:///strategy.ts"
         defaultLanguage="typescript"
-        defaultValue={defaultValue}
+        value={value}
+        onChange={(v) => onChange(v ?? "")}
         beforeMount={onBeforeMount}
         onMount={onMount}
         options={{

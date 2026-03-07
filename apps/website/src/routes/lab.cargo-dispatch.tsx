@@ -1,5 +1,5 @@
-import { FlaskIcon } from "@phosphor-icons/react";
-import { createFileRoute } from "@tanstack/react-router";
+import { ArrowLeftIcon, FlaskIcon } from "@phosphor-icons/react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy } from "react";
 import { Section } from "@/components/Section";
 import { DOMAIN } from "@/constants/site";
@@ -65,8 +65,21 @@ function CargoDispatchPage() {
       {/* Structured Data */}
       <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
 
-      <Section title={title} subtitle={description} icon={FlaskIcon} headingClassName="uppercase">
-        <CargoDispatch />
+      <Section
+        title={title}
+        subtitle={
+          <div className="flex flex-col items-start justify-start gap-2">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center">{description}</div>
+            <Link to="/lab" className="inline-flex items-center gap-2 text-primary hover:underline">
+              <ArrowLeftIcon className="size-4" />
+              Back to Lab
+            </Link>
+          </div>
+        }
+        icon={FlaskIcon}
+        headingClassName="uppercase"
+      >
+        <CargoDispatch className="mt-4" />
       </Section>
     </>
   );

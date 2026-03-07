@@ -27,7 +27,8 @@
   "dependencies": {
     "@matthuggins/ui": "workspace:*",
     "@monaco-editor/react": "^4.7.0",
-    "@phosphor-icons/react": "catalog:"
+    "@phosphor-icons/react": "catalog:",
+    "sucrase": "^3.35.1"
   },
   "devDependencies": {
     "@matthuggins/tsconfig": "workspace:*",
