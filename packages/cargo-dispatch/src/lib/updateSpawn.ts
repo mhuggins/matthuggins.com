@@ -9,11 +9,11 @@ interface SpawnedInfo {
   destination: number;
 }
 
-export function updateSpawn(world: WorldState, dt: number): SpawnedInfo | null {
+export function updateSpawn(world: WorldState, deltaTime: number): SpawnedInfo | null {
   if (world.spawnedCount >= world.level.totalPackages) return null;
   if (world.completedAt !== null) return null;
 
-  world.nextSpawnIn -= dt;
+  world.nextSpawnIn -= deltaTime;
   if (world.nextSpawnIn > 0) return null;
 
   const [minInterval, maxInterval] = world.level.spawnInterval;
@@ -26,8 +26,8 @@ export function updateSpawn(world: WorldState, dt: number): SpawnedInfo | null {
 
   const pkg: GamePackage = {
     id: world.nextPackageId++,
-    from: aisle.stop,
-    to: truck.stop,
+    origin: aisle.stop,
+    destination: truck.stop,
     color: truck.color,
     createdAt: world.time,
     pickedUpAt: null,

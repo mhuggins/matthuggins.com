@@ -26,6 +26,8 @@ export interface RobotSummary {
   readonly id: number;
   readonly currentStop: StopId | null;
   readonly cargoCount: number;
+  /** Package count per destination truck stop. */
+  readonly destinations: Record<StopId, number>;
   readonly queuedStops: StopId[];
   readonly idle: boolean;
 }
@@ -37,16 +39,22 @@ export interface CargoInfo {
   readonly destination: StopId;
 }
 
+export interface WaitingPackage {
+  /** The truck stop this package needs to be delivered to. */
+  readonly destination: StopId;
+  readonly color: string;
+}
+
 export interface CargoSummary {
   readonly total: number;
   /** Package count per destination truck stop. */
-  readonly byTruck: Record<StopId, number>;
+  readonly destinations: Record<StopId, number>;
 }
 
 export interface RobotController {
   /** Called when the robot has no queued stops and is ready for work. */
   onIdle(callback: () => void): void;
-  /** Called after the robot arrives at a stop and auto pickup/dropoff completes. */
+  /** Called after the robot arrives at a stop. Call dropOff() and/or pickUp() here. */
   onStop(callback: (stop: StopId) => void): void;
   /** Queue a stop to visit. If idle, the robot begins moving immediately. */
   goTo(stop: StopId): void;
@@ -76,6 +84,16 @@ export interface RobotController {
   getQueuedStops(): StopId[];
   /** Set a display label shown on the robot in the UI. */
   setLabel(text: string): void;
+  /**
+   * Drop off all cargo destined for the current stop (if it's a truck stop).
+   * Does nothing if the robot is not at a truck stop.
+   */
+  dropOff(): void;
+  /**
+   * Pick up packages from the current stop (if it's an aisle), up to remaining capacity.
+   * An optional filter predicate lets you selectively pick up packages by color, destination, etc.
+   */
+  pickUp(filter?: (pkg: WaitingPackage) => boolean): void;
 }
 
 export interface WorldAPI {
@@ -95,6 +113,8 @@ export interface WorldAPI {
   getBusiestAisle(): AisleSummary | null;
   /** Nearest aisle with waiting packages relative to fromStop, or null. */
   getNearestAisleWithWaiting(fromStop: StopId): AisleSummary | null;
+  /** Packages waiting at a given aisle stop. Returns [] if the stop is not an aisle. */
+  getWaitingPackages(stop: StopId): WaitingPackage[];
   /** Called whenever new cargo spawns into an aisle — useful for waking idle robots. */
   onCargoReady(callback: (cargo: CargoInfo) => void): void;
 }

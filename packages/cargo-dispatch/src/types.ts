@@ -4,8 +4,8 @@ export type RobotState = "idle" | "moving";
 
 export interface GamePackage {
   id: number;
-  from: StopId;
-  to: StopId;
+  origin: StopId;
+  destination: StopId;
   color: string;
   createdAt: number;
   pickedUpAt: number | null;

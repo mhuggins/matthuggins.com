@@ -9,7 +9,11 @@ export function APIReference() {
         <div className="text-gray-500">
           robot.onIdle(callback) — called when robot has no queued stops
           <br />
-          robot.onStop(callback) — called after robot arrives + auto pickup/dropoff
+          robot.onStop(callback) — called after robot arrives at a stop, receives StopId
+          <br />
+          robot.dropOff() — deliver cargo destined for current truck stop
+          <br />
+          robot.pickUp(filter?) — pick up packages at current aisle (optional filter)
           <br />
           robot.goTo(stop) — queue a stop to visit
           <br />
@@ -25,7 +29,7 @@ export function APIReference() {
           <br />
           robot.getDeliveryStops() → StopId[]
           <br />
-          robot.getCargoSummary() → {"{ total, byTruck }"}
+          robot.getCargoSummary() → {"{ total, destinations }"}
           <br />
           robot.getQueuedStops() → StopId[]
           <br />
@@ -37,6 +41,9 @@ export function APIReference() {
         </div>
         <div className="mt-2 mb-1 font-semibold">world</div>
         <div className="text-gray-500">
+          world.onCargoReady(callback) — called when cargo spawns, receives{" "}
+          {"{ aisle, destination }"}
+          <br />
           world.getBusiestAisle() → {"{ stop, waitingCount, destinations } | null"}
           <br />
           world.getNearestAisleWithWaiting(fromStop) → aisle | null
@@ -45,18 +52,17 @@ export function APIReference() {
           <br />
           world.getWaitingCount(stop) → number
           <br />
-          world.getAisles() → aisle[]
+          world.getWaitingPackages(stop) → {"{ destination, color }[]"}
           <br />
-          world.getTrucks() → truck[]
+          world.getAisles() → {"{ stop, waitingCount, destinations }[]"}
           <br />
-          world.getRobots() → robot summary[]
+          world.getTrucks() → {"{ stop, name, color }[]"}
           <br />
-          world.onCargoReady(callback) — called when cargo spawns, receives{" "}
-          {"{ aisle, destination }"}
+          world.getRobots() → {"{ id, currentStop, cargoCount, destinations, queuedStops, idle }[]"}
           <br />
           world.getTime() → number
         </div>
-        <div className="mt-2 mb-1 font-semibold">StopId values for day ${LEVEL_1.day}</div>
+        <div className="mt-2 mb-1 font-semibold">StopId values for day {LEVEL_1.day}</div>
         <div className="text-gray-500">
           Stops 0-{LEVEL_1.truckCount - 1}: trucks
           <br />

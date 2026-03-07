@@ -519,12 +519,12 @@ A fixed timestep is easiest.
 ```javascript
 const TICK_RATE = 1 / 30; // 30 updates/sec
 
-function update(dt) {
-  world.time += dt;
+function update(deltaTime) {
+  world.time += deltaTime;
 
-  spawnSystem.update(dt, world);
+  spawnSystem.update(deltaTime, world);
   for (const robot of world.robots) {
-    robot.update(dt, world);
+    robot.update(deltaTime, world);
   }
 
   scoring.update(world);

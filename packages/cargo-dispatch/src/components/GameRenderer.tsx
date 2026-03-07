@@ -46,7 +46,7 @@ export function GameRenderer({ world }: Props) {
 
         {/* Divider between trucks and aisles */}
         <div
-          className="absolute right-0 left-0 z-10 bg-gray-300"
+          className="absolute right-0 left-0 z-1 bg-gray-300"
           style={{ top: trucks.length * ROW_HEIGHT, height: 3 }}
         />
 
@@ -63,7 +63,7 @@ export function GameRenderer({ world }: Props) {
             <span className="min-w-[72px] text-[13px] text-gray-700">Aisle {i + 1}</span>
             <div className="mx-2 flex flex-1 flex-wrap gap-[3px]">
               {aisle.waiting.slice(0, 16).map((pkg) => {
-                const truck = world.trucks.find((t) => t.stop === pkg.to);
+                const truck = world.trucks.find((t) => t.stop === pkg.destination);
                 return (
                   <PackageIcon
                     key={pkg.id}
@@ -118,7 +118,7 @@ const RobotLane = memo(function RobotLane({
 }) {
   return (
     <>
-      <div className="absolute top-0 right-0 left-0 z-20 flex border-gray-300 border-b bg-gray-200 py-0.5">
+      <div className="absolute top-0 right-0 left-0 z-1 flex border-gray-300 border-b bg-gray-200 py-0.5">
         {robots.map((robot) => (
           <span
             key={robot.id}
@@ -182,7 +182,7 @@ function RobotMarker({
   return (
     <div
       title={`${robot.label} | ${robot.cargo.length}/${robot.capacity} packages`}
-      className="-translate-x-1/2 -translate-y-1/2 absolute z-10"
+      className="-translate-x-1/2 -translate-y-1/2 absolute z-1"
       style={{ left: colCenter, top: yPx, width: iconSize, height: iconSize }}
     >
       {atCapacity && (

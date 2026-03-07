@@ -21,7 +21,12 @@ const DEFAULT_CODE = `function init(robots: RobotController[], world: WorldAPI):
     robot.setLabel(\`Bot \${index + 1}\`);
 
     robot.onIdle(() => assignWork(robot));
-    robot.onStop(() => assignWork(robot));
+
+    robot.onStop((stop) => {
+      robot.dropOff();
+      robot.pickUp();
+      assignWork(robot);
+    });
 
     world.onCargoReady((_cargo) => {
       if (robot.isIdle()) {
@@ -78,9 +83,9 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
   }, []);
 
   const onTick = useCallback(
-    (dt: number) => {
+    (deltaTime: number) => {
       if (!worldRef.current) return false;
-      updateWorld(worldRef.current, dt, handleEvent);
+      updateWorld(worldRef.current, deltaTime, handleEvent);
 
       const errs = sandboxRef.current?.getErrors() ?? [];
       if (errs.length > 0) {

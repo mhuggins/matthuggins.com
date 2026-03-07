@@ -8,19 +8,19 @@ export type EngineEvent =
 
 type EventHandler = (event: EngineEvent) => void;
 
-export function updateWorld(world: WorldState, dt: number, onEvent: EventHandler): void {
-  world.time += dt;
-  const spawned = updateSpawn(world, dt);
+export function updateWorld(world: WorldState, deltaTime: number, onEvent: EventHandler): void {
+  world.time += deltaTime;
+  const spawned = updateSpawn(world, deltaTime);
   if (spawned) {
     onEvent({ type: "cargoSpawned", aisle: spawned.aisle, destination: spawned.destination });
   }
   for (const robot of world.robots) {
-    updateRobot(robot, world, dt, onEvent);
+    updateRobot(robot, deltaTime, onEvent);
   }
   checkVictory(world);
 }
 
-function updateRobot(robot: RobotData, world: WorldState, dt: number, onEvent: EventHandler): void {
+function updateRobot(robot: RobotData, deltaTime: number, onEvent: EventHandler): void {
   if (robot.state === "idle") return;
 
   if (robot.targetStop === null) {
@@ -35,7 +35,7 @@ function updateRobot(robot: RobotData, world: WorldState, dt: number, onEvent: E
   }
 
   const dist = robot.targetStop - robot.position;
-  const step = robot.speed * dt;
+  const step = robot.speed * deltaTime;
 
   if (Math.abs(dist) <= step) {
     robot.position = robot.targetStop;
@@ -44,7 +44,6 @@ function updateRobot(robot: RobotData, world: WorldState, dt: number, onEvent: E
 
     const stop: StopId = robot.position;
 
-    doPickupDropoff(robot, world, stop);
     onEvent({ type: "robotStop", robotId: robot.id, stop });
 
     if (robot.stopQueue.length > 0) {
@@ -56,31 +55,6 @@ function updateRobot(robot: RobotData, world: WorldState, dt: number, onEvent: E
     }
   } else {
     robot.position += robot.direction * step;
-  }
-}
-
-function doPickupDropoff(robot: RobotData, world: WorldState, stop: StopId): void {
-  const truck = world.trucks.find((t) => t.stop === stop);
-  if (truck) {
-    const toDeliver = robot.cargo.filter((p) => p.to === stop);
-    for (const pkg of toDeliver) {
-      pkg.deliveredAt = world.time;
-      truck.deliveredCount++;
-      world.deliveredCount++;
-    }
-    robot.cargo = robot.cargo.filter((p) => p.to !== stop);
-  }
-
-  const aisle = world.aisles.find((a) => a.stop === stop);
-  if (aisle && aisle.waiting.length > 0) {
-    const available = robot.capacity - robot.cargo.length;
-    if (available > 0) {
-      const toPickup = aisle.waiting.splice(0, available);
-      for (const pkg of toPickup) {
-        pkg.pickedUpAt = world.time;
-        robot.cargo.push(pkg);
-      }
-    }
   }
 }
 

@@ -8,7 +8,7 @@ import { useStableRef } from "./useStableRef";
  * @param onTick - Called each frame with the scaled delta time in seconds.
  *   Return true to continue the loop, false to stop it.
  */
-export function useGameLoop(speed: number, onTick: (dt: number) => boolean) {
+export function useGameLoop(speed: number, onTick: (deltaTime: number) => boolean) {
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
   const speedRef = useStableRef(speed);
@@ -22,8 +22,8 @@ export function useGameLoop(speed: number, onTick: (dt: number) => boolean) {
       const rawDt = (timestamp - lastTimeRef.current) / 1000;
       lastTimeRef.current = timestamp;
 
-      const dt = Math.min(rawDt, 0.1) * speedRef.current;
-      const shouldContinue = onTickRef.current(dt);
+      const deltaTime = Math.min(rawDt, 0.1) * speedRef.current;
+      const shouldContinue = onTickRef.current(deltaTime);
 
       if (shouldContinue) {
         rafRef.current = requestAnimationFrame(tick);
