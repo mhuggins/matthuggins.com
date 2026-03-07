@@ -10,6 +10,7 @@ import {
 } from "@phosphor-icons/react";
 import { memo, type ReactNode } from "react";
 import type { WorldState } from "../types";
+import { Tooltip } from "./Tooltip";
 
 interface StatusBarProps {
   world: WorldState;
@@ -20,16 +21,16 @@ export const StatusBar = memo(function StatusBar({ world, className }: StatusBar
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <div className="flex flex-1 items-center gap-4 text-[13px] text-gray-700">
-        <Metric icon={RobotIcon} label="Robots">
-          {world.level.robotCount}
+        <Metric icon={TruckIcon} label="Trucks">
+          {world.level.truckCount}
         </Metric>
         <Metric icon={WarehouseIcon} label="Aisles">
           {world.level.aisleCount}
         </Metric>
-        <Metric icon={TruckIcon} label="Trucks">
-          {world.level.truckCount}
+        <Metric icon={RobotIcon} label="Robots">
+          {world.level.robotCount}
         </Metric>
-        <Metric icon={HandCoinsIcon} label="Robot cargo capacity">
+        <Metric icon={HandCoinsIcon} label="Robot capacity">
           {world.level.robotCapacity}
         </Metric>
       </div>
@@ -58,8 +59,10 @@ const Metric = ({
   children: ReactNode;
   className?: string;
 }) => (
-  <span title={label} className={cn("flex items-center gap-1 whitespace-nowrap", className)}>
-    <MetricIcon size={18} weight="regular" aria-label={label} className="text-gray-600" />
-    <span>{children}</span>
-  </span>
+  <Tooltip content={label}>
+    <span className={cn("flex items-center gap-1 whitespace-nowrap", className)}>
+      <MetricIcon size={18} weight="regular" aria-label={label} className="text-gray-600" />
+      <span>{children}</span>
+    </span>
+  </Tooltip>
 );

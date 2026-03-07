@@ -10,7 +10,7 @@ type EventHandler = (event: EngineEvent) => void;
 
 export function updateWorld(world: WorldState, deltaTime: number, onEvent: EventHandler): void {
   world.time += deltaTime;
-  const spawned = updateSpawn(world, deltaTime);
+  const spawned = updateSpawn(world);
   if (spawned) {
     onEvent({ type: "cargoSpawned", aisle: spawned.aisle, destination: spawned.destination });
   }

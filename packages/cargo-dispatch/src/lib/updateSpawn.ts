@@ -1,23 +1,14 @@
 import type { GamePackage, WorldState } from "../types";
 
-function randomBetween(min: number, max: number): number {
-  return min + Math.random() * (max - min);
-}
-
 interface SpawnedInfo {
   aisle: number;
   destination: number;
 }
 
-export function updateSpawn(world: WorldState, deltaTime: number): SpawnedInfo | null {
+export function updateSpawn(world: WorldState): SpawnedInfo | null {
   if (world.spawnedCount >= world.level.totalPackages) return null;
   if (world.completedAt !== null) return null;
-
-  world.nextSpawnIn -= deltaTime;
-  if (world.nextSpawnIn > 0) return null;
-
-  const [minInterval, maxInterval] = world.level.spawnInterval;
-  world.nextSpawnIn = randomBetween(minInterval, maxInterval);
+  if (world.time < world.spawnSchedule[world.spawnedCount]!) return null;
 
   const aisleIndex = Math.floor(Math.random() * world.aisles.length);
   const truckIndex = Math.floor(Math.random() * world.trucks.length);

@@ -170,15 +170,19 @@ export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivEle
         onEdit={view === "game" ? handleEditCode : undefined}
       />
 
-      <LevelTimeline
-        levels={LEVELS}
-        currentLevelIndex={levelIndex}
-        results={levelResults}
-        status={status}
-        className="my-2"
-      />
+      {view === "game" && (
+        <>
+          <LevelTimeline
+            levels={LEVELS}
+            currentLevelIndex={levelIndex}
+            results={levelResults}
+            status={status}
+            className="my-2"
+          />
 
-      <StatusBar world={world} />
+          <StatusBar world={world} />
+        </>
+      )}
 
       <ErrorPanel errors={errors} />
 

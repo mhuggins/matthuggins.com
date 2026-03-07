@@ -46,7 +46,7 @@ export interface LevelConfig {
   robotCapacity: number;
   robotSpeed: number;
   totalPackages: number;
-  spawnInterval: [number, number];
+  spawnWindow: number;
 }
 
 export interface WorldState {
@@ -59,7 +59,7 @@ export interface WorldState {
   spawnedCount: number;
   deliveredCount: number;
   level: LevelConfig;
-  nextSpawnIn: number;
+  spawnSchedule: number[];
   nextPackageId: number;
   completedAt: number | null;
 }

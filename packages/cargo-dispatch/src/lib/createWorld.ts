@@ -30,6 +30,12 @@ export function createWorld(level: LevelConfig): WorldState {
     label: `Bot ${i + 1}`,
   }));
 
+  const slotDuration = level.spawnWindow / level.totalPackages;
+  const spawnSchedule = Array.from(
+    { length: level.totalPackages },
+    (_, i) => i * slotDuration + Math.random() * slotDuration,
+  );
+
   return {
     time: 0,
     stops,
@@ -40,7 +46,7 @@ export function createWorld(level: LevelConfig): WorldState {
     spawnedCount: 0,
     deliveredCount: 0,
     level,
-    nextSpawnIn: 0,
+    spawnSchedule,
     nextPackageId: 0,
     completedAt: null,
   };

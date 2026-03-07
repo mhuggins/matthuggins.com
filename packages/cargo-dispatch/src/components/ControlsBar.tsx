@@ -3,6 +3,7 @@ import { ArrowCounterClockwiseIcon, CodeIcon, PauseIcon, PlayIcon } from "@phosp
 import { memo } from "react";
 import type { GameStatus } from "../types";
 import { Button } from "./Button";
+import { Tooltip } from "./Tooltip";
 
 interface ControlsBarProps {
   status: GameStatus;
@@ -55,9 +56,11 @@ export const ControlsBar = memo(function ControlsBar({
           </Button>
         )}
         {status !== "idle" && (
-          <Button title="Reset" onClick={onReset}>
-            <ArrowCounterClockwiseIcon size={15} />
-          </Button>
+          <Tooltip content="Reset">
+            <Button onClick={onReset} className="h-full">
+              <ArrowCounterClockwiseIcon size={15} />
+            </Button>
+          </Tooltip>
         )}
         {onEdit && (
           <Button onClick={onEdit} title="Edit code">
