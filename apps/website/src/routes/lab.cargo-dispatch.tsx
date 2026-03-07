@@ -69,7 +69,11 @@ function CargoDispatchPage() {
         title={title}
         subtitle={
           <div className="flex flex-col items-start justify-start gap-2">
-            <div className="flex flex-col gap-2 lg:flex-row lg:items-center">{description}</div>
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+              Programming game where you write TypeScript or JavaScript to control a fleet of
+              warehouse robots. Packages spawn in aisles and need to be picked up and delivered to
+              the correct trucks &mdash; all before time runs out. Can you survive the workweek?
+            </div>
             <Link to="/lab" className="inline-flex items-center gap-2 text-primary hover:underline">
               <ArrowLeftIcon className="size-4" />
               Back to Lab
@@ -79,7 +83,7 @@ function CargoDispatchPage() {
         icon={FlaskIcon}
         headingClassName="uppercase"
       >
-        <CargoDispatch className="mt-4" />
+        <CargoDispatch className="mt-6" />
       </Section>
     </>
   );

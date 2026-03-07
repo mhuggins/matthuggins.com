@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300">
+  <defs>
+    <!-- Phosphor TruckIcon (fill weight) -->
+    <symbol id="truck" viewBox="0 0 256 256">
+      <path d="M255.43,117l-14-35A15.93,15.93,0,0,0,226.58,72H192V64a8,8,0,0,0-8-8H32A16,16,0,0,0,16,72V184a16,16,0,0,0,16,16H49a32,32,0,0,0,62,0h50a32,32,0,0,0,62,0h17a16,16,0,0,0,16-16V120A8.13,8.13,0,0,0,255.43,117ZM80,208a16,16,0,1,1,16-16A16,16,0,0,1,80,208ZM32,136V72H176v64Zm160,72a16,16,0,1,1,16-16A16,16,0,0,1,192,208Zm0-96V88h34.58l9.6,24Z"/>
+    </symbol>
+    <!-- Phosphor WarehouseIcon (fill weight) -->
+    <symbol id="warehouse" viewBox="0 0 256 256">
+      <path d="M240,184h-8V57.9l9.67-2.08a8,8,0,1,0-3.35-15.64l-224,48A8,8,0,0,0,16,104a8.16,8.16,0,0,0,1.69-.18L24,102.47V184H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16Zm-56,0H72V168H184Zm0-32H72V136H184Z"/>
+    </symbol>
+    <!-- Phosphor PackageIcon (fill weight) -->
+    <symbol id="pkg" viewBox="0 0 256 256">
+      <path d="M223.68,66.15,135.68,18a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32l80.35,44L178.57,92.29l-80.35-44Zm0,88L47.65,76,81.56,57.43l80.35,44Zm88,55.85h0l-80,43.79V133.83l32-17.51V152a8,8,0,0,0,16,0V107.56l32-17.51v85.76Z"/>
+    </symbol>
+    <!-- Phosphor RobotIcon (duotone weight) -->
+    <symbol id="robot" viewBox="0 0 256 256">
+      <path d="M200,56H56A24,24,0,0,0,32,80V192a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V80A24,24,0,0,0,200,56ZM164,184H92a20,20,0,0,1,0-40h72a20,20,0,0,1,0,40Z" opacity="0.3"/>
+      <path d="M200,48H136V16a8,8,0,0,0-16,0V48H56A32,32,0,0,0,24,80V192a32,32,0,0,0,32,32H200a32,32,0,0,0,32-32V80A32,32,0,0,0,200,48Zm16,144a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V80A16,16,0,0,1,56,64H200a16,16,0,0,1,16,16ZM72,108a12,12,0,1,1,12,12A12,12,0,0,1,72,108Zm88,0a12,12,0,1,1,12,12A12,12,0,0,1,160,108Zm4,28H92a28,28,0,0,0,0,56h72a28,28,0,0,0,0-56Zm-24,16v24H116V152ZM80,164a12,12,0,0,1,12-12h8v24H92A12,12,0,0,1,80,164Zm84,12h-8V152h8a12,12,0,0,1,0,24Z"/>
+    </symbol>
+  </defs>
+
+  <!-- ── Background ── -->
+  <rect width="600" height="300" fill="#f8fafc"/>
+
+  <!-- ══ Stop panel (x: 0–240) ══
+       Row height: 60px  |  centers: 30, 90, 153, 213, 271
+       Truck rows: 0–60, 60–120
+       Divider: 120–123
+       Aisle rows: 123–183, 183–243, 243–300
+  -->
+
+  <!-- Truck A (center 30) -->
+  <rect x="0" y="0" width="240" height="60" fill="#f1f5f9"/>
+  <use href="#truck" x="12" y="18" width="24" height="24" fill="#ef4444"/>
+  <text x="44" y="30" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="#0f172a" dominant-baseline="middle">Truck A</text>
+  <rect x="0" y="59" width="240" height="1" fill="#e2e8f0"/>
+
+  <!-- Truck B (center 90) -->
+  <rect x="0" y="60" width="240" height="60" fill="#f1f5f9"/>
+  <use href="#truck" x="12" y="78" width="24" height="24" fill="#3b82f6"/>
+  <text x="44" y="90" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="#0f172a" dominant-baseline="middle">Truck B</text>
+
+  <!-- Trucks / aisles divider -->
+  <rect x="0" y="120" width="240" height="3" fill="#cbd5e1"/>
+
+  <!-- Aisle 1 (center 153) — white -->
+  <rect x="0" y="123" width="240" height="60" fill="#ffffff"/>
+  <use href="#warehouse" x="12" y="141" width="24" height="24" fill="#6b7280"/>
+  <text x="44" y="153" font-family="system-ui,sans-serif" font-size="12" fill="#64748b" dominant-baseline="middle">Aisle 1</text>
+  <use href="#pkg" x="156" y="145" width="16" height="16" fill="#ef4444"/>
+  <use href="#pkg" x="176" y="145" width="16" height="16" fill="#3b82f6"/>
+  <use href="#pkg" x="196" y="145" width="16" height="16" fill="#ef4444"/>
+  <use href="#pkg" x="216" y="145" width="16" height="16" fill="#3b82f6"/>
+  <rect x="0" y="182" width="240" height="1" fill="#e2e8f0"/>
+
+  <!-- Aisle 2 (center 213) — #fafafa -->
+  <rect x="0" y="183" width="240" height="60" fill="#fafafa"/>
+  <use href="#warehouse" x="12" y="201" width="24" height="24" fill="#6b7280"/>
+  <text x="44" y="213" font-family="system-ui,sans-serif" font-size="12" fill="#64748b" dominant-baseline="middle">Aisle 2</text>
+  <use href="#pkg" x="196" y="205" width="16" height="16" fill="#3b82f6"/>
+  <use href="#pkg" x="216" y="205" width="16" height="16" fill="#ef4444"/>
+  <rect x="0" y="242" width="240" height="1" fill="#e2e8f0"/>
+
+  <!-- Aisle 3 (center 271) — white -->
+  <rect x="0" y="243" width="240" height="57" fill="#ffffff"/>
+  <use href="#warehouse" x="12" y="259" width="24" height="24" fill="#6b7280"/>
+  <text x="44" y="271" font-family="system-ui,sans-serif" font-size="12" fill="#64748b" dominant-baseline="middle">Aisle 3</text>
+  <use href="#pkg" x="176" y="263" width="16" height="16" fill="#ef4444"/>
+  <use href="#pkg" x="196" y="263" width="16" height="16" fill="#3b82f6"/>
+  <use href="#pkg" x="216" y="263" width="16" height="16" fill="#ef4444"/>
+
+  <!-- ══ Robot lane (x: 240–298, center x: 269) ══ -->
+  <rect x="240" y="0" width="2" height="300" fill="#cbd5e1"/>
+
+  <!-- Lane header -->
+  <rect x="242" y="0" width="56" height="18" fill="#e2e8f0"/>
+  <line x1="242" y1="18" x2="298" y2="18" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="270" y="13" font-family="system-ui,sans-serif" font-size="9" fill="#6b7280" text-anchor="middle" dominant-baseline="middle">Bot 1</text>
+
+  <!-- Track line -->
+  <line x1="270" y1="18" x2="270" y2="300" stroke="#d1d5db" stroke-width="1.5"/>
+
+  <!-- Stop dots at each row center -->
+  <circle cx="270" cy="30"  r="3" fill="#9ca3af"/>
+  <circle cx="270" cy="90"  r="3" fill="#9ca3af"/>
+  <circle cx="270" cy="153" r="3" fill="#9ca3af"/>
+  <circle cx="270" cy="213" r="3" fill="#9ca3af"/>
+  <circle cx="270" cy="271" r="3" fill="#9ca3af"/>
+
+  <!-- Robot at Aisle 1 (center 153), 32px -->
+  <use href="#robot" x="254" y="137" width="32" height="32" fill="#1e3a5f"/>
+
+  <!-- Cargo badge -->
+  <rect x="252" y="171" width="36" height="15" rx="3" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <use href="#pkg" x="255" y="173" width="11" height="11" fill="#ef4444"/>
+  <text x="268" y="179" font-family="system-ui,sans-serif" font-size="9" font-weight="600" fill="#6b7280" dominant-baseline="middle">×2</text>
+
+  <!-- ══ Code panel (x: 308–592) ══ -->
+  <rect x="308" y="8" width="284" height="284" rx="8" fill="#1e293b"/>
+
+  <!-- Window chrome dots -->
+  <circle cx="329" cy="27" r="4.5" fill="#ef4444" opacity="0.7"/>
+  <circle cx="346" cy="27" r="4.5" fill="#f59e0b" opacity="0.7"/>
+  <circle cx="363" cy="27" r="4.5" fill="#22c55e" opacity="0.7"/>
+
+  <!-- Code lines -->
+  <text font-family="ui-monospace,monospace" font-size="11.5" dominant-baseline="middle">
+    <tspan x="322" y="60"  fill="#38bdf8">function </tspan><tspan fill="#e2e8f0">init() {</tspan>
+    <tspan x="336" dy="22" fill="#e2e8f0">robot.</tspan><tspan fill="#4ade80">onIdle</tspan><tspan fill="#e2e8f0"> = (r) =&gt; {</tspan>
+    <tspan x="350" dy="22" fill="#c4b5fd">const</tspan><tspan fill="#e2e8f0"> aisle =</tspan>
+    <tspan x="363" dy="22" fill="#e2e8f0">r.</tspan><tspan fill="#4ade80">nearestAisleWithCargo</tspan><tspan fill="#e2e8f0">();</tspan>
+    <tspan x="350" dy="22" fill="#e2e8f0">r.</tspan><tspan fill="#4ade80">moveTo</tspan><tspan fill="#e2e8f0">(aisle);</tspan>
+    <tspan x="336" dy="22" fill="#e2e8f0">};</tspan>
+    <tspan x="336" dy="22" fill="#e2e8f0">robot.</tspan><tspan fill="#4ade80">onStop</tspan><tspan fill="#e2e8f0"> = (r, stop) =&gt; {</tspan>
+    <tspan x="350" dy="22" fill="#e2e8f0">r.</tspan><tspan fill="#4ade80">deliverCargo</tspan><tspan fill="#e2e8f0">();</tspan>
+    <tspan x="336" dy="22" fill="#e2e8f0">};</tspan>
+    <tspan x="322" dy="22" fill="#e2e8f0">}</tspan>
+  </text>
+
+  <!-- Cursor -->
+  <rect x="322" y="268" width="7" height="13" rx="1" fill="#38bdf8" opacity="0.8"/>
+</svg>
