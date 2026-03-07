@@ -56,7 +56,7 @@ export function APIReference() {
           <br />
           world.getTime() → number
         </div>
-        <div className="mt-2 mb-1 font-semibold">Stop layout</div>
+        <div className="mt-2 mb-1 font-semibold">StopId values for day ${LEVEL_1.day}</div>
         <div className="text-gray-500">
           Stops 0-{LEVEL_1.truckCount - 1}: trucks
           <br />
