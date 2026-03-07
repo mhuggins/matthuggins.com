@@ -10,7 +10,7 @@ interface GameViewProps {
 
 export function GameView({ world, overlay }: GameViewProps) {
   return (
-    <div className="relative mb-4 overflow-hidden rounded-lg border border-gray-200">
+    <div className="relative mb-4 overflow-hidden rounded-lg border-2 border-gray-300">
       <GameRenderer world={world} />
       <InfoBar world={world} />
       {overlay}
