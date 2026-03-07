@@ -987,7 +987,7 @@ This is a minimal browser-side controller.
 
 ```javascript
 // main.js
-const worker = new Worker("./sandbox-worker.js", { type: "module" });
+const worker = new Worker("./worker.js", { type: "module" });
 
 const robots = [
   { id: 1, stop: 3, queuedStops: [], cargoCount: 0 },

@@ -65,3 +65,11 @@ export interface WorldState {
 }
 
 export type GameStatus = "idle" | "running" | "paused" | "completed";
+
+export type WorkerInbound =
+  | { type: "boot"; code: string; world: WorldState }
+  | { type: "tick"; deltaTime: number };
+
+export type WorkerOutbound =
+  | { type: "bootResult"; errors: string[] }
+  | { type: "tickResult"; world: WorldState; errors: string[]; completed: boolean };

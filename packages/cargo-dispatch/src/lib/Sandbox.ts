@@ -37,6 +37,10 @@ export class Sandbox {
     return [...this.errors];
   }
 
+  clearErrors() {
+    this.errors = [];
+  }
+
   fireRobotIdle(robotId: number): void {
     const handlers = this.robotHandlers.get(robotId);
     if (!handlers) return;
@@ -125,7 +129,7 @@ export class Sandbox {
         if (!robot) {
           return null;
         }
-        return Number.isInteger(robot.position) ? (robot.position as StopId) : null;
+        return Number.isInteger(robot.position) ? robot.position : null;
       },
       isIdle: () => {
         return this.world?.robots.find((r) => r.id === robotId)?.state === "idle";
@@ -160,7 +164,7 @@ export class Sandbox {
       getCargoSummary: () => {
         const robot = this.world?.robots.find((r) => r.id === robotId);
         if (!robot) {
-          return { total: 0, destinations: {} as Record<StopId, number> };
+          return { total: 0, destinations: {} };
         }
 
         const destinations: Record<StopId, number> = {};
@@ -230,13 +234,10 @@ export class Sandbox {
     const toAisleSummary = (aisle: AisleEntry): AisleSummary => ({
       stop: aisle.stop,
       waitingCount: aisle.waiting.length,
-      destinations: aisle.waiting.reduce(
-        (acc, p) => {
-          acc[p.destination] = (acc[p.destination] ?? 0) + 1;
-          return acc;
-        },
-        {} as Record<StopId, number>,
-      ),
+      destinations: aisle.waiting.reduce((acc: Record<StopId, number>, p) => {
+        acc[p.destination] = (acc[p.destination] ?? 0) + 1;
+        return acc;
+      }, {}),
     });
 
     return {
@@ -252,7 +253,7 @@ export class Sandbox {
           }
           return {
             id: r.id,
-            currentStop: Number.isInteger(r.position) ? (r.position as StopId) : null,
+            currentStop: Number.isInteger(r.position) ? r.position : null,
             cargoCount: r.cargo.length,
             destinations,
             queuedStops: [...r.stopQueue],

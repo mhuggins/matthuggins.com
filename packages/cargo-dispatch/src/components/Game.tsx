@@ -2,12 +2,10 @@ import type * as Monaco from "monaco-editor";
 import { HTMLAttributes, useCallback, useRef, useState } from "react";
 import { transform } from "sucrase";
 import { GAME_API_TYPES } from "../generated/api";
-import { useGameLoop } from "../hooks/useGameLoop";
+import { useWorkerGameLoop } from "../hooks/useWorkerGameLoop";
 import { calculateScore } from "../lib/calculateScore";
 import { createWorld } from "../lib/createWorld";
 import { LEVEL_1 } from "../lib/level";
-import { Sandbox } from "../lib/Sandbox";
-import { type EngineEvent, updateWorld } from "../lib/updateWorld";
 import type { GameStatus, WorldState } from "../types";
 import { APIReference } from "./APIReference";
 import { CompletionPanel } from "./CompletionPanel";
@@ -60,8 +58,6 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
   const [code, setCode] = useState(DEFAULT_CODE);
 
   const monacoRef = useRef<typeof Monaco | null>(null);
-  const worldRef = useRef<WorldState | null>(null);
-  const sandboxRef = useRef<Sandbox | null>(null);
 
   const handleMount = useCallback(
     (_editor: Monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof Monaco) => {
@@ -70,71 +66,47 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
     [],
   );
 
-  const handleEvent = useCallback((event: EngineEvent) => {
-    const sandbox = sandboxRef.current;
-    if (!sandbox) return;
-    if (event.type === "robotIdle") {
-      sandbox.fireRobotIdle(event.robotId);
-    } else if (event.type === "robotStop") {
-      sandbox.fireRobotStop(event.robotId, event.stop);
-    } else if (event.type === "cargoSpawned") {
-      sandbox.fireCargoReady({ aisle: event.aisle, destination: event.destination });
-    }
-  }, []);
-
-  const onTick = useCallback(
-    (deltaTime: number) => {
-      if (!worldRef.current) return false;
-      updateWorld(worldRef.current, deltaTime, handleEvent);
-
-      const errs = sandboxRef.current?.getErrors() ?? [];
+  const { boot, pause, resume, stop } = useWorkerGameLoop({
+    speed,
+    onBootResult: (errs) => {
       if (errs.length > 0) {
         setErrors(errs);
+        setStatus("idle");
+      } else {
+        setErrors([]);
+        setStatus("running");
+        resume();
       }
-
-      setWorld({ ...worldRef.current });
-
-      if (worldRef.current.completedAt !== null) {
-        setStatus("completed");
-        return false;
-      }
-
-      return true;
     },
-    [handleEvent],
-  );
-
-  const { start, pause, resume, stop } = useGameLoop(speed, onTick);
+    onTickResult: (newWorld, errs, completed) => {
+      setWorld(newWorld);
+      setErrors(errs);
+      if (completed) {
+        setStatus("completed");
+        stop();
+      }
+    },
+    onTimeout: () => {
+      setErrors(["Timed out — code may contain an infinite loop."]);
+      setStatus("idle");
+    },
+  });
 
   const handleRun = useCallback(() => {
     let runCode: string;
     try {
       runCode = transpile(code);
+      setErrors([]);
     } catch (err) {
       setErrors([err instanceof Error ? err.message : String(err)]);
       return;
     }
 
     const newWorld = createWorld(LEVEL_1);
-    const sandbox = new Sandbox();
-
-    sandbox.boot(runCode, newWorld);
-
-    const bootErrors = sandbox.getErrors();
-    if (bootErrors.length > 0) {
-      setErrors(bootErrors);
-      return;
-    }
-
-    worldRef.current = newWorld;
-    sandboxRef.current = sandbox;
-
-    setErrors([]);
-    setWorld({ ...newWorld });
-    setStatus("running");
+    boot(runCode, newWorld);
+    setWorld(newWorld);
     setView("game");
-    start();
-  }, [code, start]);
+  }, [code, boot]);
 
   const handlePause = useCallback(() => {
     pause();
@@ -148,10 +120,7 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
 
   const handleReset = useCallback(() => {
     stop();
-    const freshWorld = createWorld(LEVEL_1);
-    worldRef.current = null;
-    sandboxRef.current = null;
-    setWorld(freshWorld);
+    setWorld(createWorld(LEVEL_1));
     setErrors([]);
     setStatus("idle");
   }, [stop]);
