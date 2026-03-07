@@ -13,8 +13,8 @@ import ts from "typescript";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const srcDir = resolve(__dirname, "../src");
-const inputFile = resolve(srcDir, "api.ts");
-const outputFile = resolve(srcDir, "api-types.ts");
+const inputFile = resolve(srcDir, "lib", "api.ts");
+const outputFile = resolve(srcDir, "generated", "api.ts");
 
 // Emit .d.ts for api.ts and all its transitive dependencies in memory.
 // Collecting all files ensures referenced types (e.g. RobotData from types.ts)
@@ -62,10 +62,10 @@ const ambient = dtsChunks
 
 const output = [
   "// AUTO-GENERATED — do not edit manually.",
-  "// Source: packages/cargo-dispatch/src/api.ts",
+  "// Source: packages/cargo-dispatch/src/lib/api.ts",
   "// Regenerated automatically by the type-generator Vite plugin.",
   "",
-  `export const GAME_API_TYPES = ${JSON.stringify(`${ambient}\n`)};`,
+  `export const GAME_API_TYPES = \`${ambient.replace("`", "\`")}\`;`,
   "",
 ].join("\n");
 

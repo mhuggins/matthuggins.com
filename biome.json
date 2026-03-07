@@ -8,7 +8,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**/*", "!packages/cargo-dispatch/src/api-types.ts"]
+    "includes": ["**/*", "!**/generated/**/*"]
   },
   "formatter": {
     "enabled": true,

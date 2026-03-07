@@ -1,5 +1,5 @@
+import type { StopId, WorldState } from "../types";
 import type { CargoInfo, RobotController, WorldAPI } from "./api";
-import type { StopId, WorldState } from "./types";
 
 type IdleHandler = () => void;
 type StopHandler = (stop: StopId) => void;

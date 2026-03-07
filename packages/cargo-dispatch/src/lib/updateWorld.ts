@@ -1,5 +1,5 @@
-import { updateSpawn } from "./spawn-system";
-import type { RobotData, StopId, WorldState } from "./types";
+import type { RobotData, StopId, WorldState } from "../types";
+import { updateSpawn } from "./updateSpawn";
 
 export type EngineEvent =
   | { type: "robotIdle"; robotId: number }

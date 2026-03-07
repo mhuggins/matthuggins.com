@@ -168,6 +168,9 @@ importers:
 
   packages/cargo-dispatch:
     dependencies:
+      '@matthuggins/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.52.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)

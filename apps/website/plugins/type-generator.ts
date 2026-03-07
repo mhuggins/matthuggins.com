@@ -13,7 +13,7 @@ const scriptPath = resolve(
   "../../../packages/cargo-dispatch/scripts/generate-api-types.ts",
 );
 
-const playerApiFile = resolve(__dirname, "../../../packages/cargo-dispatch/src/api.ts");
+const playerApiFile = resolve(__dirname, "../../../packages/cargo-dispatch/src/lib/api.ts");
 
 export function typeGeneratorPlugin(): Plugin {
   if (process.env.VITEST) {

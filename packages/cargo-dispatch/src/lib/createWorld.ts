@@ -1,5 +1,5 @@
+import type { AisleData, LevelConfig, RobotData, TruckData, WorldState } from "../types";
 import { TRUCK_COLORS, TRUCK_NAMES } from "./level";
-import type { AisleData, LevelConfig, RobotData, TruckData, WorldState } from "./types";
 
 export function createWorld(level: LevelConfig): WorldState {
   const trucks: TruckData[] = Array.from({ length: level.truckCount }, (_, i) => ({
