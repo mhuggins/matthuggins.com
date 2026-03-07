@@ -9,7 +9,7 @@ export function markdownToHtml(markdown: string): string {
   // This preserves line breaks from YAML multi-line strings
   const processedMarkdown = markdown.replace(/([^\n])\n([^\n])/g, "$1  \n$2");
 
-  return marked.parse(processedMarkdown, { async: false }) as string;
+  return marked.parse(processedMarkdown, { async: false });
 }
 
 /**

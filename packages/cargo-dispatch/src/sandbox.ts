@@ -1,4 +1,5 @@
-import type { StopId, WorldState } from "./types.js";
+import type { CargoInfo, RobotController, WorldAPI } from "./api";
+import type { StopId, WorldState } from "./types";
 
 type IdleHandler = () => void;
 type StopHandler = (stop: StopId) => void;
@@ -10,12 +11,14 @@ interface RobotHandlers {
 
 export class Sandbox {
   private robotHandlers = new Map<number, RobotHandlers>();
+  private cargoReadyHandlers: Array<(cargo: CargoInfo) => void> = [];
   private world: WorldState | null = null;
   private errors: string[] = [];
 
   boot(userCode: string, world: WorldState): void {
     this.world = world;
     this.robotHandlers.clear();
+    this.cargoReadyHandlers = [];
     this.errors = [];
 
     const robots = world.robots.map((r) => this.createRobotFacade(r.id));
@@ -34,26 +37,38 @@ export class Sandbox {
     return [...this.errors];
   }
 
-  fireIdle(robotId: number): void {
+  fireRobotIdle(robotId: number): void {
     const handlers = this.robotHandlers.get(robotId);
     if (!handlers) return;
-    for (const h of handlers.idle) {
+    for (const handler of handlers.idle) {
       try {
-        h();
+        handler();
       } catch (err) {
         this.errors.push(`onIdle error: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
   }
 
-  fireStop(robotId: number, stop: StopId): void {
+  fireRobotStop(robotId: number, stop: StopId): void {
     const handlers = this.robotHandlers.get(robotId);
-    if (!handlers) return;
-    for (const h of handlers.stop) {
+    if (!handlers) {
+      return;
+    }
+    for (const handler of handlers.stop) {
       try {
-        h(stop);
+        handler(stop);
       } catch (err) {
         this.errors.push(`onStop error: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+  }
+
+  fireCargoReady(cargo: CargoInfo): void {
+    for (const handler of this.cargoReadyHandlers) {
+      try {
+        handler(cargo);
+      } catch (err) {
+        this.errors.push(`onCargoReady error: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
   }
@@ -67,7 +82,7 @@ export class Sandbox {
     return handlers;
   }
 
-  private createRobotFacade(robotId: number) {
+  private createRobotFacade(robotId: number): RobotController {
     return {
       onIdle: (cb: IdleHandler) => {
         this.getHandlers(robotId).idle.push(cb);
@@ -140,7 +155,7 @@ export class Sandbox {
     };
   }
 
-  private createWorldApi() {
+  private createWorldApi(): WorldAPI {
     type AisleEntry = { stop: number; waiting: Array<{ to: number }> };
 
     const toAisleSummary = (aisle: AisleEntry) => ({
@@ -185,6 +200,9 @@ export class Sandbox {
         if (aisles.length === 0) return null;
         aisles.sort((a, b) => Math.abs(a.stop - fromStop) - Math.abs(b.stop - fromStop));
         return toAisleSummary(aisles[0]!);
+      },
+      onCargoReady: (cb: (cargo: CargoInfo) => void) => {
+        this.cargoReadyHandlers.push(cb);
       },
     };
   }

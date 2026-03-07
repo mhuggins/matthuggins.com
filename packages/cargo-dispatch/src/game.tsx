@@ -1,46 +1,57 @@
+import Editor from "@monaco-editor/react";
+import type * as Monaco from "monaco-editor";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { EngineEvent } from "./engine.js";
-import { updateWorld } from "./engine.js";
-import { LEVEL_1 } from "./level.js";
-import { GameRenderer } from "./renderer.js";
-import { Sandbox } from "./sandbox.js";
-import { calculateScore } from "./scoring.js";
-import type { WorldState } from "./types.js";
-import { createWorld } from "./world.js";
+import { GAME_API_TYPES } from "./api-types";
+import type { EngineEvent } from "./engine";
+import { updateWorld } from "./engine";
+import { LEVEL_1 } from "./level";
+import { GameRenderer } from "./renderer";
+import { Sandbox } from "./sandbox";
+import { calculateScore } from "./scoring";
+import type { WorldState } from "./types";
+import { createWorld } from "./world";
 
-const DEFAULT_CODE = `function init(robots, world) {
-  robots.forEach(function(robot, index) {
-    robot.setLabel("Bot " + (index + 1));
+const DEFAULT_CODE = `function init(robots: RobotController[], world: WorldAPI): void {
+  robots.forEach((robot, index) => {
+    robot.setLabel(\`Bot \${index + 1}\`);
 
-    function assignWork() {
+    robot.onIdle(() => assignWork(robot));
+    robot.onStop(() => assignWork(robot));
+
+    world.onCargoReady((_cargo) => {
+      if (robot.isIdle()) {
+        assignWork(robot);
+      }
+    });
+
+    function assignWork(robot: RobotController): void {
       if (robot.hasCargo()) {
-        var next = robot.nextDeliveryStop();
+        const next = robot.nextDeliveryStop();
         if (next !== null) {
           robot.goTo(next);
           return;
         }
       }
 
-      var aisle = world.getNearestAisleWithWaiting(robot.getCurrentStop() ?? 0);
+      const aisle = world.getNearestAisleWithWaiting(robot.getCurrentStop() ?? 0);
       if (aisle) {
         robot.goTo(aisle.stop);
       }
     }
-
-    robot.onIdle(assignWork);
-    robot.onStop(assignWork);
   });
 }`;
 
 type GameStatus = "idle" | "running" | "paused" | "completed";
 
 export function CargoDispatch() {
-  const [code, setCode] = useState(DEFAULT_CODE);
   const [status, setStatus] = useState<GameStatus>("idle");
   const [world, setWorld] = useState<WorldState | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [speed, setSpeed] = useState(1);
+  const [isMonacoReady, setIsMonacoReady] = useState(false);
 
+  const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<typeof Monaco | null>(null);
   const worldRef = useRef<WorldState | null>(null);
   const sandboxRef = useRef<Sandbox | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -51,13 +62,49 @@ export function CargoDispatch() {
     speedRef.current = speed;
   }, [speed]);
 
+  const handleBeforeMount = useCallback((monacoInstance: typeof Monaco) => {
+    monacoInstance.languages.typescript.typescriptDefaults.setCompilerOptions({
+      target: monacoInstance.languages.typescript.ScriptTarget.ES2020,
+      module: monacoInstance.languages.typescript.ModuleKind.None,
+      strict: false,
+      allowJs: true,
+      checkJs: false,
+      allowNonTsExtensions: true,
+      noUnusedLocals: false,
+      noUnusedParameters: false,
+    });
+
+    // Disable validation warnings for unused vars
+    monacoInstance.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: false,
+      noSyntaxValidation: false,
+      diagnosticCodesToIgnore: [6133, 6196], // Unused variable/parameter warnings
+    });
+
+    monacoInstance.languages.typescript.typescriptDefaults.addExtraLib(
+      GAME_API_TYPES,
+      "file:///api.d.ts",
+    );
+  }, []);
+
+  const handleMount = useCallback(
+    (editor: Monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof Monaco) => {
+      editorRef.current = editor;
+      monacoRef.current = monacoInstance;
+      setIsMonacoReady(true);
+    },
+    [],
+  );
+
   const handleEvent = useCallback((event: EngineEvent) => {
     const sandbox = sandboxRef.current;
     if (!sandbox) return;
     if (event.type === "robotIdle") {
-      sandbox.fireIdle(event.robotId);
-    } else {
-      sandbox.fireStop(event.robotId, event.stop);
+      sandbox.fireRobotIdle(event.robotId);
+    } else if (event.type === "robotStop") {
+      sandbox.fireRobotStop(event.robotId, event.stop);
+    } else if (event.type === "cargoSpawned") {
+      sandbox.fireCargoReady({ aisle: event.aisle, destination: event.destination });
     }
   }, []);
 
@@ -72,7 +119,9 @@ export function CargoDispatch() {
       updateWorld(worldRef.current, dt, handleEvent);
 
       const errs = sandboxRef.current?.getErrors() ?? [];
-      if (errs.length > 0) setErrors(errs);
+      if (errs.length > 0) {
+        setErrors(errs);
+      }
 
       setWorld({ ...worldRef.current });
 
@@ -86,10 +135,40 @@ export function CargoDispatch() {
     [handleEvent],
   );
 
-  const handleRun = useCallback(() => {
+  const handleRun = useCallback(async () => {
+    const editor = editorRef.current;
+    const monacoInstance = monacoRef.current;
+    if (!editor || !monacoInstance) {
+      return;
+    }
+
+    const sourceCode = editor.getValue();
+    let runCode = sourceCode;
+
+    const model = editor.getModel();
+    if (model) {
+      try {
+        const getWorker = await monacoInstance.languages.typescript.getTypeScriptWorker();
+        const tsWorker = await getWorker(model.uri);
+        const output = await tsWorker.getEmitOutput(model.uri.toString());
+        const jsFile = output.outputFiles.find((f) => f.name.endsWith(".js"));
+        if (jsFile) {
+          runCode = jsFile.text;
+        } else {
+          setErrors(["TypeScript compilation produced no output"]);
+          return;
+        }
+      } catch (err) {
+        setErrors([
+          `TypeScript compilation error: ${err instanceof Error ? err.message : String(err)}`,
+        ]);
+        return;
+      }
+    }
+
     const newWorld = createWorld(LEVEL_1);
     const sandbox = new Sandbox();
-    sandbox.boot(code, newWorld);
+    sandbox.boot(runCode, newWorld);
 
     const bootErrors = sandbox.getErrors();
     if (bootErrors.length > 0) {
@@ -104,7 +183,7 @@ export function CargoDispatch() {
     setStatus("running");
     lastTimeRef.current = null;
     rafRef.current = requestAnimationFrame(tick);
-  }, [code, tick]);
+  }, [tick]);
 
   const handlePause = useCallback(() => {
     if (rafRef.current !== null) {
@@ -134,12 +213,15 @@ export function CargoDispatch() {
 
   useEffect(() => {
     return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
   }, []);
 
   const score = world ? calculateScore(world) : null;
   const isEditorDisabled = status === "running" || status === "paused";
+  const canRun = (status === "idle" || status === "completed") && isMonacoReady;
 
   return (
     <div
@@ -160,14 +242,15 @@ export function CargoDispatch() {
       <div style={{ display: "flex", gap: 8, marginBottom: 16, alignItems: "center" }}>
         {(status === "idle" || status === "completed") && (
           <button
-            onClick={handleRun}
+            onClick={() => void handleRun()}
+            disabled={!canRun}
             style={{
               padding: "6px 16px",
-              background: "#2563eb",
+              background: canRun ? "#2563eb" : "#93c5fd",
               color: "#fff",
               border: "none",
               borderRadius: 6,
-              cursor: "pointer",
+              cursor: canRun ? "pointer" : "default",
               fontWeight: 600,
               fontSize: 13,
             }}
@@ -244,7 +327,7 @@ export function CargoDispatch() {
                   cursor: "pointer",
                 }}
               >
-                {s}×
+                {s}&#x00d7;
               </button>
             ))}
           </div>
@@ -345,41 +428,33 @@ export function CargoDispatch() {
       )}
 
       {/* Code editor */}
-      <div>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 600,
-            color: "#374151",
-            marginBottom: 6,
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          <span>Strategy Code</span>
-          {isEditorDisabled && (
-            <span style={{ fontWeight: 400, color: "#9ca3af" }}>Reset to edit</span>
-          )}
-        </div>
-        <textarea
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          rows={22}
-          disabled={isEditorDisabled}
-          spellCheck={false}
-          style={{
-            width: "100%",
-            fontFamily: "'Fira Code', 'Cascadia Code', Consolas, monospace",
+      <div
+        style={{
+          border: "1px solid #d1d5db",
+          borderRadius: 6,
+          overflow: "hidden",
+          opacity: isEditorDisabled ? 0.7 : 1,
+        }}
+      >
+        <Editor
+          height="420px"
+          path="file:///strategy.ts"
+          defaultLanguage="typescript"
+          defaultValue={DEFAULT_CODE}
+          beforeMount={handleBeforeMount}
+          onMount={handleMount}
+          options={{
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
             fontSize: 13,
-            lineHeight: 1.6,
-            padding: 12,
-            border: "1px solid #d1d5db",
-            borderRadius: 6,
-            resize: "vertical",
-            background: isEditorDisabled ? "#f9fafb" : "#fff",
-            color: "#1f2937",
-            boxSizing: "border-box",
-            outline: "none",
+            lineHeight: 20,
+            readOnly: isEditorDisabled,
+            wordWrap: "on",
+            padding: { top: 10, bottom: 10 },
+            automaticLayout: true,
+            tabSize: 2,
+            renderLineHighlight: "none",
+            overviewRulerLanes: 0,
           }}
         />
       </div>
@@ -447,12 +522,16 @@ export function CargoDispatch() {
             <br />
             world.getRobots() → robot summary[]
             <br />
+            world.onCargoReady(callback) — called when cargo spawns, receives{" "}
+            {"{ aisle, destination }"}
+            <br />
             world.getTime() → number
           </div>
           <div style={{ fontWeight: 600, margin: "8px 0 4px" }}>Stop layout</div>
           <div style={{ color: "#6b7280" }}>
-            Stops 0–{LEVEL_1.truckCount - 1}: trucks | Stops {LEVEL_1.truckCount}–
-            {LEVEL_1.truckCount + LEVEL_1.aisleCount - 1}: aisles
+            Stops 0-{LEVEL_1.truckCount - 1}: trucks
+            <br />
+            Stops {LEVEL_1.truckCount}-{LEVEL_1.truckCount + LEVEL_1.aisleCount - 1}: aisles
           </div>
         </div>
       </details>

@@ -1,15 +1,19 @@
-import { updateSpawn } from "./spawn-system.js";
-import type { RobotData, StopId, WorldState } from "./types.js";
+import { updateSpawn } from "./spawn-system";
+import type { RobotData, StopId, WorldState } from "./types";
 
 export type EngineEvent =
   | { type: "robotIdle"; robotId: number }
-  | { type: "robotStop"; robotId: number; stop: StopId };
+  | { type: "robotStop"; robotId: number; stop: StopId }
+  | { type: "cargoSpawned"; aisle: number; destination: number };
 
 type EventHandler = (event: EngineEvent) => void;
 
 export function updateWorld(world: WorldState, dt: number, onEvent: EventHandler): void {
   world.time += dt;
-  updateSpawn(world, dt);
+  const spawned = updateSpawn(world, dt);
+  if (spawned) {
+    onEvent({ type: "cargoSpawned", aisle: spawned.aisle, destination: spawned.destination });
+  }
   for (const robot of world.robots) {
     updateRobot(robot, world, dt, onEvent);
   }
@@ -38,7 +42,8 @@ function updateRobot(robot: RobotData, world: WorldState, dt: number, onEvent: E
     robot.targetStop = null;
     robot.direction = 0;
 
-    const stop = robot.position as StopId;
+    const stop: StopId = robot.position;
+
     doPickupDropoff(robot, world, stop);
     onEvent({ type: "robotStop", robotId: robot.id, stop });
 

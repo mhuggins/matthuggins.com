@@ -1,1 +1,1 @@
-export { CargoDispatch } from "./game.js";
+export * from "./game";

@@ -3,6 +3,7 @@ packages:
   - packages/*
 
 catalog:
+  "@types/node": ^24.3.3
   "@types/react": ^19.1.13
   "@types/react-dom": ^19.1.9
   jsdom: ^27.0.1

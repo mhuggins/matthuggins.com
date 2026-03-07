@@ -1,5 +1,5 @@
+import { cn } from "@matthuggins/ui";
 import { useCallback, useRef, useState } from "react";
-import { cn } from "@/utils/cn";
 import { ContactLinks } from "./ContactLinks";
 import { Dropdown } from "./Dropdown";
 import { Profile } from "./Profile";

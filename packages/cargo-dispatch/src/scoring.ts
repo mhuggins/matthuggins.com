@@ -1,4 +1,4 @@
-import type { WorldState } from "./types.js";
+import type { WorldState } from "./types";
 
 export interface Score {
   completionTime: number;

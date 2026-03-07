@@ -1,4 +1,4 @@
-import type { LevelConfig } from "./types.js";
+import type { LevelConfig } from "./types";
 
 export const TRUCK_COLORS = ["#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7"];
 export const TRUCK_NAMES = ["Truck A", "Truck B", "Truck C", "Truck D", "Truck E"];

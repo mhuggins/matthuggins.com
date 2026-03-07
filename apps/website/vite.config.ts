@@ -23,6 +23,7 @@ import type { ShikiTransformer } from "shiki";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { blogWatcherPlugin } from "./plugins/blog-watcher";
+import { typeGeneratorPlugin } from "./plugins/type-generator";
 
 export default defineConfig({
   root: "./src",
@@ -47,6 +48,7 @@ export default defineConfig({
     noExternal: ["@tanstack/react-router", "@phosphor-icons/react"],
   },
   plugins: [
+    typeGeneratorPlugin(),
     blogWatcherPlugin(),
     tsconfigPaths(),
     tanstackRouter({

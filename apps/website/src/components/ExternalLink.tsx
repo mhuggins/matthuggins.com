@@ -1,5 +1,5 @@
+import { cn } from "@matthuggins/ui";
 import { LinkHTMLAttributes } from "react";
-import { cn } from "@/utils/cn";
 
 export const ExternalLink = ({ className, ...props }: LinkHTMLAttributes<HTMLAnchorElement>) => (
   <a

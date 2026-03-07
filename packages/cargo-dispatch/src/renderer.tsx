@@ -1,4 +1,4 @@
-import type { WorldState } from "./types.js";
+import type { WorldState } from "./types";
 
 const ROW_HEIGHT = 64;
 const STOP_PANEL_WIDTH = 340;

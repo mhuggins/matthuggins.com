@@ -1,5 +1,5 @@
+import { cn } from "@matthuggins/ui";
 import { type ComponentPropsWithoutRef } from "react";
-import { cn } from "@/utils/cn";
 
 export const StackOverflowIcon = ({ className, ...props }: ComponentPropsWithoutRef<"svg">) => (
   <svg

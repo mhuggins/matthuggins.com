@@ -1,3 +1,4 @@
+import { cn } from "@matthuggins/ui";
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 import Codebound from "@/assets/codebound.png";
@@ -9,7 +10,6 @@ import { Profile } from "@/components/Profile";
 import { Tags } from "@/components/Tags";
 import { getAllPosts, getAllTags } from "@/data/blog-metadata";
 import { useIsMounted } from "@/hooks/useIsMounted";
-import { cn } from "@/utils/cn";
 import { formatDate } from "@/utils/formatDate";
 
 const TanStackRouterDevtools = import.meta.env.PROD
