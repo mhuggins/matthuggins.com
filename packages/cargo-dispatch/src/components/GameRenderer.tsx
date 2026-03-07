@@ -44,12 +44,6 @@ export function GameRenderer({ world }: Props) {
           </div>
         ))}
 
-        {/* Divider between trucks and aisles */}
-        <div
-          className="absolute right-0 left-0 z-1 bg-gray-300"
-          style={{ top: trucks.length * ROW_HEIGHT, height: 3 }}
-        />
-
         {/* Aisle rows */}
         {aisles.map((aisle, i) => (
           <div
@@ -85,6 +79,12 @@ export function GameRenderer({ world }: Props) {
             )}
           </div>
         ))}
+
+        {/* Divider between trucks and aisles — rendered last to paint above rows */}
+        <div
+          className="absolute right-0 left-0 bg-gray-300"
+          style={{ top: trucks.length * ROW_HEIGHT, height: 3 }}
+        />
       </div>
 
       {/* Robot lane */}
@@ -118,18 +118,6 @@ const RobotLane = memo(function RobotLane({
 }) {
   return (
     <>
-      <div className="absolute top-0 right-0 left-0 z-1 flex border-gray-300 border-b bg-gray-200 py-0.5">
-        {robots.map((robot) => (
-          <span
-            key={robot.id}
-            className="overflow-hidden text-ellipsis whitespace-nowrap text-center text-[9px] text-gray-500"
-            style={{ width: ROBOT_LANE_WIDTH }}
-          >
-            {robot.label}
-          </span>
-        ))}
-      </div>
-
       {robots.map((robot, idx) => {
         const colCenter = ((idx + 0.5) * ROBOT_LANE_WIDTH) / robots.length;
         return (
@@ -151,6 +139,19 @@ const RobotLane = memo(function RobotLane({
           />
         ));
       })}
+
+      {/* Header rendered last to paint above tracks and stop markers */}
+      <div className="absolute top-0 right-0 left-0 flex border-gray-300 border-b bg-gray-200 py-0.5">
+        {robots.map((robot) => (
+          <span
+            key={robot.id}
+            className="overflow-hidden text-ellipsis whitespace-nowrap text-center text-[9px] text-gray-500"
+            style={{ width: ROBOT_LANE_WIDTH }}
+          >
+            {robot.label}
+          </span>
+        ))}
+      </div>
     </>
   );
 });
@@ -182,7 +183,7 @@ function RobotMarker({
   return (
     <div
       title={`${robot.label} | ${robot.cargo.length}/${robot.capacity} packages`}
-      className="-translate-x-1/2 -translate-y-1/2 absolute z-1"
+      className="-translate-x-1/2 -translate-y-1/2 absolute"
       style={{ left: colCenter, top: yPx, width: iconSize, height: iconSize }}
     >
       {atCapacity && (
