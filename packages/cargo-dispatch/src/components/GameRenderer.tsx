@@ -4,7 +4,8 @@ import { memo } from "react";
 import type { RobotData, WorldState } from "../types";
 
 const ROW_HEIGHT = 64;
-const ROBOT_LANE_WIDTH = 110;
+const ROBOT_LANE_WIDTH = 56; // per robot
+const ROBOT_ICON_SIZE = 32;
 
 interface Props {
   world: WorldState;
@@ -55,19 +56,22 @@ export function GameRenderer({ world }: Props) {
             style={{ top: aisle.stop * ROW_HEIGHT, height: ROW_HEIGHT }}
           >
             <span className="min-w-[72px] text-[13px] text-gray-700">Aisle {i + 1}</span>
-            <div className="mx-2 flex flex-1 flex-wrap gap-[3px]">
-              {aisle.waiting.slice(0, 16).map((pkg) => {
-                const truck = world.trucks.find((t) => t.stop === pkg.destination);
-                return (
-                  <PackageIcon
-                    key={pkg.id}
-                    weight="fill"
-                    size={24}
-                    aria-label={truck?.name}
-                    style={{ color: pkg.color }}
-                  />
-                );
-              })}
+            <div className="mx-2 flex flex-1 flex-wrap justify-end gap-[3px]">
+              {aisle.waiting
+                .slice(0, 16)
+                .reverse()
+                .map((pkg) => {
+                  const truck = world.trucks.find((t) => t.stop === pkg.destination);
+                  return (
+                    <PackageIcon
+                      key={pkg.id}
+                      weight="fill"
+                      size={24}
+                      aria-label={truck?.name}
+                      style={{ color: pkg.color }}
+                    />
+                  );
+                })}
               {aisle.waiting.length > 16 && (
                 <span className="text-[10px] text-gray-400 leading-[12px]">
                   +{aisle.waiting.length - 16}
@@ -75,7 +79,7 @@ export function GameRenderer({ world }: Props) {
               )}
             </div>
             {aisle.waiting.length > 0 && (
-              <span className="shrink-0 text-[11px] text-gray-400">{aisle.waiting.length}</span>
+              <span className="shrink-0 text-gray-400 text-sm">{aisle.waiting.length}</span>
             )}
           </div>
         ))}
@@ -90,19 +94,13 @@ export function GameRenderer({ world }: Props) {
       {/* Robot lane */}
       <div
         className="relative shrink-0 border-gray-300 border-x-2 bg-gray-100"
-        style={{ width: ROBOT_LANE_WIDTH }}
+        style={{ width: ROBOT_LANE_WIDTH * robots.length }}
       >
         <RobotLane robots={robots} totalStops={totalStops} />
 
-        {/* Robots */}
-        {robots.map((robot, idx) => {
-          const colWidth = ROBOT_LANE_WIDTH / robots.length;
-          const colCenter = (idx + 0.5) * colWidth;
-          const iconSize = Math.min(32, Math.floor(colWidth * 0.55));
-          return (
-            <RobotMarker key={robot.id} robot={robot} colCenter={colCenter} iconSize={iconSize} />
-          );
-        })}
+        {robots.map((robot, idx) => (
+          <RobotMarker key={robot.id} robot={robot} idx={idx} />
+        ))}
       </div>
     </div>
   );
@@ -119,7 +117,7 @@ const RobotLane = memo(function RobotLane({
   return (
     <>
       {robots.map((robot, idx) => {
-        const colCenter = ((idx + 0.5) * ROBOT_LANE_WIDTH) / robots.length;
+        const colCenter = (idx + 0.5) * ROBOT_LANE_WIDTH;
         return (
           <div
             key={robot.id}
@@ -130,7 +128,7 @@ const RobotLane = memo(function RobotLane({
       })}
 
       {robots.map((robot, robotIdx) => {
-        const colCenter = ((robotIdx + 0.5) * ROBOT_LANE_WIDTH) / robots.length;
+        const colCenter = (robotIdx + 0.5) * ROBOT_LANE_WIDTH;
         return Array.from({ length: totalStops }, (_, i) => (
           <div
             key={`${robot.id}-${i}`}
@@ -146,7 +144,7 @@ const RobotLane = memo(function RobotLane({
           <span
             key={robot.id}
             className="overflow-hidden text-ellipsis whitespace-nowrap text-center text-[9px] text-gray-500"
-            style={{ width: ROBOT_LANE_WIDTH }}
+            style={{ width: ROBOT_LANE_WIDTH, minWidth: ROBOT_LANE_WIDTH }}
           >
             {robot.label}
           </span>
@@ -156,15 +154,9 @@ const RobotLane = memo(function RobotLane({
   );
 });
 
-function RobotMarker({
-  robot,
-  colCenter,
-  iconSize,
-}: {
-  robot: RobotData;
-  colCenter: number;
-  iconSize: number;
-}) {
+function RobotMarker({ robot, idx }: { robot: RobotData; idx: number }) {
+  const colCenter = (idx + 0.5) * ROBOT_LANE_WIDTH;
+  const iconSize = ROBOT_ICON_SIZE;
   const yPx = robot.position * ROW_HEIGHT + ROW_HEIGHT / 2;
   const atCapacity = robot.cargo.length >= robot.capacity;
 

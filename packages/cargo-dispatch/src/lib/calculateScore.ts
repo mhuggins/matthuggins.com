@@ -2,6 +2,8 @@ import type { WorldState } from "../types";
 
 export interface Score {
   completionTime: number;
+  timeGoal: number;
+  success: boolean;
   deliveredCount: number;
   averageWaitTime: number;
   longestWaitTime: number;
@@ -20,6 +22,8 @@ export function calculateScore(world: WorldState): Score | null {
 
   return {
     completionTime: world.completedAt,
+    timeGoal: world.level.time,
+    success: world.completedAt <= world.level.time,
     deliveredCount: world.deliveredCount,
     averageWaitTime,
     longestWaitTime,

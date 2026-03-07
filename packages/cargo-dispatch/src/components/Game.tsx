@@ -1,17 +1,20 @@
+import { cn } from "@matthuggins/ui";
 import type * as Monaco from "monaco-editor";
 import { HTMLAttributes, useCallback, useRef, useState } from "react";
 import { transform } from "sucrase";
+import { LEVELS } from "../constants/level";
 import { GAME_API_TYPES } from "../generated/api";
 import { useWorkerGameLoop } from "../hooks/useWorkerGameLoop";
 import { calculateScore } from "../lib/calculateScore";
 import { createWorld } from "../lib/createWorld";
-import { LEVEL_1 } from "../lib/level";
 import type { GameStatus, WorldState } from "../types";
 import { APIReference } from "./APIReference";
-import { CompletionPanel } from "./CompletionPanel";
+import { CompletionOverlay } from "./CompletionOverlay";
 import { ControlsBar } from "./ControlsBar";
 import { ErrorPanel } from "./ErrorPanel";
 import { GameView } from "./GameView";
+import { LevelTimeline } from "./LevelTimeline";
+import { StatusBar } from "./StatusBar";
 import { StrategyEditor } from "./StrategyEditor";
 
 const DEFAULT_CODE = `function init(robots: RobotController[], world: WorldAPI): void {
@@ -49,13 +52,15 @@ const DEFAULT_CODE = `function init(robots: RobotController[], world: WorldAPI):
   });
 }`;
 
-export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
+export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   const [status, setStatus] = useState<GameStatus>("idle");
-  const [world, setWorld] = useState<WorldState>(() => createWorld(LEVEL_1));
+  const [world, setWorld] = useState<WorldState>(() => createWorld(LEVELS[0]!));
   const [errors, setErrors] = useState<string[]>([]);
   const [speed, setSpeed] = useState(1);
   const [view, setView] = useState<"game" | "code">("game");
   const [code, setCode] = useState(DEFAULT_CODE);
+  const [levelIndex, setLevelIndex] = useState(0);
+  const [levelResults, setLevelResults] = useState<(boolean | null)[]>(LEVELS.map(() => null));
 
   const monacoRef = useRef<typeof Monaco | null>(null);
 
@@ -82,6 +87,12 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
       setWorld(newWorld);
       setErrors(errs);
       if (completed) {
+        const success = newWorld.completedAt! <= newWorld.level.time;
+        setLevelResults((prev) => {
+          const next = [...prev];
+          next[levelIndex] = success;
+          return next;
+        });
         setStatus("completed");
         stop();
       }
@@ -92,21 +103,27 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
     },
   });
 
-  const handleRun = useCallback(() => {
-    let runCode: string;
-    try {
-      runCode = transpile(code);
+  const bootLevel = useCallback(
+    (index: number) => {
+      let runCode: string;
+      try {
+        runCode = transpile(code);
+      } catch (err) {
+        setErrors([err instanceof Error ? err.message : String(err)]);
+        return;
+      }
+      const newWorld = createWorld(LEVELS[index]!);
+      boot(runCode, newWorld);
+      setWorld(newWorld);
       setErrors([]);
-    } catch (err) {
-      setErrors([err instanceof Error ? err.message : String(err)]);
-      return;
-    }
+    },
+    [code, boot],
+  );
 
-    const newWorld = createWorld(LEVEL_1);
-    boot(runCode, newWorld);
-    setWorld(newWorld);
+  const handleRun = useCallback(() => {
     setView("game");
-  }, [code, boot]);
+    bootLevel(levelIndex);
+  }, [levelIndex, bootLevel]);
 
   const handlePause = useCallback(() => {
     pause();
@@ -120,10 +137,32 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
 
   const handleReset = useCallback(() => {
     stop();
-    setWorld(createWorld(LEVEL_1));
+    setWorld(createWorld(LEVELS[levelIndex]!));
     setErrors([]);
     setStatus("idle");
-  }, [stop]);
+  }, [stop, levelIndex]);
+
+  const handleNextLevel = useCallback(() => {
+    const nextIndex = levelIndex + 1;
+    setLevelIndex(nextIndex);
+    setStatus("idle");
+    bootLevel(nextIndex);
+    setView("game");
+  }, [levelIndex, bootLevel]);
+
+  const handleContinue = useCallback(() => {
+    stop();
+    setWorld(createWorld(LEVELS[levelIndex]!));
+    setErrors([]);
+    setStatus("idle");
+  }, [stop, levelIndex]);
+
+  const handleEditStrategy = useCallback(() => {
+    setStatus("idle");
+    setWorld(createWorld(LEVELS[levelIndex]!));
+    setErrors([]);
+    setView("code");
+  }, [levelIndex]);
 
   const handleViewChange = useCallback((nextView: "game" | "code") => {
     setView(nextView);
@@ -136,16 +175,26 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
     handleViewChange("code");
   }, [status, handleReset, handleViewChange]);
 
-  const score = calculateScore(world);
+  const score = status === "completed" ? calculateScore(world) : null;
   const isEditorDisabled = status === "running" || status === "paused";
   const canRun = status === "idle" || status === "completed";
 
+  const overlay =
+    score !== null ? (
+      <CompletionOverlay
+        score={score}
+        hasNextLevel={levelIndex < LEVELS.length - 1}
+        onNextLevel={handleNextLevel}
+        onContinue={handleContinue}
+        onEditStrategy={handleEditStrategy}
+      />
+    ) : null;
+
   return (
-    <div {...props}>
+    <div {...props} className={cn("flex flex-col gap-2", className)}>
       <ControlsBar
         status={status}
         speed={speed}
-        world={world}
         canRun={canRun}
         onRun={handleRun}
         onPause={handlePause}
@@ -155,14 +204,19 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
         onEdit={view === "game" ? handleEditCode : undefined}
       />
 
+      <LevelTimeline
+        levels={LEVELS}
+        currentLevelIndex={levelIndex}
+        results={levelResults}
+        status={status}
+        className="my-2"
+      />
+
+      <StatusBar world={world} />
+
       <ErrorPanel errors={errors} />
 
-      {view === "game" && (
-        <>
-          <GameView world={world} />
-          {status === "completed" && score && <CompletionPanel score={score} />}
-        </>
-      )}
+      {view === "game" && <GameView world={world} overlay={overlay} />}
 
       {view === "code" && (
         <>
@@ -173,7 +227,7 @@ export function CargoDispatch(props: HTMLAttributes<HTMLDivElement>) {
             onBeforeMount={handleBeforeMount}
             onMount={handleMount}
           />
-          <APIReference />
+          <APIReference levels={LEVELS} currentLevelIndex={levelIndex} />
         </>
       )}
     </div>

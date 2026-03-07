@@ -1,0 +1,61 @@
+import { cn } from "@matthuggins/ui";
+import {
+  ClockIcon,
+  type Icon,
+  PackageIcon,
+  RobotIcon,
+  TruckIcon,
+  WarehouseIcon,
+} from "@phosphor-icons/react";
+import { memo, type ReactNode } from "react";
+import type { WorldState } from "../types";
+
+interface StatusBarProps {
+  world: WorldState;
+  className?: string;
+}
+
+export const StatusBar = memo(function StatusBar({ world, className }: StatusBarProps) {
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
+      <div className="flex flex-1 items-center gap-4 text-[13px] text-gray-700">
+        <Metric icon={RobotIcon} label="Robots">
+          {world.level.robotCount}
+        </Metric>
+        <Metric icon={WarehouseIcon} label="Aisles">
+          {world.level.aisleCount}
+        </Metric>
+        <Metric icon={TruckIcon} label="Trucks">
+          {world.level.truckCount}
+        </Metric>
+      </div>
+      <div className="flex items-center gap-4 text-[13px] text-gray-700">
+        <Metric icon={ClockIcon} label="Time remaining">
+          <strong className={cn(world.level.time - world.time <= 0 && "text-red-800")}>
+            {(world.level.time - world.time).toFixed(1)}s
+          </strong>
+        </Metric>
+        <Metric icon={PackageIcon} label="Packages delivered">
+          <strong>{world.deliveredCount}</strong> of {world.level.totalPackages}
+        </Metric>
+      </div>
+    </div>
+  );
+});
+
+const Metric = ({
+  icon: MetricIcon,
+  label,
+  children,
+  className,
+}: {
+  icon: Icon;
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) => (
+  <span title={label} className={cn("flex items-center gap-1 whitespace-nowrap", className)}>
+    <MetricIcon size={18} weight="regular" aria-label={label} className="text-gray-600" />
+    <span>{children}</span>
+  </span>
+);
