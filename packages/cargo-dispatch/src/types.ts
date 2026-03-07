@@ -38,6 +38,8 @@ export interface TruckData {
 }
 
 export interface LevelConfig {
+  day: number;
+  time: number;
   aisleCount: number;
   truckCount: number;
   robotCount: number;

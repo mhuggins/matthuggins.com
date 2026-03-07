@@ -86,7 +86,9 @@ export function CargoDispatch() {
       updateWorld(worldRef.current, dt, handleEvent);
 
       const errs = sandboxRef.current?.getErrors() ?? [];
-      if (errs.length > 0) setErrors(errs);
+      if (errs.length > 0) {
+        setErrors(errs);
+      }
 
       setWorld({ ...worldRef.current });
 
@@ -105,31 +107,11 @@ export function CargoDispatch() {
   const handleRun = useCallback(async () => {
     const editor = editorRef.current;
     const monacoInstance = monacoRef.current;
-    if (!editor || !monacoInstance) return;
-
-    const sourceCode = editor.getValue();
-    let runCode = sourceCode;
-
-    const model = editor.getModel();
-    if (model) {
-      try {
-        const getWorker = await monacoInstance.languages.typescript.getTypeScriptWorker();
-        const tsWorker = await getWorker(model.uri);
-        const output = await tsWorker.getEmitOutput(model.uri.toString());
-        const jsFile = output.outputFiles.find((f) => f.name.endsWith(".js"));
-        if (jsFile) {
-          runCode = jsFile.text;
-        } else {
-          setErrors(["TypeScript compilation produced no output"]);
-          return;
-        }
-      } catch (err) {
-        setErrors([
-          `TypeScript compilation error: ${err instanceof Error ? err.message : String(err)}`,
-        ]);
-        return;
-      }
+    if (!editor || !monacoInstance) {
+      return;
     }
+
+    const runCode = await transpileSource(editor, monacoInstance);
 
     const newWorld = createWorld(LEVEL_1);
     const sandbox = new Sandbox();
@@ -173,13 +155,12 @@ export function CargoDispatch() {
   const canRun = (status === "idle" || status === "completed") && isMonacoReady;
 
   return (
-    <div className="mx-auto max-w-[960px] p-6 font-sans">
+    <div className="mx-auto max-w-[960px] font-sans">
       <div className="mb-5">
         <h2 className="mt-0 mb-1 font-bold text-[22px] text-gray-900">Cargo Dispatch</h2>
         <p className="m-0 text-[13px] text-gray-500">
-          Write a strategy to route robots through the warehouse. Level 1: {LEVEL_1.totalPackages}{" "}
-          packages, {LEVEL_1.robotCount} robots, {LEVEL_1.aisleCount} aisles, {LEVEL_1.truckCount}{" "}
-          trucks.
+          Implement a strategy to route packages from warehouse shelves to delivery trucks within
+          the allocated time limit.
         </p>
       </div>
 
@@ -195,22 +176,49 @@ export function CargoDispatch() {
         onSpeedChange={setSpeed}
       />
 
-      <GameView world={world} />
+      {world && <GameView world={world} />}
 
       {status === "completed" && score && <CompletionPanel score={score} />}
 
       <ErrorPanel errors={errors} />
 
-      <StrategyEditor
-        defaultValue={DEFAULT_CODE}
-        disabled={isEditorDisabled}
-        onBeforeMount={handleBeforeMount}
-        onMount={handleMount}
-      />
+      {!world && (
+        <StrategyEditor
+          defaultValue={DEFAULT_CODE}
+          disabled={isEditorDisabled}
+          onBeforeMount={handleBeforeMount}
+          onMount={handleMount}
+        />
+      )}
 
-      <APIReference />
+      {!world && <APIReference />}
     </div>
   );
+}
+
+async function transpileSource(
+  editor: Monaco.editor.IStandaloneCodeEditor,
+  monacoInstance: typeof Monaco,
+) {
+  const runCode = editor.getValue();
+  const model = editor.getModel();
+
+  if (!model) {
+    return runCode;
+  }
+
+  try {
+    const getWorker = await monacoInstance.languages.typescript.getTypeScriptWorker();
+    const tsWorker = await getWorker(model.uri);
+    const output = await tsWorker.getEmitOutput(model.uri.toString());
+    const jsFile = output.outputFiles.find((f) => f.name.endsWith(".js"));
+    if (!jsFile) {
+      throw new Error("TypeScript compilation produced no output");
+    }
+    return jsFile.text;
+  } catch (err) {
+    throw new Error(`TypeScript compilation error: ${err instanceof Error ? err.message : err}`);
+  }
 }
 
 const handleBeforeMount = (monacoInstance: typeof Monaco) => {

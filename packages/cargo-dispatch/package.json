@@ -26,7 +26,8 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@matthuggins/ui": "workspace:*",
-    "@monaco-editor/react": "^4.7.0"
+    "@monaco-editor/react": "^4.7.0",
+    "@phosphor-icons/react": "catalog:"
   },
   "devDependencies": {
     "@matthuggins/tsconfig": "workspace:*",

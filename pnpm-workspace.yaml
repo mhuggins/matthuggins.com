@@ -3,6 +3,7 @@ packages:
   - packages/*
 
 catalog:
+  "@phosphor-icons/react": ^2.1.10
   "@types/node": ^24.3.3
   "@types/react": ^19.1.13
   "@types/react-dom": ^19.1.9
