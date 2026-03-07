@@ -63,3 +63,5 @@ export interface WorldState {
   nextPackageId: number;
   completedAt: number | null;
 }
+
+export type GameStatus = "idle" | "running" | "paused" | "completed";

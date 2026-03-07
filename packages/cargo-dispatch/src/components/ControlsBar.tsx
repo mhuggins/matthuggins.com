@@ -12,9 +12,7 @@ import {
   WarehouseIcon,
 } from "@phosphor-icons/react";
 import { ReactNode } from "react";
-import type { WorldState } from "../types";
-
-type GameStatus = "idle" | "running" | "paused" | "completed";
+import type { GameStatus, WorldState } from "../types";
 
 interface ControlsBarProps {
   status: GameStatus;

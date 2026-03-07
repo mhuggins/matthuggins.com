@@ -153,11 +153,13 @@ export function GameRenderer({ world }: Props) {
             <div
               key={robot.id}
               title={`${robot.label} | ${robot.cargo.length}/${robot.capacity} packages`}
-              className="-translate-x-1/2 -translate-y-1/2 absolute z-10 flex flex-col items-center"
-              style={{ left: colCenter, top: yPx }}
+              className="-translate-x-1/2 -translate-y-1/2 absolute z-10"
+              style={{ left: colCenter, top: yPx, width: iconSize, height: iconSize }}
             >
               {atCapacity && (
-                <WarningIcon weight="fill" size={12} className="mb-0.5 text-red-500" />
+                <div className="-translate-x-1/2 absolute bottom-full left-1/2 pb-0.5">
+                  <WarningIcon weight="fill" size={12} className="text-red-500" />
+                </div>
               )}
               <RobotIcon
                 weight="duotone"
@@ -165,11 +167,13 @@ export function GameRenderer({ world }: Props) {
                 className="text-[#1e3a5f] transition-colors duration-100"
               />
               {cargoGroups.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-x-1.5 gap-y-[2px]">
+                <div className="-translate-x-1/2 absolute top-full left-1/2 mt-0.5 flex flex-wrap justify-center gap-x-1.5 gap-y-0.5 rounded bg-white/80 px-1 py-0.5 shadow-sm ring-1 ring-gray-200">
                   {cargoGroups.map(({ color, count }) => (
-                    <span key={color} className="flex items-center gap-[2px]">
-                      <PackageIcon size={10} weight="fill" style={{ color }} />
-                      <span className="text-[7px] text-gray-500 leading-none">{count}</span>
+                    <span key={color} className="flex items-center gap-[3px]">
+                      <PackageIcon size={14} weight="fill" style={{ color }} />
+                      <span className="font-medium text-gray-600 text-sm leading-none">
+                        {count}
+                      </span>
                     </span>
                   ))}
                 </div>

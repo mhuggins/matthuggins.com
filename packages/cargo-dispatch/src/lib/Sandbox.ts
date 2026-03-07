@@ -92,22 +92,39 @@ export class Sandbox {
       },
       goTo: (stop: number) => {
         const world = this.world;
-        if (!world) return;
+        if (!world) {
+          return;
+        }
+
         const robot = world.robots.find((r) => r.id === robotId);
-        if (!robot) return;
-        if (!Number.isInteger(stop) || !world.stops.includes(stop)) return;
-        if (robot.stopQueue.length >= 10) return;
+        if (!robot) {
+          return;
+        }
+        if (!Number.isInteger(stop) || !world.stops.includes(stop)) {
+          return;
+        }
+        if (robot.stopQueue.length >= 10) {
+          return;
+        }
+
         robot.stopQueue.push(stop);
-        if (robot.state === "idle") robot.state = "moving";
+
+        if (robot.state === "idle") {
+          robot.state = "moving";
+        }
       },
       clearQueue: () => {
         const robot = this.world?.robots.find((r) => r.id === robotId);
-        if (robot) robot.stopQueue = [];
+        if (robot) {
+          robot.stopQueue = [];
+        }
       },
       getId: () => robotId,
       getCurrentStop: (): StopId | null => {
         const robot = this.world?.robots.find((r) => r.id === robotId);
-        if (!robot) return null;
+        if (!robot) {
+          return null;
+        }
         return Number.isInteger(robot.position) ? (robot.position as StopId) : null;
       },
       isIdle: () => {
@@ -128,21 +145,29 @@ export class Sandbox {
       },
       nextDeliveryStop: (): StopId | null => {
         const robot = this.world?.robots.find((r) => r.id === robotId);
-        if (!robot || robot.cargo.length === 0) return null;
+        if (!robot || robot.cargo.length === 0) {
+          return null;
+        }
         return robot.cargo[0]!.to;
       },
       getDeliveryStops: (): StopId[] => {
         const robot = this.world?.robots.find((r) => r.id === robotId);
-        if (!robot) return [];
+        if (!robot) {
+          return [];
+        }
         return [...new Set(robot.cargo.map((p) => p.to))];
       },
       getCargoSummary: () => {
         const robot = this.world?.robots.find((r) => r.id === robotId);
-        if (!robot) return { total: 0, byTruck: {} as Record<number, number> };
+        if (!robot) {
+          return { total: 0, byTruck: {} as Record<number, number> };
+        }
+
         const byTruck: Record<number, number> = {};
         for (const pkg of robot.cargo) {
           byTruck[pkg.to] = (byTruck[pkg.to] ?? 0) + 1;
         }
+
         return { total: robot.cargo.length, byTruck };
       },
       getQueuedStops: (): StopId[] => {
@@ -150,7 +175,9 @@ export class Sandbox {
       },
       setLabel: (text: string) => {
         const robot = this.world?.robots.find((r) => r.id === robotId);
-        if (robot) robot.label = String(text).slice(0, 20);
+        if (robot) {
+          robot.label = String(text).slice(0, 20);
+        }
       },
     };
   }

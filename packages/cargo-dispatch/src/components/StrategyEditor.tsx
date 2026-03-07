@@ -35,7 +35,6 @@ export function StrategyEditor({
           fontSize: 13,
           lineHeight: 20,
           readOnly: disabled,
-          wordWrap: "on",
           padding: { top: 10, bottom: 10 },
           automaticLayout: true,
           tabSize: 2,

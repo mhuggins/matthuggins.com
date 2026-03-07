@@ -1,10 +1,73 @@
+import { FlaskIcon } from "@phosphor-icons/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy } from "react";
+import { Section } from "@/components/Section";
+import { DOMAIN } from "@/constants/site";
 
 const CargoDispatch = lazy(async () => ({
   default: (await import("@matthuggins/cargo-dispatch")).CargoDispatch,
 }));
 
 export const Route = createFileRoute("/lab/cargo-dispatch")({
-  component: CargoDispatch,
+  component: CargoDispatchPage,
 });
+
+function CargoDispatchPage() {
+  const title = "Cargo Dispatch";
+  const description =
+    "Programming game for routing packages from warehouse shelves to delivery trucks";
+  const url = `${DOMAIN}/${Route.path}`;
+  const keywords = [
+    "development",
+    "programming",
+    "coding",
+    "typescript",
+    "javascript",
+    "game",
+    "programming game",
+  ].join(", ");
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    name: title,
+    description,
+    keywords,
+    url,
+    author: {
+      "@type": "Person",
+      name: "Matt Huggins",
+      url: DOMAIN,
+    },
+  };
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta name="keywords" content={keywords} />
+
+      {/* Canonical URL */}
+      <link rel="canonical" href={url} />
+
+      {/* Open Graph */}
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="Matt Huggins" />
+
+      {/* Twitter Card */}
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+
+      {/* Structured Data */}
+      <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+
+      <Section title={title} subtitle={description} icon={FlaskIcon} headingClassName="uppercase">
+        <CargoDispatch />
+      </Section>
+    </>
+  );
+}

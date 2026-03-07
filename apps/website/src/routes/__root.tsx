@@ -43,7 +43,9 @@ function Root() {
   const {
     location: { pathname },
   } = useRouterState();
+
   const isBlogActive = pathname.split("/")[1] === "blog";
+  const isLabActive = pathname.split("/")[1] === "lab";
 
   return (
     <div className="min-h-dvh bg-gray-100 font-sans text-gray-900">
@@ -54,8 +56,7 @@ function Root() {
             {/* Navigation Header */}
             <nav className="bg-primary px-4 text-white md:px-12 print:hidden">
               <div className="flex items-center justify-between text-sm">
-                {/* Mobile: Navigation Links on left */}
-                <div className="flex text-sm md:hidden">
+                <div className="flex text-sm">
                   <Link
                     to="/"
                     activeProps={{ className: "bg-primary-light" }}
@@ -64,24 +65,13 @@ function Root() {
                     Resume
                   </Link>
                   <Link
-                    to="/blog"
+                    to="/lab"
                     className={cn(
                       "px-4 py-4 font-medium hover:underline",
-                      isBlogActive && "bg-primary-light",
+                      isLabActive && "bg-primary-light",
                     )}
                   >
-                    Blog
-                  </Link>
-                </div>
-
-                {/* Desktop: Navigation Links */}
-                <div className="hidden text-sm md:flex">
-                  <Link
-                    to="/"
-                    activeProps={{ className: "bg-primary-light" }}
-                    className="px-4 py-4 font-medium hover:underline active:bg-red"
-                  >
-                    Resume
+                    Lab
                   </Link>
                   <Link
                     to="/blog"

@@ -7,7 +7,7 @@ import { createWorld } from "../lib/createWorld";
 import { LEVEL_1 } from "../lib/level";
 import { Sandbox } from "../lib/Sandbox";
 import { type EngineEvent, updateWorld } from "../lib/updateWorld";
-import type { WorldState } from "../types";
+import type { GameStatus, WorldState } from "../types";
 import { APIReference } from "./APIReference";
 import { CompletionPanel } from "./CompletionPanel";
 import { ControlsBar } from "./ControlsBar";
@@ -44,8 +44,6 @@ const DEFAULT_CODE = `function init(robots: RobotController[], world: WorldAPI):
     }
   });
 }`;
-
-type GameStatus = "idle" | "running" | "paused" | "completed";
 
 export function CargoDispatch() {
   const [status, setStatus] = useState<GameStatus>("idle");
@@ -155,15 +153,7 @@ export function CargoDispatch() {
   const canRun = (status === "idle" || status === "completed") && isMonacoReady;
 
   return (
-    <div className="mx-auto max-w-[960px] font-sans">
-      <div className="mb-5">
-        <h2 className="mt-0 mb-1 font-bold text-[22px] text-gray-900">Cargo Dispatch</h2>
-        <p className="m-0 text-[13px] text-gray-500">
-          Implement a strategy to route packages from warehouse shelves to delivery trucks within
-          the allocated time limit.
-        </p>
-      </div>
-
+    <div>
       <ControlsBar
         status={status}
         speed={speed}
