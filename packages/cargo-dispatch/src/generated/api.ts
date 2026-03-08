@@ -25,6 +25,7 @@ declare interface TruckSummary {
 declare interface RobotSummary {
     readonly id: number;
     readonly currentStop: StopId | null;
+    readonly targetStop: StopId | null;
     readonly cargoCount: number;
     /** Package count per destination truck stop. */
     readonly destinations: Record<StopId, number>;
@@ -65,6 +66,8 @@ declare interface RobotController {
     isIdle(): boolean;
     /** Whether the robot is currently traveling between stops. */
     isMoving(): boolean;
+    /** The stop the robot is currently traveling toward, or null if idle. */
+    getTargetStop(): StopId | null;
     /** Whether the robot is carrying any packages. */
     hasCargo(): boolean;
     /** Number of packages currently onboard. */

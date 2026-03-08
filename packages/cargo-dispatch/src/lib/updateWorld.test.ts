@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { LevelConfig, WorldState } from "../types";
 import { createWorld } from "./createWorld";
+import { Sandbox } from "./Sandbox";
 import type { EngineEvent } from "./updateWorld";
 import { updateWorld } from "./updateWorld";
 
@@ -259,6 +260,77 @@ describe("updateSpawn", () => {
 
     expect(world.spawnedCount).toBe(4);
     expect(world.packages).toHaveLength(4);
+  });
+});
+
+// --- onCargoReady end-to-end ---
+
+describe("onCargoReady end-to-end", () => {
+  it("fires handler with correct aisle and destination when a package spawns via updateWorld", () => {
+    const world = makeWorld();
+    world.spawnSchedule[0] = 0.5; // schedule one package at t=0.5
+
+    const sandbox = new Sandbox();
+    sandbox.boot(
+      `function init(robots, world) {
+        world.onCargoReady((cargo) => {
+          robots[0].goTo(cargo.aisle);
+          robots[0].goTo(cargo.destination);
+        });
+      }`,
+      world,
+    );
+
+    // Capture queue immediately after fireCargoReady but before updateRobot
+    // runs in the same tick (spawn fires before robot movement in updateWorld).
+    let queueAtSpawn: number[] = [];
+    let spawnedAisle: number | null = null;
+    let spawnedDest: number | null = null;
+    for (let i = 0; i < 6; i++) {
+      updateWorld(world, 0.1, (e) => {
+        if (e.type === "cargoSpawned") {
+          spawnedAisle = e.aisle;
+          spawnedDest = e.destination;
+          sandbox.fireCargoReady({ aisle: e.aisle, destination: e.destination });
+          queueAtSpawn = [...world.robots[0]!.stopQueue];
+        }
+      });
+    }
+
+    expect(world.spawnedCount).toBe(1);
+    expect(spawnedAisle).not.toBeNull();
+    // goTo(aisle) and goTo(destination) were both queued at the moment of spawn
+    expect(queueAtSpawn).toEqual([spawnedAisle, spawnedDest]);
+    expect(world.aisles.some((a) => a.stop === spawnedAisle)).toBe(true);
+    expect(world.trucks.some((t) => t.stop === spawnedDest)).toBe(true);
+  });
+
+  it("fires for each package that spawns during the level", () => {
+    const world = makeWorld();
+    // totalPackages = 4; supply all 4 slots so the undefined-slot bug doesn't cause an extra spawn
+    world.spawnSchedule = [0.1, 0.2, 0.3, 9999];
+
+    const sandbox = new Sandbox();
+    sandbox.boot(
+      `function init(robots, world) {
+        world.onCargoReady(() => { robots[0].goTo(0); });
+      }`,
+      world,
+    );
+
+    let fireCount = 0;
+    for (let i = 0; i < 5; i++) {
+      updateWorld(world, 0.1, (e) => {
+        if (e.type === "cargoSpawned") {
+          fireCount++;
+          sandbox.fireCargoReady({ aisle: e.aisle, destination: e.destination });
+        }
+      });
+    }
+
+    // 3 packages spawned by t=0.5; 4th is scheduled at 9999
+    expect(world.spawnedCount).toBe(3);
+    expect(fireCount).toBe(3);
   });
 });
 

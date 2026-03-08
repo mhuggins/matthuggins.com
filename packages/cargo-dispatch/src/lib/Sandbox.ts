@@ -137,6 +137,9 @@ export class Sandbox {
       isMoving: () => {
         return this.world?.robots.find((r) => r.id === robotId)?.state === "moving";
       },
+      getTargetStop: (): StopId | null => {
+        return this.world?.robots.find((r) => r.id === robotId)?.targetStop ?? null;
+      },
       hasCargo: () => {
         return (this.world?.robots.find((r) => r.id === robotId)?.cargo.length ?? 0) > 0;
       },
@@ -257,6 +260,7 @@ export class Sandbox {
           return {
             id: r.id,
             currentStop: Number.isInteger(r.position) ? r.position : null,
+            targetStop: r.targetStop,
             cargoCount: r.cargo.length,
             destinations,
             queuedStops: [...r.stopQueue],

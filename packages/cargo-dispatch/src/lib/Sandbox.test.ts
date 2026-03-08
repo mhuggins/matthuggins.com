@@ -341,6 +341,34 @@ describe("robot.dropOff", () => {
   });
 });
 
+describe("robot.getTargetStop", () => {
+  it("returns null when robot is idle", () => {
+    const world = makeWorld();
+    boot(
+      world,
+      `function init(robots) {
+        if (robots[0].getTargetStop() === null) robots[0].goTo(0);
+      }`,
+    );
+    expect(world.robots[0]!.stopQueue).toContain(0);
+  });
+
+  it("returns the active target stop once the robot begins moving", () => {
+    const world = makeWorld();
+    // Manually set targetStop to simulate mid-travel
+    world.robots[0]!.targetStop = 1;
+    world.robots[0]!.state = "moving";
+    boot(
+      world,
+      `function init(robots) {
+        const t = robots[0].getTargetStop();
+        if (t !== null) robots[0].goTo(t);
+      }`,
+    );
+    expect(world.robots[0]!.stopQueue).toContain(1);
+  });
+});
+
 describe("robot.nextDeliveryStop / getDeliveryStops / getCargoSummary", () => {
   it("nextDeliveryStop returns null when no cargo", () => {
     const world = makeWorld();
