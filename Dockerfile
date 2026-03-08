@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy workspace manifest files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/website/package.json apps/website/
+COPY packages/cargo-dispatch/package.json packages/cargo-dispatch/
+COPY packages/tsconfig/package.json packages/tsconfig/
+COPY packages/ui/package.json packages/ui/
 
 # Install pnpm
 RUN npm install -g pnpm
