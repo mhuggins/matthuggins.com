@@ -134,6 +134,9 @@ export class Sandbox {
       isIdle: () => {
         return this.world?.robots.find((r) => r.id === robotId)?.state === "idle";
       },
+      isMoving: () => {
+        return this.world?.robots.find((r) => r.id === robotId)?.state === "moving";
+      },
       hasCargo: () => {
         return (this.world?.robots.find((r) => r.id === robotId)?.cargo.length ?? 0) > 0;
       },
@@ -258,6 +261,7 @@ export class Sandbox {
             destinations,
             queuedStops: [...r.stopQueue],
             idle: r.state === "idle",
+            moving: r.state === "moving",
           };
         }),
       getTotalWaitingCount: () =>

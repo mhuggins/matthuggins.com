@@ -30,6 +30,7 @@ declare interface RobotSummary {
     readonly destinations: Record<StopId, number>;
     readonly queuedStops: StopId[];
     readonly idle: boolean;
+    readonly moving: boolean;
 }
 declare interface CargoInfo {
     /** The aisle stop where the cargo spawned. */
@@ -62,6 +63,8 @@ declare interface RobotController {
     getCurrentStop(): StopId | null;
     /** Whether the robot has no queued stops. */
     isIdle(): boolean;
+    /** Whether the robot is currently traveling between stops. */
+    isMoving(): boolean;
     /** Whether the robot is carrying any packages. */
     hasCargo(): boolean;
     /** Number of packages currently onboard. */

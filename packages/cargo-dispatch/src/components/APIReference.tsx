@@ -42,6 +42,8 @@ export function APIReference({ levels, currentLevelIndex }: APIReferenceProps) {
           <br />
           robot.isIdle() → boolean
           <br />
+          robot.isMoving() → boolean
+          <br />
           robot.getId() → number
           <br />
           robot.setLabel(text) — set display label
@@ -65,7 +67,8 @@ export function APIReference({ levels, currentLevelIndex }: APIReferenceProps) {
           <br />
           world.getTrucks() → {"{ stop, name, color }[]"}
           <br />
-          world.getRobots() → {"{ id, currentStop, cargoCount, destinations, queuedStops, idle }[]"}
+          world.getRobots() →{" "}
+          {"{ id, currentStop, cargoCount, destinations, queuedStops, idle, moving }[]"}
           <br />
           world.getTime() → number
         </div>
