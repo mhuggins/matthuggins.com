@@ -186,10 +186,10 @@ export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivEle
 
       <ErrorPanel errors={errors} />
 
-      {view === "game" && <GameView world={world} overlay={overlay} />}
-
-      {view === "code" && (
-        <>
+      <div>
+        {view === "game" ? (
+          <GameView world={world} overlay={overlay} />
+        ) : (
           <StrategyEditor
             value={code}
             disabled={isEditorDisabled}
@@ -197,9 +197,10 @@ export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivEle
             onBeforeMount={handleBeforeMount}
             onMount={handleMount}
           />
-          <APIReference levels={LEVELS} currentLevelIndex={levelIndex} />
-        </>
-      )}
+        )}
+
+        <APIReference levels={LEVELS} currentLevelIndex={levelIndex} />
+      </div>
     </div>
   );
 }
