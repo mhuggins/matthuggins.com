@@ -57,7 +57,7 @@ export const ControlsBar = memo(function ControlsBar({
         )}
         {status !== "idle" && (
           <Tooltip content="Reset">
-            <Button onClick={onReset} className="h-full">
+            <Button onClick={onReset}>
               <ArrowCounterClockwiseIcon size={15} />
             </Button>
           </Tooltip>
