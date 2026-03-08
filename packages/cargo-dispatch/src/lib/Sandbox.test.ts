@@ -65,8 +65,9 @@ describe("robot.getId", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
-        robots[0].goTo(robots[0].getId()); // getId() === 0, stop 0 is valid
+      `function init(world) {
+        const robots = world.getRobots();
+        robots[0].goTo(robots[0].id); // id === 0, stop 0 is valid
       }`,
     );
     expect(world.robots[0]!.stopQueue).toContain(0);
@@ -80,7 +81,8 @@ describe("robot.getCurrentStop", () => {
     // getCurrentStop() === 2, so goTo(2) queues stop 2
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         const stop = robots[0].getCurrentStop();
         if (stop !== null) robots[0].goTo(stop);
       }`,
@@ -93,7 +95,8 @@ describe("robot.getCurrentStop", () => {
     world.robots[0]!.position = 2.5; // mid-travel
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         const stop = robots[0].getCurrentStop();
         if (stop !== null) robots[0].goTo(stop); // should NOT be called
       }`,
@@ -107,7 +110,8 @@ describe("robot.isIdle / robot.isMoving", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         const idle = robots[0].isIdle();
         const notMoving = !robots[0].isMoving();
         if (idle) robots[0].goTo(0);
@@ -121,7 +125,8 @@ describe("robot.isIdle / robot.isMoving", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].goTo(0);
         if (robots[0].isMoving()) robots[1].goTo(0); // signal via robot[1]
       }`,
@@ -133,7 +138,8 @@ describe("robot.isIdle / robot.isMoving", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].goTo(0);
         if (!robots[0].isIdle()) robots[1].goTo(0); // signal via robot[1]
       }`,
@@ -147,7 +153,8 @@ describe("robot.clearQueue", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].goTo(0);
         robots[0].goTo(1);
         robots[0].clearQueue();
@@ -162,7 +169,8 @@ describe("robot.getQueuedStops", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].goTo(0);
         robots[0].goTo(1);
         // queue a third stop only if getQueuedStops() sees 2
@@ -176,13 +184,19 @@ describe("robot.getQueuedStops", () => {
 describe("robot.setLabel", () => {
   it("sets the robot label", () => {
     const world = makeWorld();
-    boot(world, `function init(robots) { robots[0].setLabel("Hauler"); }`);
+    boot(
+      world,
+      `function init(world) { const robots = world.getRobots(); robots[0].setLabel("Hauler"); }`,
+    );
     expect(world.robots[0]!.label).toBe("Hauler");
   });
 
   it("truncates labels longer than 20 characters", () => {
     const world = makeWorld();
-    boot(world, `function init(robots) { robots[0].setLabel("This label is way too long"); }`);
+    boot(
+      world,
+      `function init(world) { const robots = world.getRobots(); robots[0].setLabel("This label is way too long"); }`,
+    );
     expect(world.robots[0]!.label).toBe("This label is way to");
   });
 });
@@ -192,7 +206,8 @@ describe("robot.hasCargo / getCargoCount / getCapacity / getAvailableCapacity", 
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         if (!robots[0].hasCargo()) robots[0].goTo(0);
       }`,
     );
@@ -205,7 +220,8 @@ describe("robot.hasCargo / getCargoCount / getCapacity / getAvailableCapacity", 
     addPackageToAisle(world, 0, 0);
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].pickUp();
         if (robots[0].hasCargo()) robots[0].goTo(0);
       }`,
@@ -220,7 +236,8 @@ describe("robot.hasCargo / getCargoCount / getCapacity / getAvailableCapacity", 
     addPackageToAisle(world, 0, 1);
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].pickUp();
         const count = robots[0].getCargoCount();       // 2
         const avail = robots[0].getAvailableCapacity(); // 4 - 2 = 2
@@ -236,7 +253,8 @@ describe("robot.hasCargo / getCargoCount / getCapacity / getAvailableCapacity", 
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         const cap = robots[0].getCapacity();
         for (let i = 0; i < cap; i++) robots[0].goTo(0);
       }`,
@@ -252,7 +270,7 @@ describe("robot.pickUp", () => {
     world.robots[0]!.position = aisle.stop;
     for (let i = 0; i < 6; i++) addPackageToAisle(world, 0, 0); // 6 packages, capacity 4
 
-    boot(world, `function init(robots) { robots[0].pickUp(); }`);
+    boot(world, `function init(world) { const robots = world.getRobots(); robots[0].pickUp(); }`);
 
     expect(world.robots[0]!.cargo).toHaveLength(4);
     expect(aisle.waiting).toHaveLength(2);
@@ -263,7 +281,7 @@ describe("robot.pickUp", () => {
     world.robots[0]!.position = 0; // truck stop
     addPackageToAisle(world, 0, 1);
 
-    boot(world, `function init(robots) { robots[0].pickUp(); }`);
+    boot(world, `function init(world) { const robots = world.getRobots(); robots[0].pickUp(); }`);
 
     expect(world.robots[0]!.cargo).toHaveLength(0);
   });
@@ -280,7 +298,8 @@ describe("robot.pickUp", () => {
 
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].pickUp((pkg) => pkg.destination === 0);
       }`,
     );
@@ -302,7 +321,7 @@ describe("robot.dropOff", () => {
     world.robots[0]!.cargo.push(pkg);
     world.packages.push(pkg);
 
-    boot(world, `function init(robots) { robots[0].dropOff(); }`);
+    boot(world, `function init(world) { const robots = world.getRobots(); robots[0].dropOff(); }`);
 
     expect(world.robots[0]!.cargo).toHaveLength(0);
     expect(truck.deliveredCount).toBe(1);
@@ -320,7 +339,7 @@ describe("robot.dropOff", () => {
     pkgFor0.pickedUpAt = pkgFor1.pickedUpAt = 1;
     world.robots[0]!.cargo.push(pkgFor0, pkgFor1);
 
-    boot(world, `function init(robots) { robots[0].dropOff(); }`);
+    boot(world, `function init(world) { const robots = world.getRobots(); robots[0].dropOff(); }`);
 
     expect(world.robots[0]!.cargo).toHaveLength(1);
     expect(world.robots[0]!.cargo[0]!.destination).toBe(truck1.stop);
@@ -334,7 +353,7 @@ describe("robot.dropOff", () => {
     pkg.pickedUpAt = 1;
     world.robots[0]!.cargo.push(pkg);
 
-    boot(world, `function init(robots) { robots[0].dropOff(); }`);
+    boot(world, `function init(world) { const robots = world.getRobots(); robots[0].dropOff(); }`);
 
     expect(world.robots[0]!.cargo).toHaveLength(1);
     expect(world.trucks[0]!.deliveredCount).toBe(0);
@@ -346,7 +365,8 @@ describe("robot.getTargetStop", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         if (robots[0].getTargetStop() === null) robots[0].goTo(0);
       }`,
     );
@@ -360,7 +380,8 @@ describe("robot.getTargetStop", () => {
     world.robots[0]!.state = "moving";
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         const t = robots[0].getTargetStop();
         if (t !== null) robots[0].goTo(t);
       }`,
@@ -374,7 +395,8 @@ describe("robot.getNextDeliveryStop / getDeliveryStops / getCargoSummary", () =>
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         if (robots[0].getNextDeliveryStop() === null) robots[0].goTo(0);
       }`,
     );
@@ -389,7 +411,8 @@ describe("robot.getNextDeliveryStop / getDeliveryStops / getCargoSummary", () =>
 
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].goTo(robots[0].getNextDeliveryStop());
       }`,
     );
@@ -406,7 +429,8 @@ describe("robot.getNextDeliveryStop / getDeliveryStops / getCargoSummary", () =>
 
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].getDeliveryStops().forEach(s => robots[0].goTo(s));
       }`,
     );
@@ -425,7 +449,8 @@ describe("robot.getNextDeliveryStop / getDeliveryStops / getCargoSummary", () =>
 
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         const s = robots[0].getCargoSummary();
         for (let i = 0; i < s.total; i++) robots[0].goTo(0);        // 3 times
         for (let i = 0; i < s.destinations[0]; i++) robots[0].goTo(1); // 2 times
@@ -440,7 +465,8 @@ describe("robot.onIdle", () => {
     const world = makeWorld();
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].onIdle(() => { robots[0].goTo(1); });
       }`,
       world,
@@ -453,7 +479,8 @@ describe("robot.onIdle", () => {
     const world = makeWorld();
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].onIdle(() => { robots[0].goTo(0); });
       }`,
       world,
@@ -484,7 +511,8 @@ describe("robot.onStop", () => {
     const world = makeWorld();
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].onStop((stop) => { robots[0].goTo(stop); });
       }`,
       world,
@@ -502,7 +530,8 @@ describe("world.getTime", () => {
     world.time = 7;
     boot(
       world,
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         const t = world.getTime();
         for (let i = 0; i < t; i++) robots[0].goTo(0);
       }`,
@@ -512,12 +541,13 @@ describe("world.getTime", () => {
 });
 
 describe("world.getAisles", () => {
-  it("returns aisle summaries with correct stop ids", () => {
+  it("returns aisles with correct stop ids", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots, world) {
-        world.getAisles().forEach(a => robots[0].goTo(a.stop));
+      `function init(world) {
+        const robots = world.getRobots();
+        world.getAisles().forEach(a => robots[0].goTo(a.id));
       }`,
     );
     expect(world.robots[0]!.stopQueue).toEqual([2, 3]);
@@ -529,8 +559,9 @@ describe("world.getAisles", () => {
     addPackageToAisle(world, 0, 1);
     boot(
       world,
-      `function init(robots, world) {
-        const count = world.getAisles()[0].waitingCount;
+      `function init(world) {
+        const robots = world.getRobots();
+        const count = world.getAisles()[0].getWaitingCount();
         for (let i = 0; i < count; i++) robots[0].goTo(0);
       }`,
     );
@@ -543,8 +574,9 @@ describe("world.getTrucks", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots, world) {
-        world.getTrucks().forEach(t => robots[0].goTo(t.stop));
+      `function init(world) {
+        const robots = world.getRobots();
+        world.getTrucks().forEach(t => robots[0].goTo(t.id));
       }`,
     );
     expect(world.robots[0]!.stopQueue).toEqual([0, 1]);
@@ -556,7 +588,8 @@ describe("world.getRobots", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         const rs = world.getRobots();
         for (let i = 0; i < rs.length; i++) robots[0].goTo(0);
       }`,
@@ -568,10 +601,13 @@ describe("world.getRobots", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots, world) {
-        const r = world.getRobots()[0];
-        if (r.idle) robots[0].goTo(0);
-        if (!r.moving) robots[0].goTo(1);
+      `function init(world) {
+        const robots = world.getRobots();
+        const r = robots[0];
+        const wasIdle = r.isIdle();
+        const wasNotMoving = !r.isMoving();
+        if (wasIdle) r.goTo(0);
+        if (wasNotMoving) r.goTo(1);
       }`,
     );
     expect(world.robots[0]!.stopQueue).toEqual([0, 1]);
@@ -581,56 +617,46 @@ describe("world.getRobots", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[1].goTo(0);
-        if (world.getRobots()[1].moving) robots[0].goTo(0);
+        if (world.getRobots()[1].isMoving()) robots[0].goTo(0);
       }`,
     );
     expect(world.robots[0]!.stopQueue).toContain(0);
   });
 });
 
-describe("world.getTotalWaitingCount / getWaitingCount", () => {
-  it("getTotalWaitingCount sums across all aisles", () => {
+describe("world.getWaitingCount", () => {
+  it("sums waiting packages across all aisles", () => {
     const world = makeWorld();
     addPackageToAisle(world, 0, 0);
     addPackageToAisle(world, 0, 1);
     addPackageToAisle(world, 1, 0);
     boot(
       world,
-      `function init(robots, world) {
-        const total = world.getTotalWaitingCount();
+      `function init(world) {
+        const robots = world.getRobots();
+        const total = world.getWaitingCount();
         for (let i = 0; i < total; i++) robots[0].goTo(0);
       }`,
     );
     expect(world.robots[0]!.stopQueue).toHaveLength(3);
   });
 
-  it("getWaitingCount returns count for a specific aisle stop", () => {
+  it("aisle.getWaitingCount returns count for that aisle", () => {
     const world = makeWorld();
-    const aisleStop = world.aisles[0]!.stop;
     addPackageToAisle(world, 0, 0);
     addPackageToAisle(world, 0, 1);
     boot(
       world,
-      `function init(robots, world) {
-        const count = world.getWaitingCount(${aisleStop});
+      `function init(world) {
+        const robots = world.getRobots();
+        const count = world.getAisles()[0].getWaitingCount();
         for (let i = 0; i < count; i++) robots[0].goTo(0);
       }`,
     );
     expect(world.robots[0]!.stopQueue).toHaveLength(2);
-  });
-
-  it("getWaitingCount returns 0 for a truck stop", () => {
-    const world = makeWorld();
-    boot(
-      world,
-      `function init(robots, world) {
-        const count = world.getWaitingCount(0);
-        for (let i = 0; i < count; i++) robots[0].goTo(0);
-      }`,
-    );
-    expect(world.robots[0]!.stopQueue).toHaveLength(0);
   });
 });
 
@@ -639,7 +665,8 @@ describe("world.getBusiestAisle", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         if (world.getBusiestAisle() === null) robots[0].goTo(0);
       }`,
     );
@@ -654,9 +681,10 @@ describe("world.getBusiestAisle", () => {
     addPackageToAisle(world, 1, 1);
     boot(
       world,
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         const busiest = world.getBusiestAisle();
-        if (busiest) robots[0].goTo(busiest.stop);
+        if (busiest) robots[0].goTo(busiest.id);
       }`,
     );
     expect(world.robots[0]!.stopQueue).toContain(world.aisles[1]!.stop);
@@ -668,7 +696,8 @@ describe("world.getNearestAisleWithWaiting", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         if (world.getNearestAisleWithWaiting(0) === null) robots[0].goTo(0);
       }`,
     );
@@ -682,40 +711,29 @@ describe("world.getNearestAisleWithWaiting", () => {
     addPackageToAisle(world, 1, 0); // stop 3
     boot(
       world,
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         const nearest = world.getNearestAisleWithWaiting(3);
-        if (nearest) robots[0].goTo(nearest.stop);
+        if (nearest) robots[0].goTo(nearest.id);
       }`,
     );
     expect(world.robots[0]!.stopQueue).toContain(3);
   });
 });
 
-describe("world.getWaitingPackages", () => {
-  it("returns packages at the given aisle stop", () => {
+describe("aisle.getWaitingPackages", () => {
+  it("returns packages at the aisle", () => {
     const world = makeWorld();
-    const aisle = world.aisles[0]!;
     addPackageToAisle(world, 0, 0);
     addPackageToAisle(world, 0, 1);
     boot(
       world,
-      `function init(robots, world) {
-        world.getWaitingPackages(${aisle.stop}).forEach(p => robots[0].goTo(p.destination));
+      `function init(world) {
+        const robots = world.getRobots();
+        world.getAisles()[0].getWaitingPackages().forEach(p => robots[0].goTo(p.destination));
       }`,
     );
     expect(world.robots[0]!.stopQueue).toEqual([0, 1]);
-  });
-
-  it("returns empty array for a non-aisle stop", () => {
-    const world = makeWorld();
-    boot(
-      world,
-      `function init(robots, world) {
-        const pkgs = world.getWaitingPackages(0); // truck stop
-        for (let i = 0; i < pkgs.length; i++) robots[0].goTo(0);
-      }`,
-    );
-    expect(world.robots[0]!.stopQueue).toHaveLength(0);
   });
 });
 
@@ -724,9 +742,10 @@ describe("world.onCargoReady", () => {
     const world = makeWorld();
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         world.onCargoReady((cargo) => {
-          robots[0].goTo(cargo.aisle);
+          robots[0].goTo(cargo.aisle.id);
           robots[0].goTo(cargo.destination);
         });
       }`,
@@ -747,7 +766,8 @@ describe("Sandbox lifecycle", () => {
 
     // First boot registers an onIdle handler
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].onIdle(() => { robots[0].goTo(0); });
       }`,
       world,
@@ -759,7 +779,8 @@ describe("Sandbox lifecycle", () => {
     world.robots[0]!.stopQueue = [];
     world.robots[0]!.state = "idle";
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].onIdle(() => { robots[0].goTo(1); });
       }`,
       world,
@@ -774,7 +795,8 @@ describe("Sandbox lifecycle", () => {
     const world = makeWorld();
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].onIdle(() => { robots[0].goTo(0); });
         robots[0].onIdle(() => { robots[0].goTo(1); });
       }`,
@@ -788,7 +810,8 @@ describe("Sandbox lifecycle", () => {
     const world = makeWorld();
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].onIdle(() => { robots[0].goTo(0); });
         robots[1].onIdle(() => { robots[1].goTo(1); });
       }`,
@@ -808,7 +831,8 @@ describe("Sandbox lifecycle", () => {
     const world = makeWorld();
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[1].onIdle(() => { robots[1].goTo(0); });
       }`,
       world,
@@ -826,7 +850,8 @@ describe("robot.goTo queue cap", () => {
     const world = makeWorld();
     boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         for (let i = 0; i < 15; i++) robots[0].goTo(0);
       }`,
     );
@@ -839,7 +864,7 @@ describe("robot.goTo queue cap", () => {
 describe("Sandbox error handling", () => {
   it("captures runtime errors thrown from init", () => {
     const world = makeWorld();
-    const sandbox = boot(world, `function init() { throw new Error("oops"); }`);
+    const sandbox = boot(world, `function init(world) { throw new Error("oops"); }`);
     expect(sandbox.getErrors()).toHaveLength(1);
     expect(sandbox.getErrors()[0]).toContain("oops");
   });
@@ -848,7 +873,8 @@ describe("Sandbox error handling", () => {
     const world = makeWorld();
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].onIdle(() => { throw new Error("idle error"); });
       }`,
       world,
@@ -861,7 +887,8 @@ describe("Sandbox error handling", () => {
     const world = makeWorld();
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].onStop(() => { throw new Error("stop error"); });
       }`,
       world,
@@ -872,7 +899,7 @@ describe("Sandbox error handling", () => {
 
   it("clearErrors resets the error list", () => {
     const world = makeWorld();
-    const sandbox = boot(world, `function init() { throw new Error("boom"); }`);
+    const sandbox = boot(world, `function init(world) { throw new Error("boom"); }`);
     expect(sandbox.getErrors()).toHaveLength(1);
     sandbox.clearErrors();
     expect(sandbox.getErrors()).toHaveLength(0);
@@ -882,7 +909,8 @@ describe("Sandbox error handling", () => {
     const world = makeWorld();
     const sandbox = boot(
       world,
-      `function init(robots) {
+      `function init(world) {
+        const robots = world.getRobots();
         robots[0].goTo(999); // not a valid stop
       }`,
     );

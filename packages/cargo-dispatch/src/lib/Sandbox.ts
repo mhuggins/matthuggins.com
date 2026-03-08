@@ -1,5 +1,22 @@
-import type { StopId, WorldState } from "../types";
-import type { AisleSummary, CargoInfo, RobotController, WaitingPackage, WorldAPI } from "./api";
+import type { AisleData, StopId, WorldState } from "../types";
+import type { Aisle, CargoInfo, Robot, WaitingPackage, WorldAPI } from "./api";
+
+const toAisle = (aisle: AisleData): Aisle => ({
+  get id() {
+    return aisle.stop;
+  },
+  getWaitingCount: () => aisle.waiting.length,
+  getDestinations: () =>
+    aisle.waiting.reduce(
+      (acc, p) => {
+        acc[p.destination] = (acc[p.destination] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<StopId, number>,
+    ),
+  getWaitingPackages: () =>
+    aisle.waiting.map((p) => ({ destination: p.destination, color: p.color })),
+});
 
 type IdleHandler = () => void;
 type StopHandler = (stop: StopId) => void;
@@ -12,6 +29,7 @@ interface RobotHandlers {
 export class Sandbox {
   private robotHandlers = new Map<number, RobotHandlers>();
   private cargoReadyHandlers: Array<(cargo: CargoInfo) => void> = [];
+  private robotFacades: Robot[] = [];
   private world: WorldState | null = null;
   private errors: string[] = [];
 
@@ -19,15 +37,15 @@ export class Sandbox {
     this.world = world;
     this.robotHandlers.clear();
     this.cargoReadyHandlers = [];
+    this.robotFacades = world.robots.map((r) => this.createRobotFacade(r.id));
     this.errors = [];
 
-    const robots = world.robots.map((r) => this.createRobotFacade(r.id));
     const worldApi = this.createWorldApi();
     const safeConsole = { log: (...args: unknown[]) => console.log("[user]", ...args) };
 
     try {
-      const fn = new Function("robots", "world", "console", `${userCode}\ninit(robots, world);`);
-      fn(robots, worldApi, safeConsole);
+      const fn = new Function("world", "console", `${userCode}\ninit(world);`);
+      fn(worldApi, safeConsole);
     } catch (err) {
       this.errors.push(err instanceof Error ? err.message : String(err));
     }
@@ -67,7 +85,10 @@ export class Sandbox {
     }
   }
 
-  fireCargoReady(cargo: CargoInfo): void {
+  fireCargoReady(event: { aisle: StopId; destination: StopId }): void {
+    const aisleEntry = this.world?.aisles.find((a) => a.stop === event.aisle);
+    if (!aisleEntry) return;
+    const cargo: CargoInfo = { aisle: toAisle(aisleEntry), destination: event.destination };
     for (const handler of this.cargoReadyHandlers) {
       try {
         handler(cargo);
@@ -86,7 +107,7 @@ export class Sandbox {
     return handlers;
   }
 
-  private createRobotFacade(robotId: number): RobotController {
+  private createRobotFacade(robotId: number): Robot {
     return {
       onIdle: (cb: IdleHandler) => {
         this.getHandlers(robotId).idle.push(cb);
@@ -123,7 +144,9 @@ export class Sandbox {
           robot.stopQueue = [];
         }
       },
-      getId: () => robotId,
+      get id() {
+        return robotId;
+      },
       getCurrentStop: (): StopId | null => {
         const robot = this.world?.robots.find((r) => r.id === robotId);
         if (!robot) {
@@ -235,61 +258,33 @@ export class Sandbox {
   }
 
   private createWorldApi(): WorldAPI {
-    type AisleEntry = { stop: number; waiting: Array<{ destination: number }> };
-
-    const toAisleSummary = (aisle: AisleEntry): AisleSummary => ({
-      stop: aisle.stop,
-      waitingCount: aisle.waiting.length,
-      destinations: aisle.waiting.reduce((acc: Record<StopId, number>, p) => {
-        acc[p.destination] = (acc[p.destination] ?? 0) + 1;
-        return acc;
-      }, {}),
-    });
-
     return {
       getTime: () => this.world?.time ?? 0,
-      getAisles: () => (this.world?.aisles ?? []).map(toAisleSummary),
+      getAisles: () => (this.world?.aisles ?? []).map(toAisle),
       getTrucks: () =>
-        (this.world?.trucks ?? []).map((t) => ({ stop: t.stop, name: t.name, color: t.color })),
-      getRobots: () =>
-        (this.world?.robots ?? []).map((r) => {
-          const destinations: Record<StopId, number> = {};
-          for (const pkg of r.cargo) {
-            destinations[pkg.destination] = (destinations[pkg.destination] ?? 0) + 1;
-          }
-          return {
-            id: r.id,
-            currentStop: Number.isInteger(r.position) ? r.position : null,
-            targetStop: r.targetStop,
-            cargoCount: r.cargo.length,
-            destinations,
-            queuedStops: [...r.stopQueue],
-            idle: r.state === "idle",
-            moving: r.state === "moving",
-          };
-        }),
-      getTotalWaitingCount: () =>
+        (this.world?.trucks ?? []).map((t) => ({
+          get id() {
+            return t.stop;
+          },
+          name: t.name,
+          color: t.color,
+        })),
+      getRobots: () => [...this.robotFacades],
+      getWaitingCount: () =>
         (this.world?.aisles ?? []).reduce((sum, a) => sum + a.waiting.length, 0),
-      getWaitingCount: (stop: number) =>
-        this.world?.aisles.find((a) => a.stop === stop)?.waiting.length ?? 0,
       getBusiestAisle: () => {
         const aisles = this.world?.aisles ?? [];
-        let best: AisleEntry | null = null;
+        let best: AisleData | null = null;
         for (const a of aisles) {
           if (!best || a.waiting.length > best.waiting.length) best = a;
         }
-        return best && best.waiting.length > 0 ? toAisleSummary(best) : null;
+        return best && best.waiting.length > 0 ? toAisle(best) : null;
       },
       getNearestAisleWithWaiting: (fromStop: number) => {
         const aisles = (this.world?.aisles ?? []).filter((a) => a.waiting.length > 0);
         if (aisles.length === 0) return null;
         aisles.sort((a, b) => Math.abs(a.stop - fromStop) - Math.abs(b.stop - fromStop));
-        return toAisleSummary(aisles[0]!);
-      },
-      getWaitingPackages: (stop: number): WaitingPackage[] => {
-        const aisle = this.world?.aisles.find((a) => a.stop === stop);
-        if (!aisle) return [];
-        return aisle.waiting.map((p) => ({ destination: p.destination, color: p.color }));
+        return toAisle(aisles[0]!);
       },
       onCargoReady: (cb: (cargo: CargoInfo) => void) => {
         this.cargoReadyHandlers.push(cb);

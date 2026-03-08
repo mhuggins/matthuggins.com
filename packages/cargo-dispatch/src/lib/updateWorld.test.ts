@@ -272,9 +272,10 @@ describe("onCargoReady end-to-end", () => {
 
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         world.onCargoReady((cargo) => {
-          robots[0].goTo(cargo.aisle);
+          robots[0].goTo(cargo.aisle.id);
           robots[0].goTo(cargo.destination);
         });
       }`,
@@ -312,7 +313,8 @@ describe("onCargoReady end-to-end", () => {
 
     const sandbox = new Sandbox();
     sandbox.boot(
-      `function init(robots, world) {
+      `function init(world) {
+        const robots = world.getRobots();
         world.onCargoReady(() => { robots[0].goTo(0); });
       }`,
       world,

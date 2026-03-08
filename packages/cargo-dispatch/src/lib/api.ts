@@ -2,41 +2,30 @@
  * Player-facing API types — single source of truth.
  *
  * This file is compiled to a .d.ts ambient declaration string by
- * scripts/generate-api-types.ts, which writes the result to api-types.ts
+ * scripts/generate-api-types.ts, which writes the result to generated/api.ts
  * for injection into the Monaco editor. Do not import internal simulation
  * types here; keep it self-contained so the emitted .d.ts has no imports.
  */
 
 export type StopId = number;
 
-export interface AisleSummary {
-  readonly stop: StopId;
-  readonly waitingCount: number;
+export interface Aisle {
+  readonly id: StopId;
+  getWaitingCount(): number;
   /** Package count per destination truck stop. */
-  readonly destinations: Record<StopId, number>;
+  getDestinations(): Record<StopId, number>;
+  getWaitingPackages(): WaitingPackage[];
 }
 
-export interface TruckSummary {
-  readonly stop: StopId;
+export interface Truck {
+  readonly id: StopId;
   readonly name: string;
   readonly color: string;
 }
 
-export interface RobotSummary {
-  readonly id: number;
-  readonly currentStop: StopId | null;
-  readonly targetStop: StopId | null;
-  readonly cargoCount: number;
-  /** Package count per destination truck stop. */
-  readonly destinations: Record<StopId, number>;
-  readonly queuedStops: StopId[];
-  readonly idle: boolean;
-  readonly moving: boolean;
-}
-
 export interface CargoInfo {
-  /** The aisle stop where the cargo spawned. */
-  readonly aisle: StopId;
+  /** The aisle where the cargo spawned. */
+  readonly aisle: Aisle;
   /** The truck stop this cargo needs to be delivered to. */
   readonly destination: StopId;
 }
@@ -53,7 +42,9 @@ export interface CargoSummary {
   readonly destinations: Record<StopId, number>;
 }
 
-export interface RobotController {
+export interface Robot {
+  /** Unique robot id. */
+  readonly id: number;
   /** Called when the robot has no queued stops and is ready for work. */
   onIdle(callback: () => void): void;
   /** Called after the robot arrives at a stop. Call dropOff() and/or pickUp() here. */
@@ -62,8 +53,6 @@ export interface RobotController {
   goTo(stop: StopId): void;
   /** Remove all future queued stops. */
   clearQueue(): void;
-  /** Unique robot id. */
-  getId(): number;
   /** Current stop if exactly aligned, otherwise null. */
   getCurrentStop(): StopId | null;
   /** Whether the robot has no queued stops. */
@@ -106,24 +95,20 @@ export interface WorldAPI {
   /** Current simulation time in seconds. */
   getTime(): number;
   /** All aisles in the level. */
-  getAisles(): AisleSummary[];
+  getAisles(): Aisle[];
   /** All trucks in the level. */
-  getTrucks(): TruckSummary[];
-  /** Read-only summaries of all robots. */
-  getRobots(): RobotSummary[];
+  getTrucks(): Truck[];
+  /** All robots in the level. */
+  getRobots(): Robot[];
   /** Total waiting packages across all aisles. */
-  getTotalWaitingCount(): number;
-  /** Waiting package count at a specific stop. */
-  getWaitingCount(stop: StopId): number;
+  getWaitingCount(): number;
   /** Aisle with the highest waiting package count, or null if none waiting. */
-  getBusiestAisle(): AisleSummary | null;
+  getBusiestAisle(): Aisle | null;
   /** Nearest aisle with waiting packages relative to fromStop, or null. */
-  getNearestAisleWithWaiting(fromStop: StopId): AisleSummary | null;
-  /** Packages waiting at a given aisle stop. Returns [] if the stop is not an aisle. */
-  getWaitingPackages(stop: StopId): WaitingPackage[];
+  getNearestAisleWithWaiting(fromStop: StopId): Aisle | null;
   /** Called whenever new cargo spawns into an aisle — useful for waking idle robots. */
   onCargoReady(callback: (cargo: CargoInfo) => void): void;
 }
 
 /** Entry point — define this function in your strategy. */
-export type PlayerInit = (robots: RobotController[], world: WorldAPI) => void;
+export type PlayerInit = (world: WorldAPI) => void;

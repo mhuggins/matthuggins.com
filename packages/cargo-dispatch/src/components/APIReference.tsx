@@ -2,46 +2,90 @@ import { cn } from "@matthuggins/ui";
 import { CaretUpIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
+type APIMember = APIMethod | APIProperty;
+
 interface APIMethod {
+  type: "method";
   name: string;
   args: string;
   returns: string;
   description: string;
 }
 
-interface TypeField {
+interface APIProperty {
+  type: "property";
   name: string;
-  type: string;
-  description?: string;
+  returns: string;
+  description: string;
 }
 
 interface APIType {
   name: string;
   description?: string;
-  fields: TypeField[];
+  fields: APIProperty[];
 }
 
-const apiTypes: APIType[] = [
+const truckMembers: APIMember[] = [
   {
-    name: "AisleSummary",
-    fields: [
-      { name: "stop", type: "StopId" },
-      { name: "waitingCount", type: "number", description: "Total packages waiting" },
-      {
-        name: "destinations",
-        type: "Record<StopId, number>",
-        description: "Package count per destination truck stop",
-      },
-    ],
+    type: "property",
+    name: "id",
+    returns: "StopId",
+    description: "The stop number for this truck",
   },
+  {
+    type: "property",
+    name: "color",
+    returns: "string",
+    description: "Truck color (hex)",
+  },
+  { type: "property", name: "name", returns: "string", description: "Truck name" },
+];
+
+const aisleMembers: APIMember[] = [
+  {
+    type: "property",
+    name: "id",
+    returns: "StopId",
+    description: "The stop number for this aisle",
+  },
+  {
+    type: "method",
+    name: "getDestinations",
+    args: "",
+    returns: "Record<StopId, number>",
+    description: "Package count per destination truck stop",
+  },
+  {
+    type: "method",
+    name: "getWaitingCount",
+    args: "",
+    returns: "number",
+    description: "Total packages waiting",
+  },
+  {
+    type: "method",
+    name: "getWaitingPackages",
+    args: "",
+    returns: "WaitingPackage[]",
+    description: "All packages currently waiting at this aisle",
+  },
+];
+
+const apiTypes: APIType[] = [
   {
     name: "CargoInfo",
     description: "Passed to onCargoReady callbacks",
     fields: [
-      { name: "aisle", type: "StopId", description: "The aisle stop where the cargo spawned" },
       {
+        type: "property",
+        name: "aisle",
+        returns: "Aisle",
+        description: "The aisle where the cargo spawned",
+      },
+      {
+        type: "property",
         name: "destination",
-        type: "StopId",
+        returns: "StopId",
         description: "The truck stop this cargo needs to be delivered to",
       },
     ],
@@ -49,160 +93,170 @@ const apiTypes: APIType[] = [
   {
     name: "CargoSummary",
     fields: [
-      { name: "total", type: "number" },
       {
+        type: "property",
+        name: "total",
+        returns: "number",
+        description: "Number of packages ready for an aisle",
+      },
+      {
+        type: "property",
         name: "destinations",
-        type: "Record<StopId, number>",
+        returns: "Record<StopId, number>",
         description: "Package count per destination truck stop",
       },
     ],
   },
   {
-    name: "RobotSummary",
-    fields: [
-      { name: "id", type: "number" },
-      { name: "currentStop", type: "StopId | null" },
-      { name: "targetStop", type: "StopId | null" },
-      { name: "cargoCount", type: "number" },
-      {
-        name: "destinations",
-        type: "Record<StopId, number>",
-        description: "Onboard cargo count per destination",
-      },
-      { name: "queuedStops", type: "StopId[]" },
-      { name: "idle", type: "boolean" },
-      { name: "moving", type: "boolean" },
-    ],
-  },
-  {
     name: "StopId",
     description: "A number identifying a stop — trucks are 0..truckCount-1, aisles follow",
-    fields: [{ name: "(alias)", type: "number" }],
-  },
-  {
-    name: "TruckSummary",
-    fields: [
-      { name: "stop", type: "StopId" },
-      { name: "name", type: "string" },
-      { name: "color", type: "string" },
-    ],
+    fields: [],
   },
   {
     name: "WaitingPackage",
     description: "A package waiting at an aisle stop",
     fields: [
-      { name: "destination", type: "StopId" },
-      { name: "color", type: "string" },
+      {
+        type: "property",
+        name: "destination",
+        returns: "StopId",
+        description: "The truck stop this package needs to be delivered to",
+      },
+      { type: "property", name: "color", returns: "string", description: "Package color (hex)" },
     ],
   },
 ];
 
-const robotMethods: APIMethod[] = [
-  { name: "clearQueue", args: "", returns: "void", description: "Remove all future queued stops" },
+const robotMembers: APIMember[] = [
+  { type: "property", name: "id", returns: "number", description: "Unique robot ID" },
   {
+    type: "method",
+    name: "clearQueue",
+    args: "",
+    returns: "void",
+    description: "Remove all future queued stops",
+  },
+  {
+    type: "method",
     name: "dropOff",
     args: "",
     returns: "void",
     description: "Deliver all cargo destined for the current truck stop",
   },
   {
+    type: "method",
     name: "getAvailableCapacity",
     args: "",
     returns: "number",
     description: "Remaining cargo slots",
   },
   {
+    type: "method",
     name: "getCapacity",
     args: "",
     returns: "number",
     description: "Maximum packages the robot can carry",
   },
   {
+    type: "method",
     name: "getCargoCount",
     args: "",
     returns: "number",
     description: "Number of packages currently onboard",
   },
   {
+    type: "method",
     name: "getCargoSummary",
     args: "",
     returns: "CargoSummary",
     description: "Onboard cargo grouped by destination truck stop",
   },
   {
+    type: "method",
     name: "getCurrentStop",
     args: "",
     returns: "StopId | null",
     description: "Current stop number, otherwise null when moving",
   },
   {
+    type: "method",
     name: "getDeliveryStops",
     args: "",
     returns: "StopId[]",
     description: "All unique truck stops with cargo onboard",
   },
-  { name: "getId", args: "", returns: "number", description: "Unique robot ID" },
   {
+    type: "method",
     name: "getNextDeliveryStop",
     args: "",
     returns: "StopId | null",
     description: "Next truck stop to deliver to, or null if no cargo",
   },
   {
+    type: "method",
     name: "getQueuedStops",
     args: "",
     returns: "StopId[]",
     description: "Currently queued stops, not including the in-progress target",
   },
   {
+    type: "method",
     name: "getTargetStop",
     args: "",
     returns: "StopId | null",
     description: "The stop currently traveling toward, or null if idle",
   },
   {
+    type: "method",
     name: "goTo",
     args: "stop: StopId",
     returns: "void",
     description: "Queue a stop to visit; robot begins moving immediately if idle",
   },
   {
+    type: "method",
     name: "hasCargo",
     args: "",
     returns: "boolean",
     description: "Whether the robot is carrying any packages",
   },
   {
+    type: "method",
     name: "isIdle",
     args: "",
     returns: "boolean",
     description: "Whether the robot has no queued stops",
   },
   {
+    type: "method",
     name: "isMoving",
     args: "",
     returns: "boolean",
     description: "Whether the robot is currently traveling between stops",
   },
   {
+    type: "method",
     name: "onIdle",
     args: "callback: () => void",
     returns: "void",
     description: "Called when the robot has no queued stops and is ready for work",
   },
   {
+    type: "method",
     name: "onStop",
     args: "callback: (stop: StopId) => void",
     returns: "void",
     description: "Called after the robot arrives at a stop — call dropOff() and/or pickUp() here",
   },
   {
+    type: "method",
     name: "pickUp",
     args: "filter?: (pkg: WaitingPackage) => boolean",
     returns: "void",
     description: "Pick up packages at the current aisle, up to remaining capacity",
   },
   {
+    type: "method",
     name: "setLabel",
     args: "text: string",
     returns: "void",
@@ -210,62 +264,58 @@ const robotMethods: APIMethod[] = [
   },
 ];
 
-const worldMethods: APIMethod[] = [
+const worldMembers: APIMethod[] = [
   {
+    type: "method",
     name: "getAisles",
     args: "",
-    returns: "AisleSummary[]",
+    returns: "Aisle[]",
     description: "All aisles in the level",
   },
   {
+    type: "method",
     name: "getBusiestAisle",
     args: "",
-    returns: "AisleSummary | null",
+    returns: "Aisle | null",
     description: "Aisle with the highest waiting package count, or null if none waiting",
   },
   {
+    type: "method",
     name: "getNearestAisleWithWaiting",
     args: "fromStop: StopId",
-    returns: "AisleSummary | null",
+    returns: "Aisle | null",
     description: "Nearest aisle with waiting packages relative to fromStop",
   },
   {
+    type: "method",
     name: "getRobots",
     args: "",
-    returns: "RobotSummary[]",
+    returns: "Robot[]",
     description: "Read-only summaries of all robots",
   },
   {
+    type: "method",
     name: "getTime",
     args: "",
     returns: "number",
     description: "Current simulation time in seconds",
   },
   {
-    name: "getTotalWaitingCount",
+    type: "method",
+    name: "getTrucks",
+    args: "",
+    returns: "Truck[]",
+    description: "All trucks in the level",
+  },
+  {
+    type: "method",
+    name: "getWaitingCount",
     args: "",
     returns: "number",
     description: "Total waiting packages across all aisles",
   },
   {
-    name: "getTrucks",
-    args: "",
-    returns: "TruckSummary[]",
-    description: "All trucks in the level",
-  },
-  {
-    name: "getWaitingCount",
-    args: "stop: StopId",
-    returns: "number",
-    description: "Waiting package count at a specific stop",
-  },
-  {
-    name: "getWaitingPackages",
-    args: "stop: StopId",
-    returns: "WaitingPackage[]",
-    description: "Packages waiting at a given aisle stop",
-  },
-  {
+    type: "method",
     name: "onCargoReady",
     args: "callback: (cargo: CargoInfo) => void",
     returns: "void",
@@ -273,7 +323,7 @@ const worldMethods: APIMethod[] = [
   },
 ];
 
-type Section = "robot" | "world" | "types";
+type Section = "aisle" | "robot" | "truck" | "world" | "types";
 
 export function APIReference({ className }: { className?: string }) {
   const [open, setOpen] = useState<Section | null>(null);
@@ -291,11 +341,17 @@ export function APIReference({ className }: { className?: string }) {
     >
       <div className="font-semibold text-gray-500 text-sm">API Reference</div>
       <div className="overflow-hidden rounded-md border border-gray-200 bg-white font-mono text-xs">
+        <AccordionSection title="Aisle" isOpen={open === "aisle"} onToggle={() => toggle("aisle")}>
+          <MemberList prefix="aisle" members={aisleMembers} />
+        </AccordionSection>
         <AccordionSection title="Robot" isOpen={open === "robot"} onToggle={() => toggle("robot")}>
-          <MethodList prefix="robot" methods={robotMethods} />
+          <MemberList prefix="robot" members={robotMembers} />
+        </AccordionSection>
+        <AccordionSection title="Truck" isOpen={open === "truck"} onToggle={() => toggle("truck")}>
+          <MemberList prefix="truck" members={truckMembers} />
         </AccordionSection>
         <AccordionSection title="World" isOpen={open === "world"} onToggle={() => toggle("world")}>
-          <MethodList prefix="world" methods={worldMethods} />
+          <MemberList prefix="world" members={worldMembers} />
         </AccordionSection>
         <AccordionSection
           title="Types"
@@ -364,18 +420,16 @@ function TypeList({ types }: { types: APIType[] }) {
   );
 }
 
-function MethodList({ prefix, methods }: { prefix: string; methods: APIMethod[] }) {
+function MemberList({ prefix, members }: { prefix: string; members: APIMember[] }) {
   return (
     <div className="text-gray-500">
-      {methods.map((m) => (
+      {members.map((m) => (
         <div key={m.name} className="mb-2">
           <div>
             <span className="text-gray-800">
               {prefix}.{m.name}
             </span>
-            <span>(</span>
-            <span>{m.args}</span>
-            <span>)</span>
+            {m.type === "method" && <span>({m.args})</span>}
             {m.returns !== "void" && <span className="text-gray-400">: {m.returns}</span>}
           </div>
           <div className="ml-3 text-gray-400">{m.description}</div>

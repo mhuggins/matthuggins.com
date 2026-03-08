@@ -1,5 +1,5 @@
-export const DEFAULT_CODE = `const init: PlayerInit = (robots, world): void => {
-  robots.forEach((robot, index) => {
+export const DEFAULT_CODE = `const init: PlayerInit = (world): void => {
+  world.getRobots().forEach((robot, index) => {
     robot.setLabel(\`Bot \${index + 1}\`);
 
     robot.onIdle(() => assignWork(robot));
@@ -16,7 +16,7 @@ export const DEFAULT_CODE = `const init: PlayerInit = (robots, world): void => {
       }
     });
 
-    function assignWork(robot: RobotController) {
+    function assignWork(robot: Robot) {
       if (robot.hasCargo()) {
         const next = robot.getNextDeliveryStop();
         if (next !== null) {
@@ -27,7 +27,7 @@ export const DEFAULT_CODE = `const init: PlayerInit = (robots, world): void => {
 
       const aisle = world.getNearestAisleWithWaiting(robot.getCurrentStop() ?? 0);
       if (aisle) {
-        robot.goTo(aisle.stop);
+        robot.goTo(aisle.id);
       }
     }
   });

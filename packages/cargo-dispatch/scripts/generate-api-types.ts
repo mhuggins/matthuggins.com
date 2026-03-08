@@ -1,6 +1,6 @@
 /**
  * Compiles src/api.ts to a .d.ts ambient declaration string and
- * writes it as the GAME_API_TYPES export in src/api-types.ts.
+ * writes it as the GAME_API_TYPES export in src/generated/api.ts.
  *
  * Run via: tsx scripts/generate-api-types.ts
  * Or triggered automatically by the type-generator Vite plugin.
@@ -70,4 +70,4 @@ const output = [
 ].join("\n");
 
 writeFileSync(outputFile, output, "utf-8");
-console.log("✅ Generated src/api-types.ts from src/api.ts");
+console.log("✅ Generated src/generated/api.ts from src/lib/api.ts");
