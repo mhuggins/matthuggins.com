@@ -61,6 +61,16 @@
       "assist": { "enabled": false }
     },
     {
+      "includes": ["**/strategies/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["*.ts", "*.tsx", "*.mts", "*.cts"],
       "linter": {
         "rules": {
