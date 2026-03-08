@@ -2,6 +2,7 @@ import { cn } from "@matthuggins/ui";
 import { CheckIcon, StarIcon, XIcon } from "@phosphor-icons/react";
 import { Fragment } from "react";
 import type { GameStatus, LevelConfig, StarRating } from "../types";
+import { Tooltip } from "./Tooltip";
 
 interface LevelTimelineProps {
   levels: LevelConfig[];
@@ -84,14 +85,13 @@ export function LevelTimeline({
 
                 {/* Star count badge — shown for all completed (passed) levels */}
                 {passed && result !== null && (
-                  <StarIcon
-                    weight="fill"
-                    className={cn(
-                      "-top-2 -right-2 absolute flex h-5 w-5 items-center justify-center rounded-full font-bold text-[9px] leading-none",
-                      "drop-shadow-gray-500 drop-shadow-xs",
-                      STAR_BADGE[result],
-                    )}
-                  />
+                  <Tooltip content={result} className="-top-2 -right-2 absolute">
+                    <StarIcon
+                      size={20}
+                      weight="fill"
+                      className={cn("drop-shadow-gray-300 drop-shadow-xs", STAR_BADGE[result])}
+                    />
+                  </Tooltip>
                 )}
               </div>
               <span className={cn("mt-1 text-[10px]", labelClass)}>Day {level.day}</span>
