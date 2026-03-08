@@ -1,4 +1,4 @@
-export const DEFAULT_CODE = `function init(robots: RobotController[], world: WorldAPI): void {
+export const DEFAULT_CODE = `const init: PlayerInit = (robots, world): void => {
   robots.forEach((robot, index) => {
     robot.setLabel(\`Bot \${index + 1}\`);
 
@@ -16,7 +16,7 @@ export const DEFAULT_CODE = `function init(robots: RobotController[], world: Wor
       }
     });
 
-    function assignWork(robot: RobotController): void {
+    function assignWork(robot: RobotController) {
       if (robot.hasCargo()) {
         const next = robot.nextDeliveryStop();
         if (next !== null) {
@@ -31,4 +31,4 @@ export const DEFAULT_CODE = `function init(robots: RobotController[], world: Wor
       }
     }
   });
-}`;
+};`;
