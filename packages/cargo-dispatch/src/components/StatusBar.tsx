@@ -22,22 +22,24 @@ export const StatusBar = memo(function StatusBar({ world, className }: StatusBar
     <div className={cn("flex items-center gap-2", className)}>
       <div className="flex flex-1 items-center gap-4 text-[13px] text-gray-700">
         <Metric icon={TruckIcon} label="Trucks">
-          {world.level.truckCount}
+          {world.level.trucks.count}
         </Metric>
         <Metric icon={WarehouseIcon} label="Aisles">
-          {world.level.aisleCount}
+          {world.level.aisles.count}
         </Metric>
         <Metric icon={RobotIcon} label="Robots">
-          {world.level.robotCount}
+          {world.level.robots.count}
         </Metric>
         <Metric icon={HandCoinsIcon} label="Robot capacity">
-          {world.level.robotCapacity}
+          {world.level.robots.capacity}
         </Metric>
       </div>
       <div className="flex items-center gap-4 text-[13px] text-gray-700">
         <Metric icon={ClockIcon} label="Time remaining">
-          <strong className={cn(world.level.time - world.time <= 0 && "text-red-800")}>
-            {(world.level.time - world.time).toLocaleString(undefined, {
+          <strong
+            className={cn(world.level.completionTime.bronze - world.time <= 0 && "text-red-800")}
+          >
+            {(world.level.completionTime.bronze - world.time).toLocaleString(undefined, {
               maximumFractionDigits: 1,
               roundingMode: "floor",
             })}
@@ -45,7 +47,7 @@ export const StatusBar = memo(function StatusBar({ world, className }: StatusBar
           </strong>
         </Metric>
         <Metric icon={PackageIcon} label="Packages delivered">
-          <strong>{world.deliveredCount}</strong> of {world.level.totalPackages}
+          <strong>{world.deliveredCount}</strong> of {world.level.packages.count}
         </Metric>
       </div>
     </div>

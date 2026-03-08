@@ -60,7 +60,7 @@ function updateRobot(robot: RobotData, deltaTime: number, onEvent: EventHandler)
 
 function checkVictory(world: WorldState): void {
   if (world.completedAt !== null) return;
-  if (world.spawnedCount < world.level.totalPackages) return;
+  if (world.spawnedCount < world.level.packages.count) return;
   const allDelivered = world.robots.every((r) => r.cargo.length === 0);
   const noneWaiting = world.aisles.every((a) => a.waiting.length === 0);
   if (allDelivered && noneWaiting) {

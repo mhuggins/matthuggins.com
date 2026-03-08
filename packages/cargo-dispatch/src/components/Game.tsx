@@ -8,7 +8,7 @@ import { GAME_API_TYPES } from "../generated/api";
 import { useWorkerGameLoop } from "../hooks/useWorkerGameLoop";
 import { calculateScore } from "../lib/calculateScore";
 import { createWorld } from "../lib/createWorld";
-import type { GameStatus, WorldState } from "../types";
+import type { GameStatus, StarRating, WorldState } from "../types";
 import { APIReference } from "./APIReference";
 import { CompletionOverlay } from "./CompletionOverlay";
 import { ControlsBar } from "./ControlsBar";
@@ -26,7 +26,7 @@ export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivEle
   const [view, setView] = useState<"game" | "code">("game");
   const [code, setCode] = useState(DEFAULT_CODE);
   const [levelIndex, setLevelIndex] = useState(0);
-  const [levelResults, setLevelResults] = useState<(boolean | null)[]>(LEVELS.map(() => null));
+  const [levelResults, setLevelResults] = useState<(StarRating | null)[]>(LEVELS.map(() => null));
 
   const monacoRef = useRef<typeof Monaco | null>(null);
 
@@ -53,10 +53,13 @@ export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivEle
       setWorld(newWorld);
       setErrors(errs);
       if (completed) {
-        const success = newWorld.completedAt! <= newWorld.level.time;
+        const t = newWorld.completedAt!;
+        const { bronze, silver, gold } = newWorld.level.completionTime;
+        const starRating: StarRating | null =
+          t <= gold ? "gold" : t <= silver ? "silver" : t <= bronze ? "bronze" : null;
         setLevelResults((prev) => {
           const next = [...prev];
-          next[levelIndex] = success;
+          next[levelIndex] = starRating;
           return next;
         });
         setStatus("completed");
@@ -116,6 +119,12 @@ export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivEle
     setView("game");
   }, [levelIndex, bootLevel]);
 
+  const handleRetry = useCallback(() => {
+    setStatus("idle");
+    bootLevel(levelIndex);
+    setView("game");
+  }, [levelIndex, bootLevel]);
+
   const handleContinue = useCallback(() => {
     stop();
     setWorld(createWorld(LEVELS[levelIndex]!));
@@ -149,9 +158,10 @@ export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivEle
     score !== null ? (
       <CompletionOverlay
         score={score}
-        hasNextLevel={levelIndex < LEVELS.length - 1}
+        hasNextLevel={score.starRating !== null && levelIndex < LEVELS.length - 1}
         onNextLevel={handleNextLevel}
         onContinue={handleContinue}
+        onRetry={handleRetry}
         onEditStrategy={handleEditStrategy}
       />
     ) : null;

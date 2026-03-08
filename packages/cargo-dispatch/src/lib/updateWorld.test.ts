@@ -9,14 +9,12 @@ import { updateWorld } from "./updateWorld";
 
 const TEST_LEVEL: LevelConfig = {
   day: 1,
-  time: 60,
-  aisleCount: 2,
-  truckCount: 2,
-  robotCount: 2,
-  robotCapacity: 4,
-  robotSpeed: 2, // 2 stops/sec — predictable movement
-  totalPackages: 4,
-  spawnWindow: 50,
+  seed: 42,
+  completionTime: { bronze: 60, silver: 45, gold: 35 },
+  aisles: { count: 2 },
+  trucks: { count: 2 },
+  robots: { count: 2, capacity: 4, speed: 2 }, // 2 stops/sec — predictable movement
+  packages: { count: 4, spawnWindow: 50 },
 };
 
 // truck stops: 0, 1  |  aisle stops: 2, 3
@@ -342,8 +340,8 @@ describe("victory condition", () => {
   it("sets completedAt when all packages are spawned and delivered", () => {
     const world = makeWorld();
     // Mark all packages as already spawned and delivered
-    world.spawnedCount = world.level.totalPackages;
-    world.deliveredCount = world.level.totalPackages;
+    world.spawnedCount = world.level.packages.count;
+    world.deliveredCount = world.level.packages.count;
     // No packages in aisles or robot cargo (already the case)
 
     updateWorld(world, 0.1, () => {});
@@ -353,7 +351,7 @@ describe("victory condition", () => {
 
   it("does not complete while packages are still in robot cargo", () => {
     const world = makeWorld();
-    world.spawnedCount = world.level.totalPackages;
+    world.spawnedCount = world.level.packages.count;
     // Place a package in robot cargo
     world.robots[0]!.cargo.push({
       id: 0,
@@ -372,7 +370,7 @@ describe("victory condition", () => {
 
   it("does not complete while packages are waiting in an aisle", () => {
     const world = makeWorld();
-    world.spawnedCount = world.level.totalPackages;
+    world.spawnedCount = world.level.packages.count;
     world.aisles[0]!.waiting.push({
       id: 0,
       origin: 2,
@@ -400,7 +398,7 @@ describe("victory condition", () => {
   it("records completion time accurately", () => {
     const world = makeWorld();
     world.time = 42.5;
-    world.spawnedCount = world.level.totalPackages;
+    world.spawnedCount = world.level.packages.count;
 
     updateWorld(world, 0.1, () => {}); // world.time becomes 42.6
 
@@ -409,7 +407,7 @@ describe("victory condition", () => {
 
   it("does not overwrite completedAt on subsequent ticks", () => {
     const world = makeWorld();
-    world.spawnedCount = world.level.totalPackages;
+    world.spawnedCount = world.level.packages.count;
 
     updateWorld(world, 0.1, () => {});
     const firstCompletion = world.completedAt;

@@ -1,4 +1,5 @@
 import type { GamePackage, WorldState } from "../types";
+import { randNext } from "./rng";
 
 interface SpawnedInfo {
   aisle: number;
@@ -6,12 +7,12 @@ interface SpawnedInfo {
 }
 
 export function updateSpawn(world: WorldState): SpawnedInfo | null {
-  if (world.spawnedCount >= world.level.totalPackages) return null;
+  if (world.spawnedCount >= world.level.packages.count) return null;
   if (world.completedAt !== null) return null;
   if (world.time < world.spawnSchedule[world.spawnedCount]!) return null;
 
-  const aisleIndex = Math.floor(Math.random() * world.aisles.length);
-  const truckIndex = Math.floor(Math.random() * world.trucks.length);
+  const aisleIndex = Math.floor(randNext(world) * world.aisles.length);
+  const truckIndex = Math.floor(randNext(world) * world.trucks.length);
   const aisle = world.aisles[aisleIndex]!;
   const truck = world.trucks[truckIndex]!;
 

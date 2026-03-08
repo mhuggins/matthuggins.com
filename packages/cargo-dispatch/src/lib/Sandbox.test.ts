@@ -8,14 +8,12 @@ import { updateWorld } from "./updateWorld";
 
 const TEST_LEVEL: LevelConfig = {
   day: 1,
-  time: 60,
-  aisleCount: 2,
-  truckCount: 2,
-  robotCount: 2,
-  robotCapacity: 4,
-  robotSpeed: 10, // fast so robots reach stops quickly in tests
-  totalPackages: 10,
-  spawnWindow: 50,
+  seed: 42,
+  completionTime: { bronze: 60, silver: 45, gold: 35 },
+  aisles: { count: 2 },
+  trucks: { count: 2 },
+  robots: { count: 2, capacity: 4, speed: 10 }, // fast so robots reach stops quickly in tests
+  packages: { count: 10, spawnWindow: 50 },
 };
 
 // truck stops: 0, 1  |  aisle stops: 2, 3
@@ -259,7 +257,7 @@ describe("robot.hasCargo / getCargoCount / getCapacity / getAvailableCapacity", 
         for (let i = 0; i < cap; i++) robots[0].goTo(0);
       }`,
     );
-    expect(world.robots[0]!.stopQueue).toHaveLength(TEST_LEVEL.robotCapacity);
+    expect(world.robots[0]!.stopQueue).toHaveLength(TEST_LEVEL.robots.capacity);
   });
 });
 

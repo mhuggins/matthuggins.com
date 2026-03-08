@@ -1,6 +1,8 @@
 export type StopId = number;
 export type Direction = -1 | 0 | 1;
 export type RobotState = "idle" | "moving";
+export type StarRating = "bronze" | "silver" | "gold";
+export type CompletionTime = Record<StarRating, number>;
 
 export interface GamePackage {
   id: number;
@@ -39,14 +41,13 @@ export interface TruckData {
 
 export interface LevelConfig {
   day: number;
-  time: number;
-  aisleCount: number;
-  truckCount: number;
-  robotCount: number;
-  robotCapacity: number;
-  robotSpeed: number;
-  totalPackages: number;
-  spawnWindow: number;
+  /** Seed for the deterministic PRNG — same seed means identical spawns every run. */
+  seed: number;
+  completionTime: CompletionTime;
+  aisles: { count: number };
+  trucks: { count: number };
+  robots: { count: number; capacity: number; speed: number };
+  packages: { count: number; spawnWindow: number };
 }
 
 export interface WorldState {
@@ -62,6 +63,8 @@ export interface WorldState {
   spawnSchedule: number[];
   nextPackageId: number;
   completedAt: number | null;
+  /** Current state of the deterministic PRNG — mutated each time a random value is drawn. */
+  rngState: number;
 }
 
 export type GameStatus = "idle" | "running" | "paused" | "completed";
