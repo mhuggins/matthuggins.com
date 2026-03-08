@@ -6,7 +6,7 @@ export const TRUCK_NAMES = ["Truck A", "Truck B", "Truck C", "Truck D", "Truck E
 export const LEVELS: LevelConfig[] = [
   {
     day: 1,
-    time: 34,
+    time: 40,
     aisleCount: 3,
     truckCount: 2,
     robotCount: 1,
@@ -17,7 +17,7 @@ export const LEVELS: LevelConfig[] = [
   },
   {
     day: 2,
-    time: 46,
+    time: 45,
     aisleCount: 3,
     truckCount: 2,
     robotCount: 2,
@@ -28,7 +28,7 @@ export const LEVELS: LevelConfig[] = [
   },
   {
     day: 3,
-    time: 64,
+    time: 65,
     aisleCount: 5,
     truckCount: 4,
     robotCount: 3,
@@ -39,7 +39,7 @@ export const LEVELS: LevelConfig[] = [
   },
   {
     day: 4,
-    time: 67,
+    time: 75,
     aisleCount: 6,
     truckCount: 4,
     robotCount: 3,
@@ -50,7 +50,7 @@ export const LEVELS: LevelConfig[] = [
   },
   {
     day: 5,
-    time: 84,
+    time: 100,
     aisleCount: 6,
     truckCount: 5,
     robotCount: 3,
