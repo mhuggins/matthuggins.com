@@ -32,6 +32,10 @@ export function APIReference({ levels, currentLevelIndex }: APIReferenceProps) {
           <br />
           robot.getCargoCount() → number
           <br />
+          robot.getCapacity() → number
+          <br />
+          robot.getAvailableCapacity() → number
+          <br />
           robot.nextDeliveryStop() → StopId | null
           <br />
           robot.getDeliveryStops() → StopId[]
