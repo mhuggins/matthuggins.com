@@ -44,7 +44,14 @@ export function CompletionOverlay({
 
         <dl className={cn("mb-4 space-y-1 text-sm", success ? "text-green-800" : "text-red-800")}>
           <div>
-            Time: <strong>{score.completionTime.toFixed(1)}s</strong>{" "}
+            Time:{" "}
+            <strong>
+              {score.completionTime.toLocaleString(undefined, {
+                maximumFractionDigits: 1,
+                roundingMode: "ceil",
+              })}
+              s
+            </strong>{" "}
             <span className="opacity-60">/ goal {score.timeGoal.toFixed(0)}s</span>
           </div>
           <div>

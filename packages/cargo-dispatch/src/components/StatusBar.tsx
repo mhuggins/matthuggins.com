@@ -37,7 +37,11 @@ export const StatusBar = memo(function StatusBar({ world, className }: StatusBar
       <div className="flex items-center gap-4 text-[13px] text-gray-700">
         <Metric icon={ClockIcon} label="Time remaining">
           <strong className={cn(world.level.time - world.time <= 0 && "text-red-800")}>
-            {(world.level.time - world.time).toFixed(1)}s
+            {(world.level.time - world.time).toLocaleString(undefined, {
+              maximumFractionDigits: 1,
+              roundingMode: "floor",
+            })}
+            s
           </strong>
         </Metric>
         <Metric icon={PackageIcon} label="Packages delivered">
