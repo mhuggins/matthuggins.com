@@ -18,6 +18,82 @@ const toAisle = (aisle: AisleData): Aisle => ({
     aisle.waiting.map((p) => ({ destination: p.destination, color: p.color })),
 });
 
+class SafeConsole implements Omit<Console, "Console"> {
+  readonly [Symbol.toStringTag] = "console";
+
+  // Output methods — prefixed so players can identify their own logs
+  assert(condition?: boolean, ...data: unknown[]): void {
+    console.assert(condition, "[user]", ...data);
+  }
+  debug(...data: unknown[]): void {
+    console.debug("[user]", ...data);
+  }
+  error(...data: unknown[]): void {
+    console.error("[user]", ...data);
+  }
+  info(...data: unknown[]): void {
+    console.info("[user]", ...data);
+  }
+  log(...data: unknown[]): void {
+    console.log("[user]", ...data);
+  }
+  trace(...data: unknown[]): void {
+    console.trace("[user]", ...data);
+  }
+  warn(...data: unknown[]): void {
+    console.warn("[user]", ...data);
+  }
+  dir(item?: unknown, options?: unknown): void {
+    console.dir(item, options);
+  }
+  dirxml(...data: unknown[]): void {
+    console.dirxml(...data);
+  }
+  table(tabularData?: unknown, properties?: string[]): void {
+    console.table(tabularData, properties);
+  }
+
+  // Structural / timing — pass through unchanged
+  count(label?: string): void {
+    console.count(label);
+  }
+  countReset(label?: string): void {
+    console.countReset(label);
+  }
+  group(...data: unknown[]): void {
+    console.group(...data);
+  }
+  groupCollapsed(...data: unknown[]): void {
+    console.groupCollapsed(...data);
+  }
+  groupEnd(): void {
+    console.groupEnd();
+  }
+  time(label?: string): void {
+    console.time(label);
+  }
+  timeEnd(label?: string): void {
+    console.timeEnd(label);
+  }
+  timeLog(label?: string, ...data: unknown[]): void {
+    console.timeLog(label, ...data);
+  }
+
+  // Non-standard — optional chaining guards against missing implementations
+  profile(label?: string): void {
+    console.profile?.(label);
+  }
+  profileEnd(label?: string): void {
+    console.profileEnd?.(label);
+  }
+  timeStamp(label?: string): void {
+    console.timeStamp?.(label);
+  }
+
+  // No-op — don't let user code clear the host console
+  clear(): void {}
+}
+
 type IdleHandler = () => void;
 type StopHandler = (stop: StopId) => void;
 
@@ -41,7 +117,7 @@ export class Sandbox {
     this.errors = [];
 
     const worldApi = this.createWorldApi();
-    const safeConsole = { log: (...args: unknown[]) => console.log("[user]", ...args) };
+    const safeConsole = new SafeConsole();
 
     try {
       const fn = new Function("world", "console", `${userCode}\ninit(world);`);
