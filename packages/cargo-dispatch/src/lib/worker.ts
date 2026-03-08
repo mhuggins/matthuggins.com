@@ -6,8 +6,14 @@ import { Sandbox } from "./Sandbox";
 import type { EngineEvent } from "./updateWorld";
 import { updateWorld } from "./updateWorld";
 
+// Fixed simulation step size in game-seconds.
+// Every run with the same seed and strategy advances the world in identical
+// increments, so results are independent of frame rate or speed setting.
+const FIXED_DELTA_TIME = 1 / 60;
+
 let world: WorldState | null = null;
 let sandbox: Sandbox | null = null;
+let accumulator = 0;
 
 function handleEvent(event: EngineEvent): void {
   if (!sandbox) {
@@ -31,6 +37,7 @@ self.onmessage = (e: MessageEvent<WorkerInbound>) => {
   switch (msg.type) {
     case "boot": {
       world = msg.world;
+      accumulator = 0;
 
       sandbox = new Sandbox();
       sandbox.boot(msg.code, world);
@@ -46,7 +53,20 @@ self.onmessage = (e: MessageEvent<WorkerInbound>) => {
       }
 
       sandbox.clearErrors(); // Prevent stale errors from repeating every frame
-      updateWorld(world, msg.deltaTime, handleEvent);
+
+      // Advance the simulation in fixed steps so the event sequence is identical
+      // regardless of frame rate or speed setting.
+      accumulator += msg.deltaTime;
+
+      while (accumulator >= FIXED_DELTA_TIME) {
+        updateWorld(world, FIXED_DELTA_TIME, handleEvent);
+
+        accumulator -= FIXED_DELTA_TIME;
+
+        if (world.completedAt !== null) {
+          break;
+        }
+      }
 
       const errors = sandbox.getErrors();
       const completed = world.completedAt !== null;
