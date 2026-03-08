@@ -16,37 +16,26 @@ function generateSitemap(): string {
   const urls: SitemapUrl[] = [];
 
   // Homepage
-  urls.push({
-    loc: `${DOMAIN}/`,
-    changefreq: "monthly",
-    priority: 1.0,
-  });
+  urls.push({ loc: `${DOMAIN}/`, changefreq: "monthly", priority: 1.0 });
+
+  // Lab pages
+  urls.push({ loc: `${DOMAIN}/lab`, changefreq: "monthly", priority: 0.8 });
+  urls.push({ loc: `${DOMAIN}/lab/cargo-dispatch`, changefreq: "yearly", priority: 0.6 });
 
   // Blog index
-  urls.push({
-    loc: `${DOMAIN}/blog`,
-    changefreq: "weekly",
-    priority: 0.8,
-  });
+  urls.push({ loc: `${DOMAIN}/blog`, changefreq: "weekly", priority: 0.8 });
 
   // Blog posts
   for (const post of blogMetadata) {
-    urls.push({
-      loc: `${DOMAIN}/blog/posts/${post.slug}`,
-      lastmod: post.date,
-      changefreq: "yearly",
-      priority: 0.7,
-    });
+    const loc = `${DOMAIN}/blog/posts/${post.slug}`;
+    urls.push({ loc, lastmod: post.date, changefreq: "yearly", priority: 0.7 });
   }
 
   // Blog tags
   const tags = Array.from(new Set(blogMetadata.flatMap((post) => post.tags))).sort();
   for (const tag of tags) {
-    urls.push({
-      loc: `${DOMAIN}/blog/tags/${encodeURIComponent(tag)}`,
-      changefreq: "weekly",
-      priority: 0.6,
-    });
+    const loc = `${DOMAIN}/blog/tags/${encodeURIComponent(tag)}`;
+    urls.push({ loc, changefreq: "weekly", priority: 0.6 });
   }
 
   // Generate XML

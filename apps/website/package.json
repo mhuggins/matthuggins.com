@@ -32,6 +32,7 @@
     "@shikijs/transformers": "^3.12.2",
     "@tanstack/react-router": "^1.131.41",
     "@tanstack/react-router-devtools": "^1.131.42",
+    "@types/node": "catalog:",
     "dedent": "^1.7.1",
     "express": "^4.21.2",
     "marked": "^16.3.0",
