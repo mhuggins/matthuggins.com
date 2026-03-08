@@ -85,11 +85,14 @@ export function LevelTimeline({
 
                 {/* Star count badge — shown for all completed (passed) levels */}
                 {passed && result !== null && (
-                  <Tooltip content={result} className="-top-2 -right-2 absolute">
+                  <Tooltip content={result}>
                     <StarIcon
                       size={20}
                       weight="fill"
-                      className={cn("drop-shadow-gray-300 drop-shadow-xs", STAR_BADGE[result])}
+                      className={cn(
+                        "-top-2 -right-2 absolute drop-shadow-gray-300 drop-shadow-xs",
+                        STAR_BADGE[result],
+                      )}
                     />
                   </Tooltip>
                 )}

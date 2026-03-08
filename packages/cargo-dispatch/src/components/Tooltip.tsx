@@ -1,9 +1,27 @@
 import { cn } from "@matthuggins/ui";
-import { type FC, type ReactNode, useEffect, useRef, useState } from "react";
+import assertNever from "assert-never";
+import {
+  Children,
+  cloneElement,
+  type FocusEventHandler,
+  type MouseEventHandler,
+  type ReactElement,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 
+interface ChildProps {
+  "aria-label"?: string;
+  onMouseEnter?: MouseEventHandler;
+  onMouseLeave?: MouseEventHandler;
+  onFocus?: FocusEventHandler;
+  onBlur?: FocusEventHandler;
+}
+
 export interface TooltipProps {
-  children: ReactNode;
+  children: ReactElement<ChildProps>;
   content: string;
   position?: "top" | "bottom" | "left" | "right";
   delay?: number;
@@ -11,59 +29,53 @@ export interface TooltipProps {
   anchor?: HTMLElement | null;
 }
 
-export const Tooltip: FC<TooltipProps> = ({
-  children,
-  content,
-  position = "top",
-  delay = 0,
-  className = "",
-  anchor,
-}) => {
+export function Tooltip({ children, content, position = "top", delay = 0, anchor }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLDivElement>(null);
 
-  const updateTooltipPosition = () => {
-    if (!triggerRef.current) return;
-
-    const rect = triggerRef.current.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+  const updateTooltipPosition = (target: Element) => {
+    const rect = target.getBoundingClientRect();
 
     let top = 0;
     let left = 0;
 
     switch (position) {
-      case "top":
-        top = rect.top + scrollTop - 8; // 8px offset for spacing
-        left = rect.left + scrollLeft + rect.width / 2;
+      case "top": {
+        top = rect.top - 8;
+        left = rect.left + rect.width / 2;
         break;
-      case "bottom":
-        top = rect.bottom + scrollTop + 8; // 8px offset for spacing
-        left = rect.left + scrollLeft + rect.width / 2;
+      }
+      case "bottom": {
+        top = rect.bottom + 8;
+        left = rect.left + rect.width / 2;
         break;
-      case "left":
-        top = rect.top + scrollTop + rect.height / 2;
-        left = rect.left + scrollLeft - 8; // 8px offset for spacing
+      }
+      case "left": {
+        top = rect.top + rect.height / 2;
+        left = rect.left - 8;
         break;
-      case "right":
-        top = rect.top + scrollTop + rect.height / 2;
-        left = rect.right + scrollLeft + 8; // 8px offset for spacing
+      }
+      case "right": {
+        top = rect.top + rect.height / 2;
+        left = rect.right + 8;
         break;
+      }
+      default:
+        return assertNever(position);
     }
 
     setTooltipPosition({ top, left });
   };
 
-  const showTooltip = () => {
-    updateTooltipPosition();
-    const showTooltip = () => setIsVisible(true);
+  const showTooltip = (target: Element) => {
+    updateTooltipPosition(target);
+    const doShow = () => setIsVisible(true);
     if (delay <= 0) {
-      showTooltip();
+      doShow();
     } else {
-      setTimeoutId(setTimeout(showTooltip, delay));
+      setTimeoutId(setTimeout(doShow, delay));
     }
   };
 
@@ -82,6 +94,30 @@ export const Tooltip: FC<TooltipProps> = ({
       }
     };
   }, [timeoutId]);
+
+  // Cast to ChildProps to enable typed prop access and cloneElement merging.
+  // The constraint is minimal — any element with standard HTML attributes qualifies.
+  const child = Children.only(children);
+
+  const childWithHandlers = cloneElement(child, {
+    "aria-label": content,
+    onMouseEnter: (e) => {
+      showTooltip(e.currentTarget);
+      child.props.onMouseEnter?.(e);
+    },
+    onMouseLeave: (e) => {
+      hideTooltip();
+      child.props.onMouseLeave?.(e);
+    },
+    onFocus: (e) => {
+      showTooltip(e.currentTarget);
+      child.props.onFocus?.(e);
+    },
+    onBlur: (e) => {
+      hideTooltip();
+      child.props.onBlur?.(e);
+    },
+  });
 
   const tooltipElement = isVisible ? (
     <div
@@ -114,18 +150,8 @@ export const Tooltip: FC<TooltipProps> = ({
 
   return (
     <>
-      <div
-        ref={triggerRef}
-        className={cn("relative inline-block", className)}
-        onMouseEnter={showTooltip}
-        onMouseLeave={hideTooltip}
-        onFocus={showTooltip}
-        onBlur={hideTooltip}
-        aria-label={content}
-      >
-        {children}
-      </div>
+      {childWithHandlers}
       {tooltipElement && createPortal(tooltipElement, anchor ?? document.body)}
     </>
   );
-};
+}
