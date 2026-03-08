@@ -1,34 +1,25 @@
-export const DEFAULT_CODE = `const init: PlayerInit = (world): void => {
-  world.getRobots().forEach((robot, index) => {
-    robot.setLabel(\`Bot \${index + 1}\`);
+export const DEFAULT_CODE = `const init: PlayerInit = (world) => {
+  const stops = [
+    ...world.getTrucks().map((t) => t.id),
+    ...world.getAisles().map((a) => a.id),
+  ].sort((a, b) => a - b);
 
-    robot.onIdle(() => assignWork(robot));
+  world.getRobots().forEach((robot) => {
+    let forward = true;
 
-    robot.onStop((stop) => {
+    function startLeg() {
+      const leg = forward ? stops : [...stops].reverse();
+      leg.forEach((s) => robot.goTo(s));
+      forward = !forward;
+    }
+
+    robot.onStop(() => {
       robot.dropOff();
       robot.pickUp();
-      assignWork(robot);
     });
 
-    world.onCargoReady((_cargo) => {
-      if (robot.isIdle()) {
-        assignWork(robot);
-      }
-    });
+    robot.onIdle(startLeg);
 
-    function assignWork(robot: Robot) {
-      if (robot.hasCargo()) {
-        const next = robot.getNextDeliveryStop();
-        if (next !== null) {
-          robot.goTo(next);
-          return;
-        }
-      }
-
-      const aisle = world.getNearestAisleWithWaiting(robot.getCurrentStop() ?? 0);
-      if (aisle) {
-        robot.goTo(aisle.id);
-      }
-    }
+    startLeg();
   });
 };`;
