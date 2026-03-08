@@ -81,7 +81,7 @@ export interface RobotController {
   /** Remaining cargo slots. */
   getAvailableCapacity(): number;
   /** Next truck stop to deliver to, or null if no cargo. */
-  nextDeliveryStop(): StopId | null;
+  getNextDeliveryStop(): StopId | null;
   /** All unique truck stops with cargo onboard. */
   getDeliveryStops(): StopId[];
   /** Onboard cargo grouped by destination truck stop. */

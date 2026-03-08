@@ -369,19 +369,19 @@ describe("robot.getTargetStop", () => {
   });
 });
 
-describe("robot.nextDeliveryStop / getDeliveryStops / getCargoSummary", () => {
-  it("nextDeliveryStop returns null when no cargo", () => {
+describe("robot.getNextDeliveryStop / getDeliveryStops / getCargoSummary", () => {
+  it("getNextDeliveryStop returns null when no cargo", () => {
     const world = makeWorld();
     boot(
       world,
       `function init(robots) {
-        if (robots[0].nextDeliveryStop() === null) robots[0].goTo(0);
+        if (robots[0].getNextDeliveryStop() === null) robots[0].goTo(0);
       }`,
     );
     expect(world.robots[0]!.stopQueue).toContain(0);
   });
 
-  it("nextDeliveryStop returns first cargo destination", () => {
+  it("getNextDeliveryStop returns first cargo destination", () => {
     const world = makeWorld();
     const pkg = makePackage(world.aisles[0]!.stop, 1);
     pkg.pickedUpAt = 1;
@@ -390,7 +390,7 @@ describe("robot.nextDeliveryStop / getDeliveryStops / getCargoSummary", () => {
     boot(
       world,
       `function init(robots) {
-        robots[0].goTo(robots[0].nextDeliveryStop());
+        robots[0].goTo(robots[0].getNextDeliveryStop());
       }`,
     );
     expect(world.robots[0]!.stopQueue).toContain(1);

@@ -18,7 +18,7 @@ export const DEFAULT_CODE = `const init: PlayerInit = (robots, world): void => {
 
     function assignWork(robot: RobotController) {
       if (robot.hasCargo()) {
-        const next = robot.nextDeliveryStop();
+        const next = robot.getNextDeliveryStop();
         if (next !== null) {
           robot.goTo(next);
           return;

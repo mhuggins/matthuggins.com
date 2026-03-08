@@ -153,7 +153,7 @@ export class Sandbox {
         const robot = this.world?.robots.find((r) => r.id === robotId);
         return robot ? robot.capacity - robot.cargo.length : 0;
       },
-      nextDeliveryStop: (): StopId | null => {
+      getNextDeliveryStop: (): StopId | null => {
         const robot = this.world?.robots.find((r) => r.id === robotId);
         if (!robot || robot.cargo.length === 0) {
           return null;
