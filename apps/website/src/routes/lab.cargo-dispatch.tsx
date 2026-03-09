@@ -53,6 +53,7 @@ function CargoDispatchPage() {
       {/* Open Graph */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
+      <meta property="og:image" content={`${DOMAIN}/lab/cargo-dispatch.og-image.png`} />
       <meta property="og:url" content={url} />
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="Matt Huggins" />
