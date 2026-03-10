@@ -541,11 +541,90 @@ export function bindGame({
     ctx.restore();
   }
 
+  function drawMinimap() {
+    const mapW = 160;
+    const mapH = 100;
+    const margin = 12;
+    const pad = 8;
+
+    const originX = margin;
+    const originY = canvas.clientHeight - margin - mapH;
+    const mapCX = originX + mapW / 2;
+    const mapCY = originY + mapH / 2;
+
+    // Fixed world-space view radius, scaled to fit the minimap's shorter half
+    const viewRadius = 2500;
+    const scale = Math.min(mapW / 2 - pad, mapH / 2 - pad) / viewRadius;
+
+    function worldToMinimap(wx: number, wy: number) {
+      const dx = wx - player.x;
+      const dy = wy - player.y;
+      const c = Math.cos(-camera.angle);
+      const s = Math.sin(-camera.angle);
+      return {
+        x: mapCX + (dx * c - dy * s) * scale,
+        y: mapCY + (dx * s + dy * c) * scale,
+      };
+    }
+
+    ctx.save();
+
+    // Clip everything to the minimap shape
+    roundRect(ctx, originX, originY, mapW, mapH, 8);
+    ctx.clip();
+
+    // Background
+    ctx.fillStyle = "rgba(10, 16, 32, 0.88)";
+    ctx.fillRect(originX, originY, mapW, mapH);
+
+    // Planets
+    for (const p of planets) {
+      const mp = worldToMinimap(p.x, p.y);
+      const r = Math.max(3, p.radius * scale);
+
+      // Gravity range ring
+      ctx.strokeStyle = `rgba(${p.ringColor.r}, ${p.ringColor.g}, ${p.ringColor.b}, 0.2)`;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.arc(mp.x, mp.y, gravityRange(p) * scale, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Planet body with radial gradient matching main view
+      const g = ctx.createRadialGradient(mp.x - r * 0.35, mp.y - r * 0.4, r * 0.2, mp.x, mp.y, r);
+      g.addColorStop(0, "rgba(255,255,255,0.20)");
+      g.addColorStop(0.18, `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`);
+      g.addColorStop(1, "#111111");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(mp.x, mp.y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Player — centered, small upward triangle (always faces up in minimap)
+    ctx.fillStyle = "#f7f8ff";
+    ctx.beginPath();
+    // ctx.moveTo(mapCX, mapCY - 4);
+    // ctx.lineTo(mapCX + 3, mapCY + 3);
+    // ctx.lineTo(mapCX - 3, mapCY + 3);
+    // ctx.closePath();
+    ctx.arc(mapCX, mapCY, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+
+    // Border drawn after restore so it sits on top of clipped content
+    roundRect(ctx, originX, originY, mapW, mapH, 8);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
   function draw() {
     drawBackground();
     drawWorld();
     drawPlayer();
     drawPlanetIndicator();
+    drawMinimap();
     drawStatus();
   }
 
