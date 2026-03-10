@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@matthuggins/cargo-dispatch": "workspace:*",
+    "@matthuggins/space-explorer": "workspace:*",
     "@matthuggins/ui": "workspace:*",
     "@phosphor-icons/react": "catalog:",
     "@shikijs/rehype": "^3.12.2",
