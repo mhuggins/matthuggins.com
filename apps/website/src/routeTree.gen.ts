@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as LabSpaceExplorerRouteImport } from './routes/lab.space-explorer'
 import { Route as LabCargoDispatchRouteImport } from './routes/lab.cargo-dispatch'
 import { Route as BlogTagsTagRouteImport } from './routes/blog.tags.$tag'
 import { Route as BlogPostsSlugRouteImport } from './routes/blog.posts.$slug'
@@ -29,6 +30,11 @@ const LabIndexRoute = LabIndexRouteImport.update({
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/blog/',
   path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabSpaceExplorerRoute = LabSpaceExplorerRouteImport.update({
+  id: '/lab/space-explorer',
+  path: '/lab/space-explorer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabCargoDispatchRoute = LabCargoDispatchRouteImport.update({
@@ -50,6 +56,7 @@ const BlogPostsSlugRoute = BlogPostsSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/lab/cargo-dispatch': typeof LabCargoDispatchRoute
+  '/lab/space-explorer': typeof LabSpaceExplorerRoute
   '/blog': typeof BlogIndexRoute
   '/lab': typeof LabIndexRoute
   '/blog/posts/$slug': typeof BlogPostsSlugRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/lab/cargo-dispatch': typeof LabCargoDispatchRoute
+  '/lab/space-explorer': typeof LabSpaceExplorerRoute
   '/blog': typeof BlogIndexRoute
   '/lab': typeof LabIndexRoute
   '/blog/posts/$slug': typeof BlogPostsSlugRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/lab/cargo-dispatch': typeof LabCargoDispatchRoute
+  '/lab/space-explorer': typeof LabSpaceExplorerRoute
   '/blog/': typeof BlogIndexRoute
   '/lab/': typeof LabIndexRoute
   '/blog/posts/$slug': typeof BlogPostsSlugRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/lab/cargo-dispatch'
+    | '/lab/space-explorer'
     | '/blog'
     | '/lab'
     | '/blog/posts/$slug'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/lab/cargo-dispatch'
+    | '/lab/space-explorer'
     | '/blog'
     | '/lab'
     | '/blog/posts/$slug'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/lab/cargo-dispatch'
+    | '/lab/space-explorer'
     | '/blog/'
     | '/lab/'
     | '/blog/posts/$slug'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LabCargoDispatchRoute: typeof LabCargoDispatchRoute
+  LabSpaceExplorerRoute: typeof LabSpaceExplorerRoute
   BlogIndexRoute: typeof BlogIndexRoute
   LabIndexRoute: typeof LabIndexRoute
   BlogPostsSlugRoute: typeof BlogPostsSlugRoute
@@ -131,6 +144,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/space-explorer': {
+      id: '/lab/space-explorer'
+      path: '/lab/space-explorer'
+      fullPath: '/lab/space-explorer'
+      preLoaderRoute: typeof LabSpaceExplorerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/cargo-dispatch': {
       id: '/lab/cargo-dispatch'
       path: '/lab/cargo-dispatch'
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LabCargoDispatchRoute: LabCargoDispatchRoute,
+  LabSpaceExplorerRoute: LabSpaceExplorerRoute,
   BlogIndexRoute: BlogIndexRoute,
   LabIndexRoute: LabIndexRoute,
   BlogPostsSlugRoute: BlogPostsSlugRoute,

@@ -23,6 +23,12 @@ const LAB_PROJECTS: LabProject[] = [
     href: "/lab/cargo-dispatch",
     image: cargoDispatchImage,
   },
+  {
+    title: "Space Explorer",
+    description: "TODO",
+    href: "/lab/space-explorer",
+    image: null,
+  },
 ];
 
 function LabPage() {

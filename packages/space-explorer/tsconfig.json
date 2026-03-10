@@ -1,0 +1,11 @@
+{
+  "extends": "@matthuggins/tsconfig/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "baseUrl": "./",
+    "composite": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/generated/api.d.ts"]
+}
