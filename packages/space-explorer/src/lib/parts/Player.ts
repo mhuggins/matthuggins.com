@@ -1,7 +1,6 @@
 import { StunModifier } from "../modifiers/StunModifier";
 import {
   angleToUpVector,
-  applyCollisionImpulse,
   clamp,
   clampVelocity,
   dot,
@@ -20,13 +19,11 @@ const AIR_ROTATE_SPEED = 0.01;
 export class Player extends Part {
   readonly layer = RenderLayer.PLAYER;
 
-  radius = 12;
+  override radius = 12;
   onGround = false;
   currentPlanet!: Planet;
   activePlanet: Planet | undefined = undefined;
-  mode: "grounded" | "bound" | "air" = "grounded";
-  upX = 0;
-  upY = -1;
+  mode: "grounded" | "air" = "grounded";
   freeAngle = 0;
   jetpackArmed = false;
   jetpackActive = false;
@@ -57,7 +54,7 @@ export class Player extends Part {
     this.fuel = this.maxFuel;
   }
 
-  update(): void {
+  override applyInputs(): void {
     const input = this.world.input;
     const move =
       (input.isDown("KeyD") || input.isDown("ArrowRight") ? 1 : 0) -
@@ -119,9 +116,6 @@ export class Player extends Part {
 
       const blendedG = this.world.getBlendedGravity(this.x, this.y);
 
-      this.vx += blendedG.gx;
-      this.vy += blendedG.gy;
-
       if (this.hasUsedJetpackThisAirborne) {
         this.freeAngle += move * AIR_ROTATE_SPEED;
       } else {
@@ -161,15 +155,27 @@ export class Player extends Part {
         this.hasUsedJetpackThisAirborne = true;
       }
 
+      this.upX = facingUp.x;
+      this.upY = facingUp.y;
+    }
+  }
+
+  update(): void {
+    if (this.onGround) {
+      this.x += this.vx;
+      this.y += this.vy;
+    } else {
+      const blendedG = this.world.getBlendedGravity(this.x, this.y);
+
+      this.vx += blendedG.gx;
+      this.vy += blendedG.gy;
+
       const capped = clampVelocity(this.vx, this.vy, 9);
       this.vx = capped.vx;
       this.vy = capped.vy;
 
       this.x += this.vx;
       this.y += this.vy;
-
-      this.upX = facingUp.x;
-      this.upY = facingUp.y;
 
       const landingPlanet = this.world.nearestSurfacePlanet(this.x, this.y);
 
@@ -214,16 +220,18 @@ export class Player extends Part {
         }
       }
     }
-
-    if (this.onGround) {
-      this.x += this.vx;
-      this.y += this.vy;
-    }
   }
 
-  // Collision interface for applyCollisionImpulse compatibility
-  applyCollision(other: { vx: number; vy: number; mass: number; x: number; y: number }): void {
-    applyCollisionImpulse(this, other);
+  override onCollide(_other: Part, nx: number, ny: number, impactSpeed: number): void {
+    if (this.onGround) {
+      this.onGround = false;
+      this.mode = "air";
+    }
+    const rotations = Math.min(4, 1 + impactSpeed * 0.15);
+    const spinStrength = rotations * 2 * Math.PI * 0.04;
+    const existingIdx = this.modifiers.findIndex((m) => m instanceof StunModifier);
+    if (existingIdx !== -1) this.modifiers.splice(existingIdx, 1);
+    this.modifiers.push(new StunModifier(this, { nx, ny, spinStrength }));
   }
 
   render(ctx: CanvasRenderingContext2D): void {
@@ -274,16 +282,7 @@ export class Player extends Part {
       ctx.fill();
     }
 
-    // Hit-flash: white overlay driven by an active StunModifier.
-    const stun = this.modifiers.find((m): m is StunModifier => m instanceof StunModifier);
-    const flash = stun?.flashIntensity ?? 0;
-    if (flash > 0) {
-      ctx.globalAlpha = flash * 0.72;
-      ctx.fillStyle = "#ffffff";
-      this.roundRect(ctx, -8, -12, 16, 24, 6);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
+    this.renderModifiers(ctx);
 
     ctx.restore();
   }

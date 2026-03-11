@@ -1,6 +1,5 @@
 import { Color } from "../../types";
-import { StunModifier } from "../modifiers/StunModifier";
-import { applyCollisionImpulse, surfaceRadiusAt } from "../utils";
+import { surfaceRadiusAt } from "../utils";
 import { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
@@ -18,7 +17,6 @@ interface SatelliteConfig {
 export class Satellite extends Part {
   readonly layer = RenderLayer.WORLD;
 
-  radius: number;
   orbitalRadius: number;
   orbitalPeriod: number;
   angle: number;
@@ -71,37 +69,11 @@ export class Satellite extends Part {
         this.vy = Math.cos(this.angle) * this.orbitalRadius * av;
       }
     }
+  }
 
-    // Collision with player
-    const player = this.world.player;
-    const dToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
-    if (dToPlayer < player.radius + this.radius) {
-      if (this.mode === "kinematic") {
-        this.mode = "physics";
-      }
-      const nx = (player.x - this.x) / (dToPlayer || 0.001);
-      const ny = (player.y - this.y) / (dToPlayer || 0.001);
-      const impactSpeed = Math.abs((player.vx - this.vx) * nx + (player.vy - this.vy) * ny);
-
-      applyCollisionImpulse(player, this);
-
-      const overlap = player.radius + this.radius - dToPlayer;
-      player.x += nx * overlap * 0.5;
-      player.y += ny * overlap * 0.5;
-      this.x -= nx * overlap * 0.5;
-      this.y -= ny * overlap * 0.5;
-      if (player.onGround) {
-        player.onGround = false;
-        player.mode = "air";
-      }
-
-      // Rotations scale with impact: 1 rotation minimum, ~2 at typical speed.
-      // spinStrength = rotations * 2π * (1 − SPIN_DECAY) = rotations * 2π * 0.04
-      const rotations = Math.min(3, 1 + impactSpeed * 0.12);
-      const spinStrength = rotations * 2 * Math.PI * 0.04;
-      const existingIdx = player.modifiers.findIndex((m) => m instanceof StunModifier);
-      if (existingIdx !== -1) player.modifiers.splice(existingIdx, 1);
-      player.modifiers.push(new StunModifier(player, nx, ny, spinStrength));
+  override onCollide(_other: Part, _nx: number, _ny: number, _impactSpeed: number): void {
+    if (this.mode === "kinematic") {
+      this.mode = "physics";
     }
   }
 

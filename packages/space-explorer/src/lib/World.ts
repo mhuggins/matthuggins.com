@@ -5,7 +5,7 @@ import { Asteroid } from "./parts/Asteroid";
 import { Part, RenderLayer } from "./parts/Part";
 import { Planet } from "./parts/Planet";
 import { Player } from "./parts/Player";
-import { gravityVectorForPlanet, roundRect, surfaceRadiusAt } from "./utils";
+import { applyCollisionImpulse, gravityVectorForPlanet, roundRect, surfaceRadiusAt } from "./utils";
 
 const MAX_NEAREST_PLANETS = 10;
 const MIN_CONTRIBUTION = 0.02;
@@ -148,14 +148,60 @@ export class World {
 
   tick = (): void => {
     for (const part of [...this.parts]) {
-      part.update();
+      part.inputsEnabled = true;
       part.updateModifiers();
+      if (part.inputsEnabled) {
+        part.applyInputs();
+      }
+      part.update();
     }
+    this.resolveCollisions();
     this.tickAsteroidSpawner();
     this.camera.update(this.player);
     this.input.endFrame();
     this.render();
     this.rafId = requestAnimationFrame(this.tick);
+  };
+
+  private resolveCollisions = (): void => {
+    const dynamic = this.parts.filter((p) => p.radius > 0);
+    for (let i = 0; i < dynamic.length; i++) {
+      for (let j = i + 1; j < dynamic.length; j++) {
+        const a = dynamic[i];
+        const b = dynamic[j];
+        if (a.anchored && b.anchored) {
+          continue;
+        }
+
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        if (dist >= a.radius + b.radius) {
+          continue;
+        }
+
+        // nx/ny points from a toward b.
+        const nx = (b.x - a.x) / (dist || 0.001);
+        const ny = (b.y - a.y) / (dist || 0.001);
+
+        // Capture impact speed before velocities change.
+        const impactSpeed = Math.abs((a.vx - b.vx) * nx + (a.vy - b.vy) * ny);
+
+        // Separate the pair, only moving non-anchored parts.
+        const overlap = a.radius + b.radius - dist;
+        const shareA = a.anchored ? 0 : b.anchored ? 1 : 0.5;
+        const shareB = b.anchored ? 0 : a.anchored ? 1 : 0.5;
+        a.x -= nx * overlap * shareA;
+        a.y -= ny * overlap * shareA;
+        b.x += nx * overlap * shareB;
+        b.y += ny * overlap * shareB;
+
+        // Apply impulse once for both.
+        applyCollisionImpulse(a, b);
+
+        // Notify each part with its own push direction (away from the other).
+        a.onCollide(b, -nx, -ny, impactSpeed);
+        b.onCollide(a, nx, ny, impactSpeed);
+      }
+    }
   };
 
   private tickAsteroidSpawner = (): void => {
@@ -370,7 +416,7 @@ export class World {
   private drawStatus = (): void => {
     const player = this.player;
     let label = player.mode;
-    if (player.mode === "grounded" || player.mode === "bound") {
+    if (player.mode === "grounded") {
       label += player.activePlanet ? ` • ${player.activePlanet.name}` : "";
     } else if (player.mode === "air") {
       label += " • blended";
