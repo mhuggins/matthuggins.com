@@ -3,9 +3,8 @@ import { Camera } from "./Camera";
 import { Input } from "./Input";
 import { Asteroid } from "./parts/Asteroid";
 import { Part, RenderLayer } from "./parts/Part";
-import { Planet, PlanetConfig } from "./parts/Planet";
+import { Planet } from "./parts/Planet";
 import { Player } from "./parts/Player";
-import { Satellite } from "./parts/Satellite";
 import { gravityVectorForPlanet, roundRect, surfaceRadiusAt } from "./utils";
 
 const MAX_NEAREST_PLANETS = 10;
@@ -18,68 +17,50 @@ export class World {
   camera: Camera;
   ctx: CanvasRenderingContext2D;
   canvas: HTMLCanvasElement;
+  container: HTMLElement;
 
-  private statusEl: HTMLElement;
-  private fuelEl: HTMLElement;
+  private status: HTMLElement;
+  private fuel: HTMLElement;
   private rafId = 0;
   private asteroidSpawnTimer = 0;
   private starfield: Star[];
-  private boundTick: () => void;
-  private handleResize: () => void;
 
-  constructor(
-    canvas: HTMLCanvasElement,
-    container: HTMLElement,
-    statusEl: HTMLElement,
-    fuelEl: HTMLElement,
-  ) {
+  constructor({
+    canvas,
+    container,
+    status,
+    fuel,
+  }: {
+    canvas: HTMLCanvasElement;
+    container: HTMLElement;
+    status: HTMLElement;
+    fuel: HTMLElement;
+  }) {
     this.canvas = canvas;
+    this.container = container;
     this.ctx = canvas.getContext("2d")!;
-    this.statusEl = statusEl;
-    this.fuelEl = fuelEl;
+    this.status = status;
+    this.fuel = fuel;
 
     this.input = new Input(() => this.reset());
     this.camera = new Camera();
     this.starfield = generateStarfield();
 
-    this.handleResize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.floor(container.clientWidth * dpr);
-      canvas.height = Math.floor(container.clientHeight * dpr);
-      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
     window.addEventListener("resize", this.handleResize);
     this.handleResize();
-
-    this.boundTick = this.tick.bind(this);
-
-    // Add planets
-    for (const cfg of PLANET_CONFIGS) {
-      this.add(new Planet(cfg));
-    }
-
-    // Add satellites
-    for (const planet of this.planets) {
-      for (const sat of createSatellites(planet)) {
-        this.add(sat);
-      }
-    }
-
-    // Add player
-    this.add(new Player());
   }
 
-  add(part: Part): void {
+  add = (part: Part): void => {
     part.world = this;
     this.parts.push(part);
     part.onSpawn();
-  }
+  };
 
-  remove(part: Part): void {
+  remove = (part: Part): void => {
     part.onDestroy();
     const idx = this.parts.indexOf(part);
     if (idx !== -1) this.parts.splice(idx, 1);
-  }
+  };
 
   get planets(): Planet[] {
     return this.parts.filter((p): p is Planet => p instanceof Planet);
@@ -89,7 +70,14 @@ export class World {
     return this.parts.find((p): p is Player => p instanceof Player)!;
   }
 
-  getBlendedGravity(px: number, py: number) {
+  handleResize = () => {
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width = Math.floor(this.container.clientWidth * dpr);
+    this.canvas.height = Math.floor(this.container.clientHeight * dpr);
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  getBlendedGravity = (px: number, py: number) => {
     const influences = this.planets
       .map((planet) => {
         const dx = planet.x - px;
@@ -122,9 +110,9 @@ export class World {
       ),
       influences,
     };
-  }
+  };
 
-  nearestSurfacePlanet(px: number, py: number): Planet {
+  nearestSurfacePlanet = (px: number, py: number): Planet => {
     let best = this.planets[0];
     let bestMetric = Infinity;
     for (const planet of this.planets) {
@@ -137,25 +125,25 @@ export class World {
       }
     }
     return best;
-  }
+  };
 
-  reset(): void {
+  reset = (): void => {
     this.player.reset();
     this.camera.angle = 0;
-  }
+  };
 
-  start(): void {
+  start = (): void => {
     this.reset();
-    this.rafId = requestAnimationFrame(this.boundTick);
-  }
+    this.rafId = requestAnimationFrame(this.tick);
+  };
 
-  stop(): void {
+  stop = (): void => {
     cancelAnimationFrame(this.rafId);
     window.removeEventListener("resize", this.handleResize);
     this.input.destroy();
-  }
+  };
 
-  tick(): void {
+  tick = (): void => {
     for (const part of [...this.parts]) {
       part.update();
       part.updateModifiers();
@@ -164,19 +152,19 @@ export class World {
     this.camera.update(this.player);
     this.input.endFrame();
     this.render();
-    this.rafId = requestAnimationFrame(this.boundTick);
-  }
+    this.rafId = requestAnimationFrame(this.tick);
+  };
 
-  private tickAsteroidSpawner(): void {
+  private tickAsteroidSpawner = (): void => {
     const asteroidCount = this.parts.filter((p) => p instanceof Asteroid).length;
     this.asteroidSpawnTimer--;
     if (this.asteroidSpawnTimer <= 0 && asteroidCount < MAX_ASTEROIDS) {
       this.spawnAsteroid();
       this.asteroidSpawnTimer = 300 + Math.floor(Math.random() * 600);
     }
-  }
+  };
 
-  private spawnAsteroid(): void {
+  private spawnAsteroid = (): void => {
     const player = this.player;
     const angle = Math.random() * Math.PI * 2;
     const spawnDist = Math.hypot(this.canvas.clientWidth, this.canvas.clientHeight) / 2 + 500;
@@ -199,9 +187,9 @@ export class World {
     ast.vx = Math.cos(aimAngle) * speed;
     ast.vy = Math.sin(aimAngle) * speed;
     this.add(ast);
-  }
+  };
 
-  render(): void {
+  render = (): void => {
     this.drawBackground();
 
     const player = this.player;
@@ -229,9 +217,9 @@ export class World {
     this.drawPlanetIndicator();
     this.drawMinimap();
     this.drawStatus();
-  }
+  };
 
-  private drawBackground(): void {
+  private drawBackground = (): void => {
     const ctx = this.ctx;
     const player = this.player;
 
@@ -257,9 +245,9 @@ export class World {
     }
 
     ctx.globalAlpha = 1;
-  }
+  };
 
-  private drawPlanetIndicator(): void {
+  private drawPlanetIndicator = (): void => {
     const player = this.player;
     if (!player.hasUsedJetpackThisAirborne) return;
 
@@ -313,9 +301,9 @@ export class World {
     }
 
     ctx.restore();
-  }
+  };
 
-  private drawMinimap(): void {
+  private drawMinimap = (): void => {
     const ctx = this.ctx;
     const player = this.player;
     const mapW = 160;
@@ -374,9 +362,9 @@ export class World {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
     ctx.lineWidth = 1;
     ctx.stroke();
-  }
+  };
 
-  private drawStatus(): void {
+  private drawStatus = (): void => {
     const player = this.player;
     let label = player.mode;
     if (player.mode === "grounded" || player.mode === "bound") {
@@ -385,16 +373,14 @@ export class World {
       label += " • blended";
     }
 
-    if (this.statusEl) {
-      this.statusEl.textContent = label;
+    if (this.status) {
+      this.status.textContent = label;
     }
-    if (this.fuelEl) {
-      this.fuelEl.textContent = `jetpack fuel: ${Math.round((player.fuel / player.maxFuel) * 100)}%`;
+    if (this.fuel) {
+      this.fuel.textContent = `jetpack fuel: ${Math.round((player.fuel / player.maxFuel) * 100)}%`;
     }
-  }
+  };
 }
-
-// ─── Data generation ──────────────────────────────────────────────────────────
 
 function generateStarfield(count = 240): Star[] {
   return Array.from({ length: count }, (_, i) => {
@@ -407,121 +393,3 @@ function generateStarfield(count = 240): Star[] {
     };
   });
 }
-
-function createSatellites(planet: Planet): Satellite[] {
-  const sats: Satellite[] = [];
-  const satColors = [
-    { r: 180, g: 185, b: 200 },
-    { r: 200, g: 190, b: 175 },
-    { r: 165, g: 200, b: 180 },
-  ];
-
-  const count = 1 + Math.floor(Math.random() * 2);
-  for (let i = 0; i < count; i++) {
-    const orbitalRadius = planet.radius * (1.6 + Math.random() * 0.6);
-    const orbitalPeriod = 600 + (orbitalRadius / planet.radius - 1.6) * 1500;
-    const angle = Math.random() * Math.PI * 2;
-    const color = satColors[Math.floor(Math.random() * satColors.length)];
-    const tintedColor = {
-      r: Math.round(color.r * 0.8 + planet.color.r * 0.2),
-      g: Math.round(color.g * 0.8 + planet.color.g * 0.2),
-      b: Math.round(color.b * 0.8 + planet.color.b * 0.2),
-    };
-    const radius = 20 + Math.random() * 20;
-    const mass = 200 + Math.random() * 300;
-    sats.push(
-      new Satellite(planet, orbitalRadius, orbitalPeriod, angle, radius, mass, tintedColor),
-    );
-  }
-  return sats;
-}
-
-const PLANET_CONFIGS: PlanetConfig[] = [
-  {
-    name: "Azure",
-    x: 0,
-    y: 0,
-    radius: 750,
-    gravity: 0.32,
-    color: { r: 85, g: 125, b: 255 },
-    ringColor: { r: 85, g: 125, b: 255 },
-    deco: [
-      { angle: 0.4, size: 14, color: "#93b0ff" },
-      { angle: 1.6, size: 12, color: "#93b0ff" },
-      { angle: 4.8, size: 13, color: "#93b0ff" },
-    ],
-    terrain: [
-      { angle: 0.0, amplitude: 18, width: 0.9 },
-      { angle: 1.8, amplitude: 22, width: 0.7 },
-      { angle: 3.2, amplitude: 14, width: 1.1 },
-      { angle: 4.6, amplitude: 20, width: 0.8 },
-      { angle: 5.5, amplitude: 12, width: 0.6 },
-    ],
-  },
-  {
-    name: "Cinder",
-    x: 2700,
-    y: -2600,
-    radius: 550,
-    gravity: 0.34,
-    color: { r: 255, g: 155, b: 74 },
-    ringColor: { r: 255, g: 155, b: 74 },
-    deco: [
-      { angle: 0.8, size: 13, color: "#ffd7b4" },
-      { angle: 2.5, size: 15, color: "#ffd7b4" },
-      { angle: 5.1, size: 11, color: "#ffd7b4" },
-    ],
-    terrain: [
-      { angle: 0.3, amplitude: 38, width: 0.45 },
-      { angle: 1.1, amplitude: -22, width: 0.35 },
-      { angle: 2.0, amplitude: 28, width: 0.5 },
-      { angle: 3.0, amplitude: -18, width: 0.3 },
-      { angle: 4.1, amplitude: 42, width: 0.4 },
-      { angle: 5.0, amplitude: -25, width: 0.38 },
-      { angle: 5.9, amplitude: 20, width: 0.5 },
-    ],
-  },
-  {
-    name: "Verdant",
-    x: 5700,
-    y: 200,
-    radius: 420,
-    gravity: 0.2,
-    color: { r: 72, g: 199, b: 142 },
-    ringColor: { r: 72, g: 199, b: 142 },
-    deco: [
-      { angle: 1.0, size: 12, color: "#b8f3d7" },
-      { angle: 3.3, size: 13, color: "#b8f3d7" },
-    ],
-    terrain: [
-      { angle: 0.5, amplitude: 16, width: 0.55 },
-      { angle: 1.3, amplitude: 12, width: 0.65 },
-      { angle: 2.2, amplitude: 20, width: 0.5 },
-      { angle: 3.1, amplitude: 15, width: 0.6 },
-      { angle: 4.0, amplitude: 18, width: 0.55 },
-      { angle: 5.1, amplitude: 10, width: 0.7 },
-    ],
-  },
-  {
-    name: "Violet",
-    x: 6900,
-    y: -3100,
-    radius: 520,
-    gravity: 0.25,
-    color: { r: 192, g: 107, b: 255 },
-    ringColor: { r: 192, g: 107, b: 255 },
-    deco: [
-      { angle: 2.0, size: 11, color: "#ead1ff" },
-      { angle: 4.2, size: 10, color: "#ead1ff" },
-    ],
-    terrain: [
-      { angle: 0.0, amplitude: 50, width: 0.3 },
-      { angle: 0.9, amplitude: -12, width: 0.6 },
-      { angle: 1.7, amplitude: 45, width: 0.28 },
-      { angle: 2.6, amplitude: -10, width: 0.5 },
-      { angle: 3.5, amplitude: 52, width: 0.32 },
-      { angle: 4.5, amplitude: -14, width: 0.55 },
-      { angle: 5.3, amplitude: 40, width: 0.3 },
-    ],
-  },
-];
