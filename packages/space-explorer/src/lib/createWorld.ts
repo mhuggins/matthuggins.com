@@ -1,3 +1,4 @@
+import { Color } from "../types";
 import { Planet, PlanetConfig } from "./parts/Planet";
 import { Player } from "./parts/Player";
 import { Satellite } from "./parts/Satellite";
@@ -10,7 +11,7 @@ export function createWorld(...args: WorldArgs): World {
 
   // Add planets
   for (const cfg of PLANET_CONFIGS) {
-    world.add(new Planet(cfg));
+    world.add(new Planet(world, cfg));
   }
 
   // Add satellites
@@ -21,20 +22,21 @@ export function createWorld(...args: WorldArgs): World {
   }
 
   // Add player
-  world.add(new Player());
+  world.add(new Player(world));
 
   return world;
 }
 
 function createSatellites(planet: Planet): Satellite[] {
   const sats: Satellite[] = [];
-  const satColors = [
+  const satColors: Color[] = [
     { r: 180, g: 185, b: 200 },
     { r: 200, g: 190, b: 175 },
     { r: 165, g: 200, b: 180 },
   ];
 
   const count = 1 + Math.floor(Math.random() * 2);
+
   for (let i = 0; i < count; i++) {
     const orbitalRadius = planet.radius * (1.6 + Math.random() * 0.6);
     const orbitalPeriod = 600 + (orbitalRadius / planet.radius - 1.6) * 1500;
@@ -47,8 +49,17 @@ function createSatellites(planet: Planet): Satellite[] {
     };
     const radius = 20 + Math.random() * 20;
     const mass = 600 + Math.random() * 300;
+
     sats.push(
-      new Satellite(planet, orbitalRadius, orbitalPeriod, angle, radius, mass, tintedColor),
+      new Satellite(planet.world, {
+        planet,
+        orbitalRadius,
+        orbitalPeriod,
+        angle,
+        radius,
+        mass,
+        color: tintedColor,
+      }),
     );
   }
   return sats;

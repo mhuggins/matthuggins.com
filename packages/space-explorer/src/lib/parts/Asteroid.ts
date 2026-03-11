@@ -1,20 +1,25 @@
 import { StunModifier } from "../modifiers/StunModifier";
 import { applyCollisionImpulse, surfaceRadiusAt } from "../utils";
+import { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 import { Satellite } from "./Satellite";
+
+interface AsteroidConfig {
+  radius: number;
+  vertexOffsets: number[];
+}
 
 export class Asteroid extends Part {
   readonly layer = RenderLayer.WORLD;
 
   radius: number;
-  mass: number;
   vertexOffsets: number[];
 
-  constructor(radius: number, vertexOffsets: number[]) {
-    super();
-    this.radius = radius;
-    this.mass = radius * radius;
-    this.vertexOffsets = vertexOffsets;
+  constructor(world: World, cfg: AsteroidConfig) {
+    super(world);
+    this.radius = cfg.radius;
+    this.mass = cfg.radius ** 2;
+    this.vertexOffsets = cfg.vertexOffsets;
   }
 
   update(): void {

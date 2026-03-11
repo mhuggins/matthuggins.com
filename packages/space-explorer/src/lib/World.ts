@@ -184,7 +184,7 @@ export class World {
     const numVertices = 7 + Math.floor(Math.random() * 3);
     const vertexOffsets = Array.from({ length: numVertices }, () => 0.75 + Math.random() * 0.5);
 
-    const asteroid = new Asteroid(radius, vertexOffsets);
+    const asteroid = new Asteroid(this, { radius, vertexOffsets });
     asteroid.x = spawnX;
     asteroid.y = spawnY;
     asteroid.vx = Math.cos(aimAngle) * speed;

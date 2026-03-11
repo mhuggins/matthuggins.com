@@ -12,11 +12,16 @@ export abstract class Part {
   y = 0;
   vx = 0;
   vy = 0;
+  mass = 0;
   anchored = false;
   abstract readonly layer: RenderLayer;
   zIndex = 0;
   modifiers: Modifier[] = [];
-  world!: World;
+  world: World;
+
+  constructor(world: World) {
+    this.world = world;
+  }
 
   abstract update(): void;
   abstract render(ctx: CanvasRenderingContext2D): void;

@@ -1,43 +1,46 @@
+import { Color } from "../../types";
 import { StunModifier } from "../modifiers/StunModifier";
 import { applyCollisionImpulse, surfaceRadiusAt } from "../utils";
+import { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
+
+interface SatelliteConfig {
+  planet: Planet;
+  orbitalRadius: number;
+  orbitalPeriod: number;
+  angle: number;
+  radius: number;
+  mass: number;
+  color: Color;
+}
 
 export class Satellite extends Part {
   readonly layer = RenderLayer.WORLD;
 
   radius: number;
-  mass: number;
   orbitalRadius: number;
   orbitalPeriod: number;
   angle: number;
   mode: "kinematic" | "physics" = "kinematic";
-  color: { r: number; g: number; b: number };
+  color: Color;
   parentPlanet: Planet;
 
-  constructor(
-    planet: Planet,
-    orbitalRadius: number,
-    orbitalPeriod: number,
-    angle: number,
-    radius: number,
-    mass: number,
-    color: { r: number; g: number; b: number },
-  ) {
-    super();
-    this.parentPlanet = planet;
-    this.orbitalRadius = orbitalRadius;
-    this.orbitalPeriod = orbitalPeriod;
-    this.angle = angle;
-    this.radius = radius;
-    this.mass = mass;
-    this.color = color;
+  constructor(world: World, cfg: SatelliteConfig) {
+    super(world);
+    this.parentPlanet = cfg.planet;
+    this.orbitalRadius = cfg.orbitalRadius;
+    this.orbitalPeriod = cfg.orbitalPeriod;
+    this.angle = cfg.angle;
+    this.radius = cfg.radius;
+    this.mass = cfg.mass;
+    this.color = cfg.color;
 
-    const angularVelocity = (Math.PI * 2) / orbitalPeriod;
-    this.x = planet.x + Math.cos(angle) * orbitalRadius;
-    this.y = planet.y + Math.sin(angle) * orbitalRadius;
-    this.vx = -Math.sin(angle) * orbitalRadius * angularVelocity;
-    this.vy = Math.cos(angle) * orbitalRadius * angularVelocity;
+    const angularVelocity = (Math.PI * 2) / cfg.orbitalPeriod;
+    this.x = cfg.planet.x + Math.cos(cfg.angle) * cfg.orbitalRadius;
+    this.y = cfg.planet.y + Math.sin(cfg.angle) * cfg.orbitalRadius;
+    this.vx = -Math.sin(cfg.angle) * cfg.orbitalRadius * angularVelocity;
+    this.vy = Math.cos(cfg.angle) * cfg.orbitalRadius * angularVelocity;
   }
 
   update(): void {
