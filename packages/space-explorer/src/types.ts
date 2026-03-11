@@ -1,3 +1,9 @@
+export interface TerrainFeature {
+  angle: number; // center angle in radians (Math.atan2 convention)
+  amplitude: number; // height offset in world units (positive = hill, negative = crater)
+  width: number; // angular half-width in radians
+}
+
 export interface Planet {
   name: string;
   x: number;
@@ -7,6 +13,7 @@ export interface Planet {
   color: Color;
   ringColor: Color;
   deco: PlanetDecoration[];
+  terrain: TerrainFeature[];
 }
 
 export interface Color {
