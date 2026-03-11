@@ -112,7 +112,8 @@ export function bindGame({
     for (const planet of planets) {
       const dx = planet.x - px;
       const dy = planet.y - py;
-      const distToSurface = Math.hypot(dx, dy) - planet.radius;
+      const angle = Math.atan2(py - planet.y, px - planet.x);
+      const distToSurface = Math.hypot(dx, dy) - surfaceRadiusAt(planet, angle);
       if (distToSurface < bestMetric) {
         bestMetric = distToSurface;
         best = planet;
@@ -150,7 +151,7 @@ export function bindGame({
   function resetPlayer() {
     const p = planets[0];
     player.x = p.x;
-    player.y = p.y - p.radius - player.radius;
+    player.y = p.y - surfaceRadiusAt(p, -Math.PI / 2) - player.radius;
     player.vx = 0;
     player.vy = 0;
     player.onGround = true;
@@ -193,7 +194,9 @@ export function bindGame({
       const up = { x: -down.x, y: -down.y };
       const tangent = { x: down.y, y: -down.x };
 
-      const targetDist = planet.radius + player.radius;
+      const playerAngle = Math.atan2(player.y - planet.y, player.x - planet.x);
+      const surfR = surfaceRadiusAt(planet, playerAngle);
+      const targetDist = surfR + player.radius;
 
       player.x = planet.x - down.x * targetDist;
       player.y = planet.y - down.y * targetDist;
@@ -296,8 +299,10 @@ export function bindGame({
       const ldy = landingPlanet.y - player.y;
       const ldown = normalize(ldx, ldy);
 
+      const landingAngle = Math.atan2(player.y - landingPlanet.y, player.x - landingPlanet.x);
+      const surfRAfter = surfaceRadiusAt(landingPlanet, landingAngle);
       const distAfter = length(player.x - landingPlanet.x, player.y - landingPlanet.y);
-      const targetDistAfter = landingPlanet.radius + player.radius;
+      const targetDistAfter = surfRAfter + player.radius;
       const radialSpeedAfter = dot(player.vx, player.vy, ldown.x, ldown.y);
 
       if (distAfter < targetDistAfter && radialSpeedAfter > 0) {
@@ -410,14 +415,27 @@ export function bindGame({
     g.addColorStop(0.18, `rgb(${planet.color.r}, ${planet.color.g}, ${planet.color.b})`);
     g.addColorStop(1, `rgb(${planet.color.r}, ${planet.color.g}, ${planet.color.b}, 0.3)`);
 
-    ctx.fillStyle = g;
+    const N = 256;
     ctx.beginPath();
-    ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
+    for (let i = 0; i <= N; i++) {
+      const a = (i / N) * Math.PI * 2;
+      const r = surfaceRadiusAt(planet, a);
+      const px = planet.x + Math.cos(a) * r;
+      const py = planet.y + Math.sin(a) * r;
+      if (i === 0) {
+        ctx.moveTo(px, py);
+      } else {
+        ctx.lineTo(px, py);
+      }
+    }
+    ctx.closePath();
+    ctx.fillStyle = g;
     ctx.fill();
 
     for (const d of planet.deco) {
-      const ox = Math.cos(d.angle) * (planet.radius - d.size * 0.8);
-      const oy = Math.sin(d.angle) * (planet.radius - d.size * 0.8);
+      const surfR = surfaceRadiusAt(planet, d.angle);
+      const ox = Math.cos(d.angle) * (surfR - d.size * 0.8);
+      const oy = Math.sin(d.angle) * (surfR - d.size * 0.8);
 
       ctx.fillStyle = d.color;
       ctx.beginPath();
@@ -429,11 +447,12 @@ export function bindGame({
       const a = (i / 8) * Math.PI * 2 + 0.3;
       const nx = Math.cos(a);
       const ny = Math.sin(a);
+      const surfR = surfaceRadiusAt(planet, a);
 
-      const trunkBaseX = planet.x + nx * planet.radius;
-      const trunkBaseY = planet.y + ny * planet.radius;
-      const trunkTopX = planet.x + nx * (planet.radius + 10);
-      const trunkTopY = planet.y + ny * (planet.radius + 10);
+      const trunkBaseX = planet.x + nx * surfR;
+      const trunkBaseY = planet.y + ny * surfR;
+      const trunkTopX = planet.x + nx * (surfR + 10);
+      const trunkTopY = planet.y + ny * (surfR + 10);
 
       ctx.strokeStyle = "rgba(60,35,20,0.9)";
       ctx.lineWidth = 2;
@@ -444,13 +463,7 @@ export function bindGame({
 
       ctx.fillStyle = "rgba(145,220,160,0.95)";
       ctx.beginPath();
-      ctx.arc(
-        planet.x + nx * (planet.radius + 14),
-        planet.y + ny * (planet.radius + 14),
-        4,
-        0,
-        Math.PI * 2,
-      );
+      ctx.arc(planet.x + nx * (surfR + 14), planet.y + ny * (surfR + 14), 4, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -686,6 +699,18 @@ export function bindGame({
   };
 }
 
+function surfaceRadiusAt(planet: Planet, angle: number): number {
+  let offset = 0;
+  for (const feature of planet.terrain) {
+    const diff = wrapAngle(angle - feature.angle);
+    if (Math.abs(diff) < feature.width) {
+      const t = diff / feature.width; // -1 to 1
+      offset += feature.amplitude * 0.5 * (1 + Math.cos(Math.PI * t)); // Hann window: C1, zero at edges
+    }
+  }
+  return planet.radius + offset;
+}
+
 function clamp(v: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, v));
 }
@@ -803,6 +828,13 @@ function generatePlanets(): Planet[] {
         { angle: 1.6, size: 12, color: "#93b0ff" },
         { angle: 4.8, size: 13, color: "#93b0ff" },
       ],
+      terrain: [
+        { angle: 0.0, amplitude: 18, width: 0.9 },
+        { angle: 1.8, amplitude: 22, width: 0.7 },
+        { angle: 3.2, amplitude: 14, width: 1.1 },
+        { angle: 4.6, amplitude: 20, width: 0.8 },
+        { angle: 5.5, amplitude: 12, width: 0.6 },
+      ],
     },
     {
       name: "Cinder",
@@ -817,6 +849,15 @@ function generatePlanets(): Planet[] {
         { angle: 2.5, size: 15, color: "#ffd7b4" },
         { angle: 5.1, size: 11, color: "#ffd7b4" },
       ],
+      terrain: [
+        { angle: 0.3, amplitude: 38, width: 0.45 },
+        { angle: 1.1, amplitude: -22, width: 0.35 },
+        { angle: 2.0, amplitude: 28, width: 0.5 },
+        { angle: 3.0, amplitude: -18, width: 0.3 },
+        { angle: 4.1, amplitude: 42, width: 0.4 },
+        { angle: 5.0, amplitude: -25, width: 0.38 },
+        { angle: 5.9, amplitude: 20, width: 0.5 },
+      ],
     },
     {
       name: "Verdant",
@@ -830,6 +871,14 @@ function generatePlanets(): Planet[] {
         { angle: 1.0, size: 12, color: "#b8f3d7" },
         { angle: 3.3, size: 13, color: "#b8f3d7" },
       ],
+      terrain: [
+        { angle: 0.5, amplitude: 16, width: 0.55 },
+        { angle: 1.3, amplitude: 12, width: 0.65 },
+        { angle: 2.2, amplitude: 20, width: 0.5 },
+        { angle: 3.1, amplitude: 15, width: 0.6 },
+        { angle: 4.0, amplitude: 18, width: 0.55 },
+        { angle: 5.1, amplitude: 10, width: 0.7 },
+      ],
     },
     {
       name: "Violet",
@@ -842,6 +891,15 @@ function generatePlanets(): Planet[] {
       deco: [
         { angle: 2.0, size: 11, color: "#ead1ff" },
         { angle: 4.2, size: 10, color: "#ead1ff" },
+      ],
+      terrain: [
+        { angle: 0.0, amplitude: 50, width: 0.3 },
+        { angle: 0.9, amplitude: -12, width: 0.6 },
+        { angle: 1.7, amplitude: 45, width: 0.28 },
+        { angle: 2.6, amplitude: -10, width: 0.5 },
+        { angle: 3.5, amplitude: 52, width: 0.32 },
+        { angle: 4.5, amplitude: -14, width: 0.55 },
+        { angle: 5.3, amplitude: 40, width: 0.3 },
       ],
     },
   ];
