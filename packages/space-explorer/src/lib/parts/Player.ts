@@ -21,7 +21,6 @@ export class Player extends Part {
   readonly layer = RenderLayer.PLAYER;
 
   radius = 12;
-  mass = 80;
   onGround = false;
   currentPlanet!: Planet;
   activePlanet: Planet | undefined = undefined;
@@ -47,6 +46,7 @@ export class Player extends Part {
     this.currentPlanet = p;
     this.activePlanet = p;
     this.mode = "grounded";
+    this.mass = 80;
     this.upX = 0;
     this.upY = -1;
     this.freeAngle = 0;
