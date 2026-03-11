@@ -1,3 +1,4 @@
+import { StunModifier } from "../modifiers/StunModifier";
 import { applyCollisionImpulse, surfaceRadiusAt } from "../utils";
 import { Part, RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
@@ -75,10 +76,13 @@ export class Satellite extends Part {
       if (this.mode === "kinematic") {
         this.mode = "physics";
       }
-      applyCollisionImpulse(player, this);
-      const overlap = player.radius + this.radius - dToPlayer;
       const nx = (player.x - this.x) / (dToPlayer || 0.001);
       const ny = (player.y - this.y) / (dToPlayer || 0.001);
+      const impactSpeed = Math.abs((player.vx - this.vx) * nx + (player.vy - this.vy) * ny);
+
+      applyCollisionImpulse(player, this);
+
+      const overlap = player.radius + this.radius - dToPlayer;
       player.x += nx * overlap * 0.5;
       player.y += ny * overlap * 0.5;
       this.x -= nx * overlap * 0.5;
@@ -87,6 +91,14 @@ export class Satellite extends Part {
         player.onGround = false;
         player.mode = "air";
       }
+
+      // Rotations scale with impact: 1 rotation minimum, ~2 at typical speed.
+      // spinStrength = rotations * 2π * (1 − SPIN_DECAY) = rotations * 2π * 0.04
+      const rotations = Math.min(3, 1 + impactSpeed * 0.12);
+      const spinStrength = rotations * 2 * Math.PI * 0.04;
+      const existingIdx = player.modifiers.findIndex((m) => m instanceof StunModifier);
+      if (existingIdx !== -1) player.modifiers.splice(existingIdx, 1);
+      player.modifiers.push(new StunModifier(player, nx, ny, spinStrength));
     }
   }
 
