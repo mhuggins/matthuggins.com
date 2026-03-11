@@ -1,5 +1,6 @@
 import { Color, PlanetDecoration, TerrainFeature } from "../../types";
 import { clamp, GRAVITY_RADIUS_BASE, GRAVITY_RADIUS_MULTIPLIER, surfaceRadiusAt } from "../utils";
+import { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 
 // Assumed gravity range across all planets — used to normalize visual intensity.
@@ -34,8 +35,8 @@ export class Planet extends Part {
   deco: PlanetDecoration[];
   terrain: TerrainFeature[];
 
-  constructor(cfg: PlanetConfig) {
-    super();
+  constructor(world: World, cfg: PlanetConfig) {
+    super(world);
     this.x = cfg.x;
     this.y = cfg.y;
     this.name = cfg.name;
@@ -45,6 +46,7 @@ export class Planet extends Part {
     this.ringColor = cfg.ringColor;
     this.deco = cfg.deco;
     this.terrain = cfg.terrain;
+    this.mass = 4 * Math.PI * cfg.radius ** 2;
   }
 
   update(): void {

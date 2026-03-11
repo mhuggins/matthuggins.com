@@ -22,3 +22,9 @@ export interface Star {
   r: number;
   a: number;
 }
+
+export interface Color {
+  r: number;
+  g: number;
+  b: number;
+}
