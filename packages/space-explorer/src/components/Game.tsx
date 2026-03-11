@@ -34,7 +34,10 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
       </div>
 
       <button
-        onClick={() => toggleFullscreen(containerRef.current)}
+        onClick={(e) => {
+          toggleFullscreen(containerRef.current);
+          e.currentTarget.blur();
+        }}
         className="absolute right-3 bottom-3 cursor-pointer rounded-lg border border-white/[0.08] bg-black/[0.42] p-2 text-[#dce7ff] backdrop-blur-sm transition-colors hover:bg-black/[0.65]"
         aria-label="Toggle fullscreen"
       >
