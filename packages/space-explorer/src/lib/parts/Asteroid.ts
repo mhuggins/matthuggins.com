@@ -1,3 +1,4 @@
+import { StunModifier } from "../modifiers/StunModifier";
 import { applyCollisionImpulse, surfaceRadiusAt } from "../utils";
 import { Part, RenderLayer } from "./Part";
 import { Satellite } from "./Satellite";
@@ -47,11 +48,23 @@ export class Asteroid extends Part {
     const player = this.world.player;
     const dToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
     if (dToPlayer < player.radius + this.radius) {
+      const nx = (player.x - this.x) / (dToPlayer || 0.001);
+      const ny = (player.y - this.y) / (dToPlayer || 0.001);
+      const impactSpeed = Math.abs((player.vx - this.vx) * nx + (player.vy - this.vy) * ny);
+
       applyCollisionImpulse(player, this);
+
       if (player.onGround) {
         player.onGround = false;
         player.mode = "air";
       }
+
+      // Asteroids hit harder: 1 rotation minimum, up to ~4 for a fast direct hit.
+      const rotations = Math.min(4, 1 + impactSpeed * 0.18);
+      const spinStrength = rotations * 2 * Math.PI * 0.04;
+      const existingIdx = player.modifiers.findIndex((m) => m instanceof StunModifier);
+      if (existingIdx !== -1) player.modifiers.splice(existingIdx, 1);
+      player.modifiers.push(new StunModifier(player, nx, ny, spinStrength));
     }
 
     // Collision with satellites

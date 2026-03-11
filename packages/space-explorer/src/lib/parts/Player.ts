@@ -1,3 +1,4 @@
+import { StunModifier } from "../modifiers/StunModifier";
 import {
   angleToUpVector,
   applyCollisionImpulse,
@@ -271,6 +272,17 @@ export class Player extends Part {
       ctx.lineTo(2.2, 12);
       ctx.closePath();
       ctx.fill();
+    }
+
+    // Hit-flash: white overlay driven by an active StunModifier.
+    const stun = this.modifiers.find((m): m is StunModifier => m instanceof StunModifier);
+    const flash = stun?.flashIntensity ?? 0;
+    if (flash > 0) {
+      ctx.globalAlpha = flash * 0.72;
+      ctx.fillStyle = "#ffffff";
+      this.roundRect(ctx, -8, -12, 16, 24, 6);
+      ctx.fill();
+      ctx.globalAlpha = 1;
     }
 
     ctx.restore();
