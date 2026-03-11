@@ -1,6 +1,6 @@
 import { cn } from "@matthuggins/ui";
 import { useEffect, useRef } from "react";
-import { bindGame } from "../lib/bindGame";
+import { World } from "../lib/World";
 
 export const SpaceExplorer = ({ className }: { className?: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,7 +18,9 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
       return undefined;
     }
 
-    return bindGame({ container, canvas, status, fuel });
+    const world = new World(canvas, container, status, fuel);
+    world.start();
+    return world.stop;
   }, []);
 
   return (
