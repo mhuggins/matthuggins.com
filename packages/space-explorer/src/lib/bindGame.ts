@@ -139,6 +139,8 @@ export function bindGame({
     hasUsedJetpackThisAirborne: false,
     fuel: 1,
     maxFuel: 1,
+    jumpAngularVelocity: 0, // rad/frame, preserved during arc to match surface travel distance
+    jumpAngularVelocityMax: 0, // |ω| at jump time — caps aerial steering
   };
 
   const camera = {
@@ -205,6 +207,15 @@ export function bindGame({
       player.freeAngle = Math.atan2(player.upX, -player.upY);
 
       if (justPressed("Space")) {
+        // Store angular velocity so the airborne arc covers the same surface distance as walking.
+        // Max is floored at full walk angular velocity so standstill jumps can still steer.
+        const vt = dot(player.vx, player.vy, tangent.x, tangent.y);
+        player.jumpAngularVelocity = vt / targetDist;
+        player.jumpAngularVelocityMax = Math.max(
+          Math.abs(player.jumpAngularVelocity),
+          walkSpeed / targetDist,
+        );
+
         player.vx += up.x * JUMP_STRENGTH;
         player.vy += up.y * JUMP_STRENGTH;
         player.onGround = false;
@@ -227,11 +238,37 @@ export function bindGame({
       if (player.hasUsedJetpackThisAirborne) {
         player.freeAngle += move * AIR_ROTATE_SPEED;
       } else {
-        const fromPlanet = normalize(
-          player.x - player.currentPlanet.x,
-          player.y - player.currentPlanet.y,
-        );
+        const fromPlanetX = player.x - player.currentPlanet.x;
+        const fromPlanetY = player.y - player.currentPlanet.y;
+        const r = Math.hypot(fromPlanetX, fromPlanetY);
+        const fromPlanet = { x: fromPlanetX / r, y: fromPlanetY / r };
         player.freeAngle = Math.atan2(fromPlanet.x, -fromPlanet.y);
+
+        // Scale enforcement by how dominant the jump planet is vs. other gravity sources.
+        // When another planet pulls equally or more, enforcement fades to avoid unnatural lateral speed.
+        const jumpInfluence = blendedG.influences.find((g) => g.planet === player.currentPlanet);
+        const jumpStrength = jumpInfluence?.strength ?? 0;
+        const totalStrength = blendedG.influences.reduce((sum, g) => sum + g.strength, 0);
+        const dominance = totalStrength > 0 ? jumpStrength / totalStrength : 0;
+
+        // Allow left/right input to steer in the air, capped at the launch angular speed.
+        const airSteerAccel = 0.0003; // rad/frame²
+        player.jumpAngularVelocity = clamp(
+          player.jumpAngularVelocity + move * airSteerAccel * dominance,
+          -player.jumpAngularVelocityMax,
+          player.jumpAngularVelocityMax,
+        );
+
+        // Enforce the (steerable) angular velocity so arc distance matches surface travel.
+        // Decompose velocity into radial + tangential, replace the tangential component
+        // so ω = jumpAngularVelocity regardless of current altitude.
+        // Correction fades with dominance so blended gravity fields don't over-constrain lateral speed.
+        const tang = { x: -fromPlanet.y, y: fromPlanet.x };
+        const currentVt = dot(player.vx, player.vy, tang.x, tang.y);
+        const targetVt = player.jumpAngularVelocity * r;
+        const dvt = (targetVt - currentVt) * dominance;
+        player.vx += tang.x * dvt;
+        player.vy += tang.y * dvt;
       }
 
       const facingUp = angleToUpVector(player.freeAngle);
