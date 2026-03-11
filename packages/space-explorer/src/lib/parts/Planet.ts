@@ -28,7 +28,6 @@ export class Planet extends Part {
   override anchored = true;
 
   name: string;
-  radius: number;
   gravity: number;
   color: Color;
   ringColor: Color;
