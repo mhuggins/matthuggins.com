@@ -255,7 +255,10 @@ export class World {
     const worldParts = this.parts
       .filter((p) => p.layer === RenderLayer.WORLD)
       .sort((a, b) => a.zIndex - b.zIndex);
-    for (const part of worldParts) part.render(ctx);
+
+    for (const part of worldParts) {
+      part.render(ctx);
+    }
 
     ctx.restore();
 
@@ -283,8 +286,9 @@ export class World {
         p.x > this.canvas.clientWidth + 10 ||
         p.y < -10 ||
         p.y > this.canvas.clientHeight + 10
-      )
+      ) {
         continue;
+      }
 
       ctx.globalAlpha = star.a;
       ctx.fillStyle = "#ffffff";
@@ -298,7 +302,9 @@ export class World {
 
   private drawPlanetIndicator = (): void => {
     const player = this.player;
-    if (!player.hasUsedJetpackThisAirborne) return;
+    if (!player.hasUsedJetpackThisAirborne) {
+      return;
+    }
 
     const ctx = this.ctx;
     const planet = player.currentPlanet;
@@ -308,14 +314,18 @@ export class World {
     const worldDist = Math.hypot(planet.x - player.x, planet.y - player.y);
     const fadeStart = Math.hypot(cx, cy);
     const fadeEnd = fadeStart * 2;
-    if (worldDist < fadeStart) return;
+    if (worldDist < fadeStart) {
+      return;
+    }
     const opacity = Math.min(1, (worldDist - fadeStart) / (fadeEnd - fadeStart));
 
     const sp = this.camera.worldToScreen(planet.x, planet.y, player, this.canvas);
     const dx = sp.x - cx;
     const dy = sp.y - cy;
     const len = Math.hypot(dx, dy);
-    if (len < 0.001) return;
+    if (len < 0.001) {
+      return;
+    }
 
     const ndx = dx / len;
     const ndy = dy / len;

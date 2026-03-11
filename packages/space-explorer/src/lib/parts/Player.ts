@@ -33,6 +33,10 @@ export class Player extends Part {
   jumpAngularVelocity = 0;
   jumpAngularVelocityMax = 0;
 
+  override onSpawn(): void {
+    this.modifiers.push(new StunModifier(this));
+  }
+
   reset(): void {
     const p = this.world.planets[0];
     this.x = p ? p.x : 0;
@@ -222,16 +226,12 @@ export class Player extends Part {
     }
   }
 
-  override onCollide(_other: Part, nx: number, ny: number, impactSpeed: number): void {
+  override onCollide(other: Part, nx: number, ny: number, impactSpeed: number): void {
     if (this.onGround) {
       this.onGround = false;
       this.mode = "air";
     }
-    const rotations = Math.min(4, 1 + impactSpeed * 0.15);
-    const spinStrength = rotations * 2 * Math.PI * 0.04;
-    const existingIdx = this.modifiers.findIndex((m) => m instanceof StunModifier);
-    if (existingIdx !== -1) this.modifiers.splice(existingIdx, 1);
-    this.modifiers.push(new StunModifier(this, { nx, ny, spinStrength }));
+    super.onCollide(other, nx, ny, impactSpeed);
   }
 
   render(ctx: CanvasRenderingContext2D): void {

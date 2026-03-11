@@ -39,7 +39,11 @@ export abstract class Part {
    * been applied. `nx`/`ny` is the push direction for `this` (pointing away
    * from `other`). Override to add part-specific collision side-effects.
    */
-  onCollide(_other: Part, _nx: number, _ny: number, _impactSpeed: number): void {}
+  onCollide(other: Part, nx: number, ny: number, impactSpeed: number): void {
+    for (const m of this.modifiers) {
+      m.onCollide(other, nx, ny, impactSpeed);
+    }
+  }
 
   applyInputs(): void {}
 
@@ -47,6 +51,7 @@ export abstract class Part {
     for (const m of this.modifiers) {
       m.update();
     }
+    this.modifiers = this.modifiers.filter((m) => m.isAlive);
   }
 
   renderModifiers(ctx: CanvasRenderingContext2D): void {
