@@ -3,7 +3,7 @@ import { TerrainFeature } from "../types";
 export const GRAVITY_RADIUS_MULTIPLIER = 2.0;
 export const GRAVITY_RADIUS_BASE = 240;
 
-export interface PlanetData {
+interface PlanetData {
   x: number;
   y: number;
   radius: number;

@@ -12,7 +12,7 @@ export class Asteroid extends Part {
   constructor(radius: number, vertexOffsets: number[]) {
     super();
     this.radius = radius;
-    this.mass = radius * radius * 0.5;
+    this.mass = radius * radius;
     this.vertexOffsets = vertexOffsets;
   }
 

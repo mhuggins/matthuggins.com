@@ -1,6 +1,6 @@
 import { cn } from "@matthuggins/ui";
 import { useEffect, useRef } from "react";
-import { World } from "../lib/World";
+import { createWorld } from "../lib/createWorld";
 
 export const SpaceExplorer = ({ className }: { className?: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,7 +18,7 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
       return undefined;
     }
 
-    const world = new World(canvas, container, status, fuel);
+    const world = createWorld({ canvas, container, status, fuel });
     world.start();
     return world.stop;
   }, []);
