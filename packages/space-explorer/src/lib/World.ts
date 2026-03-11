@@ -112,8 +112,11 @@ export class World {
     };
   };
 
-  nearestSurfacePlanet = (px: number, py: number): Planet => {
+  nearestSurfacePlanet = (px: number, py: number): Planet | undefined => {
     let best = this.planets[0];
+    if (!best) {
+      return undefined;
+    }
     let bestMetric = Infinity;
     for (const planet of this.planets) {
       const angle = Math.atan2(py - planet.y, px - planet.x);
@@ -181,12 +184,12 @@ export class World {
     const numVertices = 7 + Math.floor(Math.random() * 3);
     const vertexOffsets = Array.from({ length: numVertices }, () => 0.75 + Math.random() * 0.5);
 
-    const ast = new Asteroid(radius, vertexOffsets);
-    ast.x = spawnX;
-    ast.y = spawnY;
-    ast.vx = Math.cos(aimAngle) * speed;
-    ast.vy = Math.sin(aimAngle) * speed;
-    this.add(ast);
+    const asteroid = new Asteroid(radius, vertexOffsets);
+    asteroid.x = spawnX;
+    asteroid.y = spawnY;
+    asteroid.vx = Math.cos(aimAngle) * speed;
+    asteroid.vy = Math.sin(aimAngle) * speed;
+    this.add(asteroid);
   };
 
   render = (): void => {

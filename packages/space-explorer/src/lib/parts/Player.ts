@@ -38,8 +38,8 @@ export class Player extends Part {
 
   reset(): void {
     const p = this.world.planets[0];
-    this.x = p.x;
-    this.y = p.y - surfaceRadiusAt(p, -Math.PI / 2) - this.radius;
+    this.x = p ? p.x : 0;
+    this.y = p ? p.y - surfaceRadiusAt(p, -Math.PI / 2) - this.radius : 0;
     this.vx = 0;
     this.vy = 0;
     this.onGround = true;
@@ -171,43 +171,46 @@ export class Player extends Part {
       this.upY = facingUp.y;
 
       const landingPlanet = this.world.nearestSurfacePlanet(this.x, this.y);
-      const ldx = landingPlanet.x - this.x;
-      const ldy = landingPlanet.y - this.y;
-      const ldown = normalize(ldx, ldy);
 
-      const landingAngle = Math.atan2(this.y - landingPlanet.y, this.x - landingPlanet.x);
-      const surfRAfter = surfaceRadiusAt(landingPlanet, landingAngle);
-      const distAfter = length(this.x - landingPlanet.x, this.y - landingPlanet.y);
-      const targetDistAfter = surfRAfter + this.radius;
-      const radialSpeedAfter = dot(this.vx, this.vy, ldown.x, ldown.y);
+      if (landingPlanet) {
+        const ldx = landingPlanet.x - this.x;
+        const ldy = landingPlanet.y - this.y;
+        const ldown = normalize(ldx, ldy);
 
-      if (distAfter < targetDistAfter && radialSpeedAfter > 0) {
-        this.x = landingPlanet.x - ldown.x * targetDistAfter;
-        this.y = landingPlanet.y - ldown.y * targetDistAfter;
+        const landingAngle = Math.atan2(this.y - landingPlanet.y, this.x - landingPlanet.x);
+        const surfRAfter = surfaceRadiusAt(landingPlanet, landingAngle);
+        const distAfter = length(this.x - landingPlanet.x, this.y - landingPlanet.y);
+        const targetDistAfter = surfRAfter + this.radius;
+        const radialSpeedAfter = dot(this.vx, this.vy, ldown.x, ldown.y);
 
-        const tangentAfter = { x: ldown.y, y: -ldown.x };
-        const tangentSpeedAfter = dot(this.vx, this.vy, tangentAfter.x, tangentAfter.y);
+        if (distAfter < targetDistAfter && radialSpeedAfter > 0) {
+          this.x = landingPlanet.x - ldown.x * targetDistAfter;
+          this.y = landingPlanet.y - ldown.y * targetDistAfter;
 
-        this.vx = tangentAfter.x * tangentSpeedAfter;
-        this.vy = tangentAfter.y * tangentSpeedAfter;
+          const tangentAfter = { x: ldown.y, y: -ldown.x };
+          const tangentSpeedAfter = dot(this.vx, this.vy, tangentAfter.x, tangentAfter.y);
 
-        const capped2 = clampVelocity(this.vx, this.vy, 7);
-        this.vx = capped2.vx;
-        this.vy = capped2.vy;
+          this.vx = tangentAfter.x * tangentSpeedAfter;
+          this.vy = tangentAfter.y * tangentSpeedAfter;
 
-        this.onGround = true;
-        this.currentPlanet = landingPlanet;
-        this.activePlanet = landingPlanet;
-        this.mode = "grounded";
+          const capped2 = clampVelocity(this.vx, this.vy, 7);
+          this.vx = capped2.vx;
+          this.vy = capped2.vy;
 
-        const lup = { x: -ldown.x, y: -ldown.y };
-        this.upX = lup.x;
-        this.upY = lup.y;
-        this.freeAngle = Math.atan2(this.upX, -this.upY);
+          this.onGround = true;
+          this.currentPlanet = landingPlanet;
+          this.activePlanet = landingPlanet;
+          this.mode = "grounded";
 
-        this.jetpackArmed = false;
-        this.jetpackActive = false;
-        this.hasUsedJetpackThisAirborne = false;
+          const lup = { x: -ldown.x, y: -ldown.y };
+          this.upX = lup.x;
+          this.upY = lup.y;
+          this.freeAngle = Math.atan2(this.upX, -this.upY);
+
+          this.jetpackArmed = false;
+          this.jetpackActive = false;
+          this.hasUsedJetpackThisAirborne = false;
+        }
       }
     }
 
