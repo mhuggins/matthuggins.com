@@ -1,4 +1,4 @@
-import { Planet, Player, Star } from "../types";
+import { Asteroid, Planet, Player, Satellite, Star } from "../types";
 
 const MAX_NEAREST_PLANETS = 10;
 const MIN_CONTRIBUTION = 0.02;
@@ -74,6 +74,10 @@ export function bindGame({
 
   const planets = generatePlanets();
   const starfield = generateStarfield();
+  const satellites = generateSatellites(planets);
+  const asteroids: Asteroid[] = [];
+  let asteroidSpawnTimer = 0;
+  const MAX_ASTEROIDS = 3;
 
   function getBlendedGravity(px: number, py: number) {
     const influences = planets
@@ -142,6 +146,7 @@ export function bindGame({
     vx: 0,
     vy: 0,
     radius: 12,
+    mass: 80,
     onGround: false,
     currentPlanet: planets[0],
     activePlanet: planets[0],
@@ -721,9 +726,383 @@ export function bindGame({
     ctx.stroke();
   }
 
+  function applyCollisionImpulse(
+    a: { vx: number; vy: number; mass: number; x: number; y: number },
+    b: { vx: number; vy: number; mass: number; x: number; y: number },
+  ) {
+    const dist = Math.hypot(b.x - a.x, b.y - a.y) || 0.001;
+    const nx = (b.x - a.x) / dist;
+    const ny = (b.y - a.y) / dist;
+    const relVx = a.vx - b.vx;
+    const relVy = a.vy - b.vy;
+    const relDotN = relVx * nx + relVy * ny;
+    if (relDotN >= 0) return; // already separating
+    const j = (2 * relDotN) / (1 / a.mass + 1 / b.mass);
+    a.vx -= (j / a.mass) * nx;
+    a.vy -= (j / a.mass) * ny;
+    b.vx += (j / b.mass) * nx;
+    b.vy += (j / b.mass) * ny;
+  }
+
+  function updateSatellites() {
+    for (const sat of satellites) {
+      if (sat.mode === "kinematic") {
+        const angularVelocity = (Math.PI * 2) / sat.orbitalPeriod;
+        sat.angle += angularVelocity;
+        sat.x = sat.planet.x + Math.cos(sat.angle) * sat.orbitalRadius;
+        sat.y = sat.planet.y + Math.sin(sat.angle) * sat.orbitalRadius;
+        sat.vx = -Math.sin(sat.angle) * sat.orbitalRadius * angularVelocity;
+        sat.vy = Math.cos(sat.angle) * sat.orbitalRadius * angularVelocity;
+      } else {
+        const g = getBlendedGravity(sat.x, sat.y);
+        sat.vx += g.gx;
+        sat.vy += g.gy;
+        sat.x += sat.vx;
+        sat.y += sat.vy;
+
+        // Crash into parent planet
+        const dToPlanet = Math.hypot(sat.x - sat.planet.x, sat.y - sat.planet.y);
+        const surfAngle = Math.atan2(sat.y - sat.planet.y, sat.x - sat.planet.x);
+        if (dToPlanet < surfaceRadiusAt(sat.planet, surfAngle) + sat.radius) {
+          sat.mode = "kinematic"; // respawn kinematically (reset)
+          sat.angle = Math.random() * Math.PI * 2;
+          sat.x = sat.planet.x + Math.cos(sat.angle) * sat.orbitalRadius;
+          sat.y = sat.planet.y + Math.sin(sat.angle) * sat.orbitalRadius;
+          const av = (Math.PI * 2) / sat.orbitalPeriod;
+          sat.vx = -Math.sin(sat.angle) * sat.orbitalRadius * av;
+          sat.vy = Math.cos(sat.angle) * sat.orbitalRadius * av;
+        }
+      }
+
+      // Collision with player
+      const dToPlayer = Math.hypot(player.x - sat.x, player.y - sat.y);
+      if (dToPlayer < player.radius + sat.radius) {
+        if (sat.mode === "kinematic") {
+          sat.mode = "physics"; // vx/vy already set to tangential velocity
+        }
+        applyCollisionImpulse(player, sat);
+        // Separate them
+        const overlap = player.radius + sat.radius - dToPlayer;
+        const nx = (player.x - sat.x) / (dToPlayer || 0.001);
+        const ny = (player.y - sat.y) / (dToPlayer || 0.001);
+        player.x += nx * overlap * 0.5;
+        player.y += ny * overlap * 0.5;
+        sat.x -= nx * overlap * 0.5;
+        sat.y -= ny * overlap * 0.5;
+        if (player.onGround) {
+          player.onGround = false;
+          player.mode = "air";
+        }
+      }
+    }
+  }
+
+  function spawnAsteroid() {
+    // Pick off-screen spawn point
+    const angle = Math.random() * Math.PI * 2;
+    const spawnDist = Math.hypot(canvas.clientWidth, canvas.clientHeight) / 2 + 500;
+    const spawnX = player.x + Math.cos(angle) * spawnDist;
+    const spawnY = player.y + Math.sin(angle) * spawnDist;
+
+    // Aim roughly toward planet cluster center with ±30° randomness
+    const centerX = planets.reduce((s, p) => s + p.x, 0) / planets.length;
+    const centerY = planets.reduce((s, p) => s + p.y, 0) / planets.length;
+    const toCenter = Math.atan2(centerY - spawnY, centerX - spawnX);
+    const aimAngle = toCenter + (Math.random() - 0.5) * (Math.PI / 3);
+    const speed = 6 + Math.random() * 6;
+    const radius = 15 + Math.random() * 30;
+    const numVertices = 7 + Math.floor(Math.random() * 3);
+    const vertexOffsets = Array.from({ length: numVertices }, () => 0.75 + Math.random() * 0.5);
+
+    asteroids.push({
+      x: spawnX,
+      y: spawnY,
+      vx: Math.cos(aimAngle) * speed,
+      vy: Math.sin(aimAngle) * speed,
+      radius,
+      mass: radius * radius * 0.5,
+      active: true,
+      vertexOffsets,
+    });
+  }
+
+  function updateAsteroids() {
+    const nearestPlanetDist = (ax: number, ay: number) =>
+      Math.min(...planets.map((p) => Math.hypot(ax - p.x, ay - p.y)));
+
+    for (let i = asteroids.length - 1; i >= 0; i--) {
+      const ast = asteroids[i];
+      if (!ast.active) {
+        asteroids.splice(i, 1);
+        continue;
+      }
+
+      // Gravity — 50% of full gravity so they curve but usually pass through
+      const g = getBlendedGravity(ast.x, ast.y);
+      ast.vx += g.gx * 0.5;
+      ast.vy += g.gy * 0.5;
+      ast.x += ast.vx;
+      ast.y += ast.vy;
+
+      // Despawn if too far
+      if (nearestPlanetDist(ast.x, ast.y) > 3000) {
+        ast.active = false;
+        continue;
+      }
+
+      // Collision with planets
+      let hitPlanet = false;
+      for (const planet of planets) {
+        const d = Math.hypot(ast.x - planet.x, ast.y - planet.y);
+        const surfAngle = Math.atan2(ast.y - planet.y, ast.x - planet.x);
+        if (d < surfaceRadiusAt(planet, surfAngle) + ast.radius) {
+          ast.active = false;
+          hitPlanet = true;
+          break;
+        }
+      }
+      if (hitPlanet) continue;
+
+      // Collision with player
+      const dToPlayer = Math.hypot(player.x - ast.x, player.y - ast.y);
+      if (dToPlayer < player.radius + ast.radius) {
+        const playerProxy = {
+          vx: player.vx,
+          vy: player.vy,
+          mass: player.mass,
+          x: player.x,
+          y: player.y,
+        };
+        applyCollisionImpulse(playerProxy, ast);
+        player.vx = playerProxy.vx;
+        player.vy = playerProxy.vy;
+        if (player.onGround) {
+          player.onGround = false;
+          player.mode = "air";
+        }
+      }
+
+      // Collision with satellites
+      for (const sat of satellites) {
+        const dToSat = Math.hypot(ast.x - sat.x, ast.y - sat.y);
+        if (dToSat < ast.radius + sat.radius) {
+          if (sat.mode === "kinematic") {
+            sat.mode = "physics";
+          }
+          applyCollisionImpulse(ast, sat);
+        }
+      }
+    }
+  }
+
+  function drawSatellites() {
+    ctx.save();
+    ctx.translate(canvas.clientWidth / 2, canvas.clientHeight / 2);
+    ctx.rotate(-camera.angle);
+    ctx.translate(-player.x, -player.y);
+
+    for (const sat of satellites) {
+      // Draw faint orbital ring in kinematic mode
+      if (sat.mode === "kinematic") {
+        ctx.beginPath();
+        ctx.arc(sat.planet.x, sat.planet.y, sat.orbitalRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${sat.color.r}, ${sat.color.g}, ${sat.color.b}, 0.12)`;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([6, 8]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Orientation: body perpendicular to orbit (radial axis), panels along orbit tangent.
+      // In kinematic mode use orbital angle directly; in physics use velocity direction.
+      const orientAngle =
+        sat.mode === "kinematic"
+          ? sat.angle + Math.PI / 2
+          : Math.atan2(sat.vy, sat.vx) + Math.PI / 2;
+
+      const s = sat.radius; // scale unit
+
+      ctx.save();
+      ctx.translate(sat.x, sat.y);
+      ctx.rotate(orientAngle);
+
+      // --- Solar panels ---
+      // Each wing: two panel segments separated by a short strut gap.
+      // Panels are blue/dark-blue cells with a grid, mounted on a thin boom.
+      const boomLen = s * 1.7; // half-width: center to outer edge of each wing
+      const boomW = s * 0.08;
+      const panelW = s * 1.3; // each panel section width
+      const panelH = s * 0.55;
+      const panelGap = s * 0.12; // gap at center (where boom meets body)
+
+      for (const side of [-1, 1]) {
+        const boomStartX = side * s * 0.38; // attached at body edge
+        const boomEndX = side * (s * 0.38 + boomLen);
+
+        // Boom strut
+        ctx.fillStyle = "rgba(160,165,180,0.9)";
+        ctx.fillRect(
+          Math.min(boomStartX, boomEndX),
+          -boomW / 2,
+          Math.abs(boomEndX - boomStartX),
+          boomW,
+        );
+
+        // Two panel sections along the boom (inner and outer)
+        for (let pi = 0; pi < 2; pi++) {
+          const pStartX =
+            side > 0
+              ? boomStartX + panelGap + pi * (panelW + panelGap)
+              : boomStartX - panelGap - (pi + 1) * panelW - pi * panelGap;
+
+          // Panel base — deep navy-blue
+          ctx.fillStyle = "rgba(22, 44, 120, 0.95)";
+          ctx.fillRect(pStartX, -panelH / 2, panelW * side, panelH);
+
+          // Solar cell grid lines
+          ctx.strokeStyle = "rgba(80, 120, 220, 0.6)";
+          ctx.lineWidth = 0.5;
+          const cols = 4;
+          const rows = 2;
+          for (let ci = 1; ci < cols; ci++) {
+            const lx = pStartX + (panelW * side * ci) / cols;
+            ctx.beginPath();
+            ctx.moveTo(lx, -panelH / 2);
+            ctx.lineTo(lx, panelH / 2);
+            ctx.stroke();
+          }
+          for (let ri = 1; ri < rows; ri++) {
+            const ly = -panelH / 2 + (panelH * ri) / rows;
+            ctx.beginPath();
+            ctx.moveTo(pStartX, ly);
+            ctx.lineTo(pStartX + panelW * side, ly);
+            ctx.stroke();
+          }
+
+          // Subtle reflective sheen on the panel
+          ctx.fillStyle = "rgba(100,160,255,0.10)";
+          ctx.fillRect(pStartX, -panelH / 2, panelW * side, panelH * 0.4);
+
+          // Panel border
+          ctx.strokeStyle = "rgba(140,170,255,0.5)";
+          ctx.lineWidth = 0.8;
+          ctx.strokeRect(pStartX, -panelH / 2, panelW * side, panelH);
+        }
+      }
+
+      // --- Main body ---
+      const bodyW = s * 0.76;
+      const bodyH = s * 1.1;
+
+      // Body shell — metallic gradient
+      const bodyGrad = ctx.createLinearGradient(-bodyW / 2, -bodyH / 2, bodyW / 2, bodyH / 2);
+      bodyGrad.addColorStop(0, `rgba(230,232,240,0.97)`);
+      bodyGrad.addColorStop(0.45, `rgb(${sat.color.r}, ${sat.color.g}, ${sat.color.b})`);
+      bodyGrad.addColorStop(1, `rgba(60,65,80,0.95)`);
+      ctx.fillStyle = bodyGrad;
+      ctx.beginPath();
+      const br = s * 0.1; // corner radius
+      ctx.moveTo(-bodyW / 2 + br, -bodyH / 2);
+      ctx.lineTo(bodyW / 2 - br, -bodyH / 2);
+      ctx.quadraticCurveTo(bodyW / 2, -bodyH / 2, bodyW / 2, -bodyH / 2 + br);
+      ctx.lineTo(bodyW / 2, bodyH / 2 - br);
+      ctx.quadraticCurveTo(bodyW / 2, bodyH / 2, bodyW / 2 - br, bodyH / 2);
+      ctx.lineTo(-bodyW / 2 + br, bodyH / 2);
+      ctx.quadraticCurveTo(-bodyW / 2, bodyH / 2, -bodyW / 2, bodyH / 2 - br);
+      ctx.lineTo(-bodyW / 2, -bodyH / 2 + br);
+      ctx.quadraticCurveTo(-bodyW / 2, -bodyH / 2, -bodyW / 2 + br, -bodyH / 2);
+      ctx.closePath();
+      ctx.fill();
+
+      // Body edge highlight
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Body face detail — thermal louvres (horizontal stripes)
+      ctx.strokeStyle = "rgba(100,110,140,0.45)";
+      ctx.lineWidth = 0.7;
+      const louvrCount = 5;
+      for (let li = 1; li < louvrCount; li++) {
+        const ly = -bodyH / 2 + (bodyH * li) / louvrCount;
+        ctx.beginPath();
+        ctx.moveTo(-bodyW / 2 + br, ly);
+        ctx.lineTo(bodyW / 2 - br, ly);
+        ctx.stroke();
+      }
+
+      // --- Dish antenna ---
+      // Small parabolic dish on top of the body, pointing away from planet.
+      const dishR = s * 0.28;
+      const dishStemH = s * 0.22;
+      const dishY = -bodyH / 2 - dishStemH;
+
+      // Stem
+      ctx.strokeStyle = "rgba(180,185,200,0.9)";
+      ctx.lineWidth = s * 0.06;
+      ctx.beginPath();
+      ctx.moveTo(0, -bodyH / 2);
+      ctx.lineTo(0, dishY);
+      ctx.stroke();
+
+      // Dish arc (half-circle facing up)
+      ctx.beginPath();
+      ctx.arc(0, dishY, dishR, Math.PI, Math.PI * 2);
+      ctx.fillStyle = "rgba(210,215,230,0.88)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.3)";
+      ctx.lineWidth = 0.7;
+      ctx.stroke();
+
+      // Dish feed horn (tiny dot at focus)
+      ctx.fillStyle = "rgba(80,85,100,0.9)";
+      ctx.beginPath();
+      ctx.arc(0, dishY - dishR * 0.55, s * 0.06, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  function drawAsteroids() {
+    ctx.save();
+    ctx.translate(canvas.clientWidth / 2, canvas.clientHeight / 2);
+    ctx.rotate(-camera.angle);
+    ctx.translate(-player.x, -player.y);
+
+    for (const ast of asteroids) {
+      if (!ast.active) continue;
+
+      const numVerts = ast.vertexOffsets.length;
+      ctx.beginPath();
+      for (let i = 0; i <= numVerts; i++) {
+        const vAngle = (i / numVerts) * Math.PI * 2;
+        const r = ast.radius * ast.vertexOffsets[i % numVerts];
+        const vx = ast.x + Math.cos(vAngle) * r;
+        const vy = ast.y + Math.sin(vAngle) * r;
+        if (i === 0) ctx.moveTo(vx, vy);
+        else ctx.lineTo(vx, vy);
+      }
+      ctx.closePath();
+
+      const gray = 85 + Math.floor(ast.radius * 1.5);
+      ctx.fillStyle = `rgb(${gray}, ${gray - 5}, ${gray - 10})`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(180,180,185,0.5)`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
   function draw() {
     drawBackground();
     drawWorld();
+    drawSatellites();
+    drawAsteroids();
     drawPlayer();
     drawPlanetIndicator();
     drawMinimap();
@@ -734,6 +1113,17 @@ export function bindGame({
 
   function tick() {
     updatePlayer();
+    updateSatellites();
+    updateAsteroids();
+
+    // Asteroid spawn timer
+    const activeCount = asteroids.filter((a) => a.active).length;
+    asteroidSpawnTimer--;
+    if (asteroidSpawnTimer <= 0 && activeCount < MAX_ASTEROIDS) {
+      spawnAsteroid();
+      asteroidSpawnTimer = 300 + Math.floor(Math.random() * 600);
+    }
+
     updateCamera();
     draw();
     prevKeys = new Set(keys);
@@ -951,6 +1341,49 @@ function generatePlanets(): Planet[] {
       ],
     },
   ];
+}
+
+function generateSatellites(planets: Planet[]): Satellite[] {
+  const sats: Satellite[] = [];
+  const satColors = [
+    { r: 180, g: 185, b: 200 }, // silver-blue
+    { r: 200, g: 190, b: 175 }, // warm silver
+    { r: 165, g: 200, b: 180 }, // cool teal-silver
+  ];
+
+  for (const planet of planets) {
+    const count = 1 + Math.floor(Math.random() * 2); // 1 or 2
+    for (let i = 0; i < count; i++) {
+      const orbitalRadius = planet.radius * (1.6 + Math.random() * 0.6);
+      // period scales with orbital radius: farther = slower
+      const orbitalPeriod = 600 + (orbitalRadius / planet.radius - 1.6) * 1500;
+      const angle = Math.random() * Math.PI * 2;
+      const angularVelocity = (Math.PI * 2) / orbitalPeriod;
+      const color = satColors[Math.floor(Math.random() * satColors.length)];
+      // Slight tint toward planet color
+      const tintedColor = {
+        r: Math.round(color.r * 0.8 + planet.color.r * 0.2),
+        g: Math.round(color.g * 0.8 + planet.color.g * 0.2),
+        b: Math.round(color.b * 0.8 + planet.color.b * 0.2),
+      };
+
+      sats.push({
+        planet,
+        orbitalRadius,
+        orbitalPeriod,
+        angle,
+        x: planet.x + Math.cos(angle) * orbitalRadius,
+        y: planet.y + Math.sin(angle) * orbitalRadius,
+        vx: -Math.sin(angle) * orbitalRadius * angularVelocity,
+        vy: Math.cos(angle) * orbitalRadius * angularVelocity,
+        radius: 20 + Math.random() * 20,
+        mass: 200 + Math.random() * 300,
+        mode: "kinematic",
+        color: tintedColor,
+      });
+    }
+  }
+  return sats;
 }
 
 function generateStarfield(count = 240): Star[] {
