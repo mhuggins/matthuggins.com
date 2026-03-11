@@ -1,4 +1,4 @@
-import { Planet, Star } from "../types";
+import { Planet, Player, Star } from "../types";
 
 const MAX_NEAREST_PLANETS = 10;
 const MIN_CONTRIBUTION = 0.02;
@@ -7,6 +7,20 @@ const JUMP_STRENGTH = 7.8;
 const JETPACK_FORCE = 0.35;
 const JETPACK_DRAIN = 0; // 0.0125;
 const AIR_ROTATE_SPEED = 0.01;
+
+// Assumed gravity range across all planets — used to normalize visual intensity.
+const GRAVITY_MIN = 0.15;
+const GRAVITY_MAX = 0.4;
+
+// Accumulated band opacity range — weakest planet sits at MIN, strongest at MAX.
+const GRAVITY_BAND_OPACITY_MIN = 0.08;
+const GRAVITY_BAND_OPACITY_MAX = 0.2;
+
+// How far gravity extends above a planet's surface.
+// Influence altitude = radius * GRAVITY_RADIUS_MULTIPLIER + GRAVITY_RADIUS_BASE
+// The band visual radius adds one extra planet.radius on top (planet center → surface → atmosphere).
+const GRAVITY_RADIUS_MULTIPLIER = 2.0;
+const GRAVITY_RADIUS_BASE = 240;
 
 export function bindGame({
   container,
@@ -122,7 +136,7 @@ export function bindGame({
     return best;
   }
 
-  const player = {
+  const player: Player = {
     x: 0,
     y: 0,
     vx: 0,
@@ -389,19 +403,64 @@ export function bindGame({
     ctx.rotate(-camera.angle);
     ctx.translate(-player.x, -player.y);
 
-    for (const planet of planets) drawPlanet(planet);
+    let bandVisibility: number;
+    if (player.hasUsedJetpackThisAirborne) {
+      bandVisibility = 1;
+    } else {
+      const minSurfaceDist = Math.min(
+        ...planets.map((p) => {
+          const angle = Math.atan2(player.y - p.y, player.x - p.x);
+          return Math.hypot(player.x - p.x, player.y - p.y) - surfaceRadiusAt(p, angle);
+        }),
+      );
+      bandVisibility = clamp(minSurfaceDist / 240, 0, 1);
+    }
+
+    for (const planet of planets) drawPlanet(planet, bandVisibility);
 
     ctx.restore();
   }
 
-  function drawPlanet(planet: (typeof planets)[0]) {
-    const range = gravityRange(planet);
-
-    ctx.strokeStyle = `rgba(${planet.ringColor.r}, ${planet.ringColor.g}, ${planet.ringColor.b}, 0.16)`;
-    ctx.lineWidth = 2;
+  function drawPlanet(planet: (typeof planets)[0], bandVisibility: number) {
+    // Animated gravity bands — clipped to outside the terrain polygon using evenodd.
+    // Fade out when player is near any surface; fade in as they move into open space.
+    const influenceRadius = planet.radius * (1 + GRAVITY_RADIUS_MULTIPLIER) + GRAVITY_RADIUS_BASE;
+    const numBands = Math.max(3, Math.round(planet.gravity * 32));
+    const period = 1500 / planet.gravity; // higher gravity = faster bands
+    const now = performance.now();
+    const { r: cr, g: cg, b: cb } = planet.ringColor;
+    const gravityNormalized = (planet.gravity - GRAVITY_MIN) / (GRAVITY_MAX - GRAVITY_MIN);
+    const maxOpacity =
+      GRAVITY_BAND_OPACITY_MIN +
+      gravityNormalized * (GRAVITY_BAND_OPACITY_MAX - GRAVITY_BAND_OPACITY_MIN);
+    const bandAlpha = (maxOpacity / numBands) * bandVisibility;
+    ctx.save();
     ctx.beginPath();
-    ctx.arc(planet.x, planet.y, range, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.rect(
+      planet.x - influenceRadius - 10,
+      planet.y - influenceRadius - 10,
+      (influenceRadius + 10) * 2,
+      (influenceRadius + 10) * 2,
+    );
+    for (let i = 0; i <= 256; i++) {
+      const a = (i / 256) * Math.PI * 2;
+      const r = surfaceRadiusAt(planet, a);
+      const px = planet.x + Math.cos(a) * r;
+      const py = planet.y + Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.clip("evenodd");
+    for (let i = 0; i < numBands; i++) {
+      const phase = (now / period + i / numBands) % 1; // 0 = outer edge, 1 = surface
+      const bandRadius = influenceRadius * (1 - phase);
+      ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${bandAlpha})`;
+      ctx.beginPath();
+      ctx.arc(planet.x, planet.y, bandRadius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
 
     const g = ctx.createRadialGradient(
       planet.x - planet.radius * 0.35,
@@ -522,7 +581,7 @@ export function bindGame({
     let label = player.mode;
     if (player.mode === "grounded" || player.mode === "bound") {
       label += player.activePlanet ? ` • ${player.activePlanet.name}` : "";
-    } else if (player.mode === "free") {
+    } else if (player.mode === "air") {
       label += " • blended";
     }
 
@@ -603,7 +662,7 @@ export function bindGame({
     const mapCY = originY + mapH / 2;
 
     // Fixed world-space view radius, scaled to fit the minimap's shorter half
-    const viewRadius = 2500;
+    const viewRadius = 8500;
     const scale = Math.min(mapW / 2 - pad, mapH / 2 - pad) / viewRadius;
 
     function worldToMinimap(wx: number, wy: number) {
@@ -631,13 +690,6 @@ export function bindGame({
     for (const p of planets) {
       const mp = worldToMinimap(p.x, p.y);
       const r = Math.max(3, p.radius * scale);
-
-      // Gravity range ring
-      ctx.strokeStyle = `rgba(${p.ringColor.r}, ${p.ringColor.g}, ${p.ringColor.b}, 0.2)`;
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.arc(mp.x, mp.y, gravityRange(p) * scale, 0, Math.PI * 2);
-      ctx.stroke();
 
       // Planet body with radial gradient matching main view
       const g = ctx.createRadialGradient(mp.x - r * 0.35, mp.y - r * 0.4, r * 0.2, mp.x, mp.y, r);
@@ -764,17 +816,13 @@ function roundRect(
   ctx.closePath();
 }
 
-function gravityRange(planet: Planet) {
-  return planet.radius + 90 + planet.gravity * 280;
-}
-
 function gravityStrengthForPlanet(planet: Planet, px: number, py: number) {
   const dx = planet.x - px;
   const dy = planet.y - py;
   const dist = Math.hypot(dx, dy);
 
   const altitude = Math.max(0, dist - planet.radius);
-  const influence = planet.radius * 2.6 + 320;
+  const influence = planet.radius * GRAVITY_RADIUS_MULTIPLIER + GRAVITY_RADIUS_BASE;
   const t = clamp(altitude / influence, 0, 1);
 
   const falloff = 1 - t * t * (3 - 2 * t);
@@ -819,7 +867,7 @@ function generatePlanets(): Planet[] {
       name: "Azure",
       x: 0,
       y: 0,
-      radius: 400,
+      radius: 750,
       gravity: 0.32,
       color: { r: 85, g: 125, b: 255 },
       ringColor: { r: 85, g: 125, b: 255 },
@@ -838,9 +886,9 @@ function generatePlanets(): Planet[] {
     },
     {
       name: "Cinder",
-      x: 900,
-      y: -860,
-      radius: 300,
+      x: 2700,
+      y: -2600,
+      radius: 550,
       gravity: 0.34,
       color: { r: 255, g: 155, b: 74 },
       ringColor: { r: 255, g: 155, b: 74 },
@@ -861,9 +909,9 @@ function generatePlanets(): Planet[] {
     },
     {
       name: "Verdant",
-      x: 1900,
-      y: 60,
-      radius: 200,
+      x: 5700,
+      y: 200,
+      radius: 420,
       gravity: 0.2,
       color: { r: 72, g: 199, b: 142 },
       ringColor: { r: 72, g: 199, b: 142 },
@@ -882,9 +930,9 @@ function generatePlanets(): Planet[] {
     },
     {
       name: "Violet",
-      x: 1850,
-      y: -920,
-      radius: 280,
+      x: 6900,
+      y: -3100,
+      radius: 520,
       gravity: 0.25,
       color: { r: 192, g: 107, b: 255 },
       ringColor: { r: 192, g: 107, b: 255 },
