@@ -41,6 +41,7 @@ export interface Player {
   vx: number;
   vy: number;
   radius: number;
+  mass: number;
   onGround: boolean;
   currentPlanet: Planet;
   activePlanet: Planet | undefined;
@@ -55,4 +56,30 @@ export interface Player {
   maxFuel: number;
   jumpAngularVelocity: number; // rad/frame, preserved during arc to match surface travel distance
   jumpAngularVelocityMax: number; // |ω| at jump time — caps aerial steering
+}
+
+export interface Satellite {
+  planet: Planet;
+  orbitalRadius: number;
+  orbitalPeriod: number; // frames per full orbit
+  angle: number; // current orbital angle (radians)
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  mass: number;
+  mode: "kinematic" | "physics";
+  color: { r: number; g: number; b: number };
+}
+
+export interface Asteroid {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  mass: number;
+  active: boolean;
+  vertexOffsets: number[]; // per-vertex radius multipliers
 }
