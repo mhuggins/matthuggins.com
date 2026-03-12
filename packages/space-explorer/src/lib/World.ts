@@ -165,11 +165,17 @@ export class World {
 
   private resolveCollisions = (): void => {
     const dynamic = this.parts.filter((p) => p.radius > 0);
+
     for (let i = 0; i < dynamic.length; i++) {
       for (let j = i + 1; j < dynamic.length; j++) {
+        // Skip sphere collision when either part is anchored. Anchored parts (planets)
+        // use surface-aware contact systems instead: player↔planet is handled by
+        // Player.update() landing detection (surfaceRadiusAt), and satellite↔planet
+        // is handled by Satellite.update(). The coarse sphere boundary is unreliable
+        // for terrain with valleys (surfaceRadiusAt < planet.radius).
         const a = dynamic[i];
         const b = dynamic[j];
-        if (a.anchored && b.anchored) {
+        if (a.anchored || b.anchored) {
           continue;
         }
 
