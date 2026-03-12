@@ -8,6 +8,9 @@ export enum RenderLayer {
 }
 
 export abstract class Part {
+  private static nextId = 0;
+  readonly id = Part.nextId++;
+
   x = 0;
   y = 0;
   vx = 0;
