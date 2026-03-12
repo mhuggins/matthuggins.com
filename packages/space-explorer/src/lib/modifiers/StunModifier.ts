@@ -1,7 +1,7 @@
 import type { Part } from "../parts/Part";
 import { angleToUpVector } from "../utils";
-import { FlashModifier } from "./FlashModifier";
 import { Modifier } from "./Modifier";
+import { SmokeModifier } from "./SmokeModifier";
 
 // With SPIN_DECAY=0.96, total rotation = initialVelocity / (1 - 0.96) = initialVelocity * 25.
 // So initialVelocity = desiredRotations * 2π / 25 ≈ desiredRotations * 0.2513.
@@ -28,15 +28,21 @@ export class StunModifier extends Modifier {
     this.stunFrames = cfg.stunFrames ?? DEFAULT_STUN_FRAMES;
   }
 
-  override onCollide(other: Part, _nx: number, _ny: number, impactSpeed: number): void {
+  override onCollide(other: Part, nx: number, ny: number, impactSpeed: number): void {
     // Planet collisions are handled by Player.update() landing detection — the sphere
     // collision boundary is unreliable for anchored surfaces with valley terrain
     // (surfaceRadiusAt < planet.radius), which causes spurious high-speed contacts on
     // every jump. Only dynamic objects (asteroids, satellites) should stun the player.
-    if (other.anchored) return;
+    if (other.anchored) {
+      return;
+    }
 
-    if (impactSpeed < MIN_STUN_IMPACT_SPEED) return;
-    if (this.currentStunFrames > 0) return;
+    if (impactSpeed < MIN_STUN_IMPACT_SPEED) {
+      return;
+    }
+    if (this.currentStunFrames > 0) {
+      return;
+    }
 
     const rotations = Math.min(4, 1 + impactSpeed * 0.15);
     const spinStrength = rotations * 2 * Math.PI * 0.04;
@@ -49,7 +55,7 @@ export class StunModifier extends Modifier {
     this.currentStunFrames = this.stunFrames;
     this.spinAngle = Math.atan2(this.parent.upX, -this.parent.upY);
 
-    this.parent.modifiers.push(new FlashModifier(this.parent, -8, -12, 16, 24, 6));
+    this.parent.modifiers.push(new SmokeModifier(this.parent, { nx, ny }));
   }
 
   update(): void {
