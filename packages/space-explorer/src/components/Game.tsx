@@ -1,5 +1,6 @@
 import { cn } from "@matthuggins/ui";
-import { useEffect, useRef } from "react";
+import { CornersInIcon, CornersOutIcon, MusicNotesSimpleIcon } from "@phosphor-icons/react";
+import { ButtonHTMLAttributes, useEffect, useRef, useState } from "react";
 import { createWorld } from "../lib/createWorld";
 import { startAmbientSound, stopAmbientSound } from "../lib/sounds";
 
@@ -8,6 +9,9 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
   const fuelRef = useRef<HTMLDivElement>(null);
+
+  const [displayFullscreen, setDisplayFullscreen] = useState(false);
+  const [playAmbientSounds, setPlayAmbientSounds] = useState(true);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -28,6 +32,13 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
     };
   }, []);
 
+  const toggleAmbientSound = () => {
+    setPlayAmbientSounds((prev) => {
+      prev ? stopAmbientSound() : startAmbientSound();
+      return !prev;
+    });
+  };
+
   return (
     <div
       ref={containerRef}
@@ -41,35 +52,52 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
       </div>
 
       <div className="absolute right-3 bottom-3 flex items-center gap-2">
-        <button
-          onClick={(e) => {
-            toggleFullscreen(containerRef.current);
-            e.currentTarget.blur();
+        <ConsoleButton onClick={toggleAmbientSound} aria-label="Toggle background sound">
+          <MusicNotesSimpleIcon
+            size={24}
+            weight="fill"
+            className={cn(!playAmbientSounds && "opacity-25")}
+          />
+        </ConsoleButton>
+        <ConsoleButton
+          onClick={async () => {
+            setDisplayFullscreen(await toggleFullscreen(containerRef.current));
           }}
-          className="cursor-pointer rounded-lg border border-white/[0.08] bg-black/[0.42] p-2 text-[#dce7ff] backdrop-blur-sm transition-colors hover:bg-black/[0.65]"
           aria-label="Toggle fullscreen"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          >
-            <path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5" />
-          </svg>
-        </button>
+          {displayFullscreen ? <CornersInIcon size={24} /> : <CornersOutIcon size={24} />}
+        </ConsoleButton>
       </div>
     </div>
   );
 };
 
-function toggleFullscreen(element: Element | null) {
+function ConsoleButton({ className, onClick, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      {...props}
+      onClick={(e) => {
+        onClick?.(e);
+        e.currentTarget.blur();
+      }}
+      className={cn(
+        "cursor-pointer rounded-lg border border-white/[0.08] bg-black/[0.42] p-2 text-[#dce7ff] backdrop-blur-sm transition-colors hover:bg-black/[0.65]",
+        className,
+      )}
+    />
+  );
+}
+
+async function toggleFullscreen(element: Element | null): Promise<boolean> {
   if (document.fullscreenElement) {
     document.exitFullscreen();
-  } else {
-    element?.requestFullscreen();
+    return false;
+  }
+
+  try {
+    await element?.requestFullscreen();
+    return true;
+  } catch {
+    return false;
   }
 }

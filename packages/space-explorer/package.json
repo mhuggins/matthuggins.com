@@ -27,6 +27,7 @@
     "@matthuggins/platforming-engine": "workspace:*",
     "@matthuggins/tsconfig": "workspace:*",
     "@matthuggins/ui": "workspace:*",
+    "@phosphor-icons/react": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "jsdom": "catalog:",
