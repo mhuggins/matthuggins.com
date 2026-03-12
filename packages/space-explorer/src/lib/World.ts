@@ -8,6 +8,8 @@ import { Player } from "./parts/Player";
 import { applyCollisionImpulse, gravityVectorForPlanet, roundRect, surfaceRadiusAt } from "./utils";
 
 const MAX_NEAREST_PLANETS = 10;
+const COLLISION_BUFFER = 0.2; // contact slop: catches floating-point near-misses on exact surface snaps
+const SEPARATION_BUFFER = 4; // hysteresis: contact persists until clearly separated
 const MIN_CONTRIBUTION = 0.02;
 const MAX_ASTEROIDS = 3;
 
@@ -22,6 +24,7 @@ export class World {
   private status: HTMLElement;
   private fuel: HTMLElement;
   private rafId = 0;
+  private contactPairs = new Set<string>();
   private asteroidSpawnTimer = 0;
   private starfield: Star[];
 
@@ -165,6 +168,7 @@ export class World {
 
   private resolveCollisions = (): void => {
     const dynamic = this.parts.filter((p) => p.radius > 0);
+    const newContacts = new Set<string>();
 
     for (let i = 0; i < dynamic.length; i++) {
       for (let j = i + 1; j < dynamic.length; j++) {
@@ -182,7 +186,18 @@ export class World {
         const rb = b.surfaceRadiusToward(a.x, a.y);
 
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
-        if (dist >= ra + rb) {
+        const key = `${Math.min(a.id, b.id)}-${Math.max(a.id, b.id)}`;
+        const wasContact = this.contactPairs.has(key);
+        const overlapping = dist <= ra + rb + COLLISION_BUFFER;
+
+        // Contact persists until the parts are clearly separated (hysteresis). This
+        // prevents tiny terrain dips from breaking and immediately re-creating a
+        // contact, which would fire onCollide on every step over uneven ground.
+        if (overlapping || (wasContact && dist <= ra + rb + SEPARATION_BUFFER)) {
+          newContacts.add(key);
+        }
+
+        if (!overlapping) {
           continue;
         }
 
@@ -205,11 +220,15 @@ export class World {
         // Apply impulse once for both.
         applyCollisionImpulse(a, b);
 
-        // Notify each part with its own push direction (away from the other).
-        a.onCollide(b, -nx, -ny, impactSpeed);
-        b.onCollide(a, nx, ny, impactSpeed);
+        // Only notify on first contact this pair has made.
+        if (!wasContact) {
+          a.onCollide(b, -nx, -ny, impactSpeed);
+          b.onCollide(a, nx, ny, impactSpeed);
+        }
       }
     }
+
+    this.contactPairs = newContacts;
   };
 
   private tickAsteroidSpawner = (): void => {
