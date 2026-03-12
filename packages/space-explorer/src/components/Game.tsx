@@ -1,6 +1,7 @@
 import { cn } from "@matthuggins/ui";
 import { useEffect, useRef } from "react";
 import { createWorld } from "../lib/createWorld";
+import { startAmbientSound, stopAmbientSound } from "../lib/sounds";
 
 export const SpaceExplorer = ({ className }: { className?: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,7 +21,11 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
 
     const world = createWorld({ canvas, container, status, fuel });
     world.start();
-    return world.stop;
+    startAmbientSound();
+    return () => {
+      world.stop();
+      stopAmbientSound();
+    };
   }, []);
 
   return (
@@ -35,26 +40,28 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
         <div ref={fuelRef} className="opacity-[0.82]" />
       </div>
 
-      <button
-        onClick={(e) => {
-          toggleFullscreen(containerRef.current);
-          e.currentTarget.blur();
-        }}
-        className="absolute right-3 bottom-3 cursor-pointer rounded-lg border border-white/[0.08] bg-black/[0.42] p-2 text-[#dce7ff] backdrop-blur-sm transition-colors hover:bg-black/[0.65]"
-        aria-label="Toggle fullscreen"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
+      <div className="absolute right-3 bottom-3 flex items-center gap-2">
+        <button
+          onClick={(e) => {
+            toggleFullscreen(containerRef.current);
+            e.currentTarget.blur();
+          }}
+          className="cursor-pointer rounded-lg border border-white/[0.08] bg-black/[0.42] p-2 text-[#dce7ff] backdrop-blur-sm transition-colors hover:bg-black/[0.65]"
+          aria-label="Toggle fullscreen"
         >
-          <path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5" />
-        </svg>
-      </button>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          >
+            <path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 export * from "./helpers/applyCollisionImpulse";
 
+export * from "./lib/AudioManager";
 export * from "./lib/Camera";
 export * from "./lib/Input";
 export * from "./lib/Modifier";

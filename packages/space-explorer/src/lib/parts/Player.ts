@@ -9,6 +9,14 @@ import { roundRect } from "../../helpers/roundRect";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import type { Input } from "../Input";
 import { StunModifier } from "../modifiers/StunModifier";
+import {
+  playJumpSound,
+  playLandSound,
+  startJetpackSound,
+  startWalkSound,
+  stopJetpackSound,
+  stopWalkSound,
+} from "../sounds";
 import { Part, RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
 
@@ -33,6 +41,8 @@ export class Player extends Part {
   maxFuel = 1;
   jumpAngularVelocity = 0;
   jumpAngularVelocityMax = 0;
+  private prevJetpackActive = false;
+  private prevWalkActive = false;
 
   reset(): void {
     const p = this.world.planets[0];
@@ -96,6 +106,7 @@ export class Player extends Part {
       this.freeAngle = Math.atan2(this.upX, -this.upY);
 
       if (input.justPressed("Space")) {
+        playJumpSound();
         const vt = dot(this.vx, this.vy, tangent.x, tangent.y);
         this.jumpAngularVelocity = vt / targetDist;
         this.jumpAngularVelocityMax = Math.max(
@@ -158,6 +169,23 @@ export class Player extends Part {
       this.upX = facingUp.x;
       this.upY = facingUp.y;
     }
+
+    if (this.jetpackActive && !this.prevJetpackActive) {
+      startJetpackSound();
+    }
+    if (!this.jetpackActive && this.prevJetpackActive) {
+      stopJetpackSound();
+    }
+    this.prevJetpackActive = this.jetpackActive;
+
+    const walkActive = this.onGround && move !== 0;
+    if (walkActive && !this.prevWalkActive) {
+      startWalkSound();
+    }
+    if (!walkActive && this.prevWalkActive) {
+      stopWalkSound();
+    }
+    this.prevWalkActive = walkActive;
   }
 
   doUpdate(): void {
@@ -208,6 +236,7 @@ export class Player extends Part {
           this.currentPlanet = landingPlanet;
           this.activePlanet = landingPlanet;
           this.mode = "grounded";
+          playLandSound();
 
           const lup = { x: -ldown.x, y: -ldown.y };
           this.upX = lup.x;
