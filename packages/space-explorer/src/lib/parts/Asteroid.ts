@@ -1,4 +1,4 @@
-import { surfaceRadiusAt } from "../utils";
+import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 
@@ -19,7 +19,7 @@ export class Asteroid extends Part {
     this.vertexOffsets = cfg.vertexOffsets;
   }
 
-  update(): void {
+  doUpdate(): void {
     // Gravity — 50% of full gravity so they curve but usually pass through
     const g = this.world.getBlendedGravity(this.x, this.y);
     this.vx += g.gx * 0.5;
@@ -47,7 +47,7 @@ export class Asteroid extends Part {
     }
   }
 
-  render(ctx: CanvasRenderingContext2D): void {
+  doRender(ctx: CanvasRenderingContext2D): void {
     const numVerts = this.vertexOffsets.length;
     ctx.beginPath();
     for (let i = 0; i <= numVerts; i++) {

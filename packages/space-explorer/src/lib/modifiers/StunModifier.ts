@@ -1,5 +1,7 @@
+import { Part as EnginePart } from "@matthuggins/platforming-engine";
+import { angleToUpVector } from "../../helpers/angleToUpVector";
+import type { Input } from "../Input";
 import type { Part } from "../parts/Part";
-import { angleToUpVector } from "../utils";
 import { Modifier } from "./Modifier";
 import { SmokeModifier } from "./SmokeModifier";
 
@@ -28,7 +30,7 @@ export class StunModifier extends Modifier {
     this.stunFrames = cfg.stunFrames ?? DEFAULT_STUN_FRAMES;
   }
 
-  override onCollide(other: Part, nx: number, ny: number, impactSpeed: number): void {
+  override onCollide(other: EnginePart, nx: number, ny: number, impactSpeed: number): void {
     console.log("collide!", this.parent.constructor.name, other.constructor.name);
     // Planet collisions are handled by Player.update() landing detection — the sphere
     // collision boundary is unreliable for anchored surfaces with valley terrain
@@ -56,7 +58,7 @@ export class StunModifier extends Modifier {
     this.parent.modifiers.push(new SmokeModifier(this.parent, { nx, ny }));
   }
 
-  update(): void {
+  update(_input: Input): void {
     if (this.spinVelocity === 0 && this.currentStunFrames === 0) {
       return;
     }

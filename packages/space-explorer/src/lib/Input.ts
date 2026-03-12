@@ -1,40 +1,30 @@
-export class Input {
-  private keys = new Set<string>();
-  private prevKeys = new Set<string>();
-  private handleKeydown: (e: KeyboardEvent) => void;
-  private handleKeyup: (e: KeyboardEvent) => void;
+import { Input as EngineInput } from "@matthuggins/platforming-engine";
 
-  constructor(onReset: () => void) {
-    this.handleKeydown = (e: KeyboardEvent) => {
-      this.keys.add(e.code);
-      if (e.code === "Space") e.preventDefault();
-      if (e.code === "KeyR") onReset();
-    };
-    this.handleKeyup = (e: KeyboardEvent) => {
-      this.keys.delete(e.code);
-    };
-    window.addEventListener("keydown", this.handleKeydown);
-    window.addEventListener("keyup", this.handleKeyup);
+type ResetCallback = () => void;
+
+export class Input extends EngineInput {
+  private onReset: ResetCallback;
+
+  constructor() {
+    super();
+    this.onReset = () => {};
+    window.addEventListener("keydown", this.handleExtra);
   }
 
-  isDown(code: string): boolean {
-    return this.keys.has(code);
-  }
+  private handleExtra = (e: KeyboardEvent) => {
+    if (e.code === "Space") {
+      e.preventDefault();
+    } else if (e.code === "KeyR") {
+      this.onReset();
+    }
+  };
 
-  justPressed(code: string): boolean {
-    return this.keys.has(code) && !this.prevKeys.has(code);
-  }
+  override destroy = () => {
+    super.destroy();
+    window.removeEventListener("keydown", this.handleExtra);
+  };
 
-  justReleased(code: string): boolean {
-    return !this.keys.has(code) && this.prevKeys.has(code);
-  }
-
-  endFrame(): void {
-    this.prevKeys = new Set(this.keys);
-  }
-
-  destroy(): void {
-    window.removeEventListener("keydown", this.handleKeydown);
-    window.removeEventListener("keyup", this.handleKeyup);
+  setResetCallback(fn: ResetCallback): void {
+    this.onReset = fn;
   }
 }

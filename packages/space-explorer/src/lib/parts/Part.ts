@@ -1,4 +1,4 @@
-import type { Modifier } from "../modifiers/Modifier";
+import { Part as EnginePart, Input } from "@matthuggins/platforming-engine";
 import type { World } from "../World";
 
 export enum RenderLayer {
@@ -7,68 +7,30 @@ export enum RenderLayer {
   HUD = 2,
 }
 
-export abstract class Part {
-  private static nextId = 0;
-  readonly id = Part.nextId++;
+export abstract class Part extends EnginePart {
+  // Narrow world type to the concrete SpaceWorld for access to game-specific methods.
+  declare world: World;
 
-  x = 0;
-  y = 0;
-  vx = 0;
-  vy = 0;
-  mass = 0;
-  radius = 0;
-  anchored = false;
   abstract readonly layer: RenderLayer;
   zIndex = 0;
-  modifiers: Modifier[] = [];
-  world: World;
   upX = 0;
   upY = -1;
-  inputsEnabled = true;
 
-  constructor(world: World) {
-    this.world = world;
-  }
-
-  abstract update(): void;
-  abstract render(ctx: CanvasRenderingContext2D): void;
-
-  onSpawn(): void {}
-
-  onDestroy(): void {}
-
-  /**
-   * The effective collision radius toward a given world point. Overridden by
-   * Planet to return the terrain-accurate surface radius at that angle, so the
-   * sphere collision check uses the real surface rather than the bounding sphere.
-   */
-  surfaceRadiusToward(_x: number, _y: number): number {
-    return this.radius;
-  }
-
-  /**
-   * Called by World.resolveCollisions() after the physics impulse has already
-   * been applied. `nx`/`ny` is the push direction for `this` (pointing away
-   * from `other`). Override to add part-specific collision side-effects.
-   */
-  onCollide(other: Part, nx: number, ny: number, impactSpeed: number): void {
-    for (const m of this.modifiers) {
-      m.onCollide(other, nx, ny, impactSpeed);
+  override update = (input: Input): void => {
+    this.updateModifiers(input);
+    if (this.inputsEnabled) {
+      this.applyInputs(input);
     }
-  }
+    this.doUpdate();
+  };
 
-  applyInputs(): void {}
+  override render = (ctx: CanvasRenderingContext2D): void => {
+    this.doRender(ctx);
+    this.renderModifiers(ctx);
+  };
 
-  updateModifiers(): void {
-    for (const m of this.modifiers) {
-      m.update();
-    }
-    this.modifiers = this.modifiers.filter((m) => m.isAlive);
-  }
+  applyInputs(_input: Input): void {}
 
-  renderModifiers(ctx: CanvasRenderingContext2D): void {
-    for (const m of this.modifiers) {
-      m.onRender(ctx);
-    }
-  }
+  abstract doUpdate(): void;
+  abstract doRender(ctx: CanvasRenderingContext2D): void;
 }

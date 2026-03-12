@@ -10,6 +10,14 @@ export interface Color {
   b: number;
 }
 
+export interface PlanetData {
+  x: number;
+  y: number;
+  radius: number;
+  gravity: number;
+  terrain: TerrainFeature[];
+}
+
 export interface PlanetDecoration {
   angle: number;
   size: number;
@@ -21,10 +29,4 @@ export interface Star {
   y: number;
   r: number;
   a: number;
-}
-
-export interface Color {
-  r: number;
-  g: number;
-  b: number;
 }

@@ -1,3 +1,7 @@
+import { World as EngineWorld } from "@matthuggins/platforming-engine";
+import { gravityVectorForPlanet } from "../helpers/gravityVectorForPlanet";
+import { roundRect } from "../helpers/roundRect";
+import { surfaceRadiusAt } from "../helpers/surfaceRadiusAt";
 import { Star } from "../types";
 import { Camera } from "./Camera";
 import { Input } from "./Input";
@@ -5,26 +9,18 @@ import { Asteroid } from "./parts/Asteroid";
 import { Part, RenderLayer } from "./parts/Part";
 import { Planet } from "./parts/Planet";
 import { Player } from "./parts/Player";
-import { applyCollisionImpulse, gravityVectorForPlanet, roundRect, surfaceRadiusAt } from "./utils";
 
 const MAX_NEAREST_PLANETS = 10;
-const COLLISION_BUFFER = 0.2; // contact slop: catches floating-point near-misses on exact surface snaps
-const SEPARATION_BUFFER = 4; // hysteresis: contact persists until clearly separated
 const MIN_CONTRIBUTION = 0.02;
 const MAX_ASTEROIDS = 3;
 
-export class World {
-  parts: Part[] = [];
-  input: Input;
-  camera: Camera;
-  ctx: CanvasRenderingContext2D;
-  canvas: HTMLCanvasElement;
-  container: HTMLElement;
+export class World extends EngineWorld<Input, Camera> {
+  // Narrow inherited types to concrete space-explorer classes.
+  protected declare input: Input;
+  public declare readonly camera: Camera;
 
   private status: HTMLElement;
   private fuel: HTMLElement;
-  private rafId = 0;
-  private contactPairs = new Set<string>();
   private asteroidSpawnTimer = 0;
   private starfield: Star[];
 
@@ -39,31 +35,16 @@ export class World {
     status: HTMLElement;
     fuel: HTMLElement;
   }) {
-    this.canvas = canvas;
-    this.container = container;
-    this.ctx = canvas.getContext("2d")!;
+    const input = new Input();
+    const camera = new Camera();
+    super({ canvas, container, input, camera });
+    input.setResetCallback(this.reset);
+    camera.setWorld(this);
+
     this.status = status;
     this.fuel = fuel;
-
-    this.input = new Input(() => this.reset());
-    this.camera = new Camera();
     this.starfield = generateStarfield();
-
-    window.addEventListener("resize", this.handleResize);
-    this.handleResize();
   }
-
-  add = (part: Part): void => {
-    part.world = this;
-    this.parts.push(part);
-    part.onSpawn();
-  };
-
-  remove = (part: Part): void => {
-    part.onDestroy();
-    const idx = this.parts.indexOf(part);
-    if (idx !== -1) this.parts.splice(idx, 1);
-  };
 
   get planets(): Planet[] {
     return this.parts.filter((p): p is Planet => p instanceof Planet);
@@ -73,11 +54,9 @@ export class World {
     return this.parts.find((p): p is Player => p instanceof Player)!;
   }
 
-  handleResize = () => {
-    const dpr = window.devicePixelRatio || 1;
-    this.canvas.width = Math.floor(this.container.clientWidth * dpr);
-    this.canvas.height = Math.floor(this.container.clientHeight * dpr);
-    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  override reset = (): void => {
+    this.player.reset();
+    this.camera.angle = 0;
   };
 
   getBlendedGravity = (px: number, py: number) => {
@@ -133,102 +112,41 @@ export class World {
     return best;
   };
 
-  reset = (): void => {
-    this.player.reset();
-    this.camera.angle = 0;
-  };
-
-  start = (): void => {
-    this.reset();
-    this.rafId = requestAnimationFrame(this.tick);
-  };
-
-  stop = (): void => {
-    cancelAnimationFrame(this.rafId);
-    window.removeEventListener("resize", this.handleResize);
-    this.input.destroy();
-  };
-
-  tick = (): void => {
-    for (const part of [...this.parts]) {
-      part.inputsEnabled = true;
-      part.updateModifiers();
-      if (part.inputsEnabled) {
-        part.applyInputs();
-      }
-      part.update();
-    }
-    this.resolveCollisions();
+  protected override afterPhysics(): void {
     this.tickAsteroidSpawner();
-    this.camera.update(this.player);
-    this.input.endFrame();
-    this.render();
-    this.rafId = requestAnimationFrame(this.tick);
-  };
+  }
 
-  private resolveCollisions = (): void => {
-    const dynamic = this.parts.filter((p) => p.radius > 0);
-    const newContacts = new Set<string>();
+  override render = (): void => {
+    this.drawBackground();
 
-    for (let i = 0; i < dynamic.length; i++) {
-      for (let j = i + 1; j < dynamic.length; j++) {
-        const a = dynamic[i];
-        const b = dynamic[j];
-        if (a.anchored && b.anchored) {
-          continue;
-        }
+    const player = this.player;
+    const ctx = this.ctx;
+    const cx = this.canvas.clientWidth / 2;
+    const cy = this.canvas.clientHeight / 2;
 
-        // Use each part's terrain-aware surface radius rather than the raw bounding
-        // sphere. This keeps planet-player collision accurate in valleys where
-        // surfaceRadiusAt < planet.radius — the sphere check only fires when the
-        // non-anchored part is inside the actual surface, not just the bounding sphere.
-        const ra = a.surfaceRadiusToward(b.x, b.y);
-        const rb = b.surfaceRadiusToward(a.x, a.y);
+    // Camera transform — world layer
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-this.camera.angle);
+    ctx.translate(-player.x, -player.y);
 
-        const dist = Math.hypot(a.x - b.x, a.y - b.y);
-        const key = `${Math.min(a.id, b.id)}-${Math.max(a.id, b.id)}`;
-        const wasContact = this.contactPairs.has(key);
-        const overlapping = dist <= ra + rb + COLLISION_BUFFER;
+    const worldParts = (this.parts as Part[])
+      .filter((p) => p.layer === RenderLayer.WORLD)
+      .sort((a, b) => a.zIndex - b.zIndex);
 
-        // Contact persists until the parts are clearly separated (hysteresis). This
-        // prevents tiny terrain dips from breaking and immediately re-creating a
-        // contact, which would fire onCollide on every step over uneven ground.
-        if (overlapping || (wasContact && dist <= ra + rb + SEPARATION_BUFFER)) {
-          newContacts.add(key);
-        }
-
-        if (!overlapping) {
-          continue;
-        }
-
-        // nx/ny points from a toward b.
-        const nx = (b.x - a.x) / (dist || 0.001);
-        const ny = (b.y - a.y) / (dist || 0.001);
-
-        // Capture impact speed before velocities change.
-        const impactSpeed = Math.abs((a.vx - b.vx) * nx + (a.vy - b.vy) * ny);
-
-        // Separate the pair, only moving non-anchored parts.
-        const overlap = ra + rb - dist;
-        const shareA = a.anchored ? 0 : b.anchored ? 1 : 0.5;
-        const shareB = b.anchored ? 0 : a.anchored ? 1 : 0.5;
-        a.x -= nx * overlap * shareA;
-        a.y -= ny * overlap * shareA;
-        b.x += nx * overlap * shareB;
-        b.y += ny * overlap * shareB;
-
-        // Apply impulse once for both.
-        applyCollisionImpulse(a, b);
-
-        // Only notify on first contact this pair has made.
-        if (!wasContact) {
-          a.onCollide(b, -nx, -ny, impactSpeed);
-          b.onCollide(a, nx, ny, impactSpeed);
-        }
-      }
+    for (const part of worldParts) {
+      part.render(ctx);
     }
 
-    this.contactPairs = newContacts;
+    ctx.restore();
+
+    // Player layer (screen space)
+    player.render(ctx);
+
+    // HUD layer
+    this.drawPlanetIndicator();
+    this.drawMinimap();
+    this.drawStatus();
   };
 
   private tickAsteroidSpawner = (): void => {
@@ -263,39 +181,6 @@ export class World {
     asteroid.vx = Math.cos(aimAngle) * speed;
     asteroid.vy = Math.sin(aimAngle) * speed;
     this.add(asteroid);
-  };
-
-  render = (): void => {
-    this.drawBackground();
-
-    const player = this.player;
-    const ctx = this.ctx;
-    const cx = this.canvas.clientWidth / 2;
-    const cy = this.canvas.clientHeight / 2;
-
-    // Camera transform — world layer
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(-this.camera.angle);
-    ctx.translate(-player.x, -player.y);
-
-    const worldParts = this.parts
-      .filter((p) => p.layer === RenderLayer.WORLD)
-      .sort((a, b) => a.zIndex - b.zIndex);
-
-    for (const part of worldParts) {
-      part.render(ctx);
-    }
-
-    ctx.restore();
-
-    // Player layer (screen space)
-    player.render(ctx);
-
-    // HUD layer
-    this.drawPlanetIndicator();
-    this.drawMinimap();
-    this.drawStatus();
   };
 
   private drawBackground = (): void => {

@@ -1,3 +1,4 @@
+import type { Input } from "../Input";
 import type { Part } from "../parts/Part";
 import { Modifier } from "./Modifier";
 
@@ -66,7 +67,7 @@ export class SmokeModifier extends Modifier {
     return this.framesLeft > 0;
   }
 
-  update(): void {
+  update(_input: Input): void {
     if (this.framesLeft <= 0) {
       return;
     }

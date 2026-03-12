@@ -1,13 +1,14 @@
+import { Part as EnginePart } from "@matthuggins/platforming-engine";
+import { angleToUpVector } from "../../helpers/angleToUpVector";
+import { clamp } from "../../helpers/clamp";
+import { clampVelocity } from "../../helpers/clampVelocity";
+import { dot } from "../../helpers/dot";
+import { length } from "../../helpers/length";
+import { normalize } from "../../helpers/normalize";
+import { roundRect } from "../../helpers/roundRect";
+import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
+import type { Input } from "../Input";
 import { StunModifier } from "../modifiers/StunModifier";
-import {
-  angleToUpVector,
-  clamp,
-  clampVelocity,
-  dot,
-  length,
-  normalize,
-  surfaceRadiusAt,
-} from "../utils";
 import { Part, RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
 
@@ -33,10 +34,6 @@ export class Player extends Part {
   jumpAngularVelocity = 0;
   jumpAngularVelocityMax = 0;
 
-  override onSpawn(): void {
-    this.modifiers.push(new StunModifier(this));
-  }
-
   reset(): void {
     const p = this.world.planets[0];
     this.x = p ? p.x : 0;
@@ -58,8 +55,7 @@ export class Player extends Part {
     this.fuel = this.maxFuel;
   }
 
-  override applyInputs(): void {
-    const input = this.world.input;
+  override applyInputs(input: Input): void {
     const move =
       (input.isDown("KeyD") || input.isDown("ArrowRight") ? 1 : 0) -
       (input.isDown("KeyA") || input.isDown("ArrowLeft") ? 1 : 0);
@@ -164,7 +160,7 @@ export class Player extends Part {
     }
   }
 
-  update(): void {
+  doUpdate(): void {
     if (this.onGround) {
       this.x += this.vx;
       this.y += this.vy;
@@ -226,15 +222,21 @@ export class Player extends Part {
     }
   }
 
-  override onCollide(other: Part, nx: number, ny: number, impactSpeed: number): void {
+  override onSpawn = (): void => {
+    this.modifiers.push(new StunModifier(this));
+  };
+
+  override onCollide = (other: EnginePart, nx: number, ny: number, impactSpeed: number): void => {
     if (this.onGround && !other.anchored) {
       this.onGround = false;
       this.mode = "air";
     }
-    super.onCollide(other, nx, ny, impactSpeed);
-  }
+    for (const m of this.modifiers) {
+      m.onCollide(other, nx, ny, impactSpeed);
+    }
+  };
 
-  render(ctx: CanvasRenderingContext2D): void {
+  doRender(ctx: CanvasRenderingContext2D): void {
     const canvas = this.world.canvas;
     const cx = canvas.clientWidth / 2;
     const cy = canvas.clientHeight / 2;
@@ -248,15 +250,15 @@ export class Player extends Part {
     ctx.fill();
 
     ctx.fillStyle = "#f7f8ff";
-    this.roundRect(ctx, -8, -12, 16, 24, 6);
+    roundRect(ctx, -8, -12, 16, 24, 6);
     ctx.fill();
 
     ctx.fillStyle = "#74d8ff";
-    this.roundRect(ctx, -6, -8, 12, 6, 3);
+    roundRect(ctx, -6, -8, 12, 6, 3);
     ctx.fill();
 
     ctx.fillStyle = "#d9def8";
-    this.roundRect(ctx, 6, -6, 4, 10, 2);
+    roundRect(ctx, 6, -6, 4, 10, 2);
     ctx.fill();
 
     ctx.fillStyle = "#ff6378";
@@ -282,30 +284,6 @@ export class Player extends Part {
       ctx.fill();
     }
 
-    this.renderModifiers(ctx);
-
     ctx.restore();
-  }
-
-  private roundRect(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    r: number,
-  ): void {
-    const rr = Math.min(r, w * 0.5, h * 0.5);
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y);
-    ctx.lineTo(x + w - rr, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + rr);
-    ctx.lineTo(x + w, y + h - rr);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
-    ctx.lineTo(x + rr, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - rr);
-    ctx.lineTo(x, y + rr);
-    ctx.quadraticCurveTo(x, y, x + rr, y);
-    ctx.closePath();
   }
 }
