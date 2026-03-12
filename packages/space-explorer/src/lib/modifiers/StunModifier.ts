@@ -7,6 +7,7 @@ import { Modifier } from "./Modifier";
 // So initialVelocity = desiredRotations * 2π / 25 ≈ desiredRotations * 0.2513.
 const DEFAULT_SPIN_DECAY = 0.96;
 const DEFAULT_STUN_FRAMES = 60;
+const MIN_STUN_IMPACT_SPEED = 0.5;
 
 interface StunModifierConfig {
   spinDecay?: number;
@@ -27,13 +28,24 @@ export class StunModifier extends Modifier {
     this.stunFrames = cfg.stunFrames ?? DEFAULT_STUN_FRAMES;
   }
 
-  override onCollide(_other: Part, nx: number, ny: number, impactSpeed: number): void {
+  override onCollide(other: Part, _nx: number, _ny: number, impactSpeed: number): void {
+    // Planet collisions are handled by Player.update() landing detection — the sphere
+    // collision boundary is unreliable for anchored surfaces with valley terrain
+    // (surfaceRadiusAt < planet.radius), which causes spurious high-speed contacts on
+    // every jump. Only dynamic objects (asteroids, satellites) should stun the player.
+    if (other.anchored) return;
+
+    if (impactSpeed < MIN_STUN_IMPACT_SPEED) return;
+    if (this.currentStunFrames > 0) return;
+
     const rotations = Math.min(4, 1 + impactSpeed * 0.15);
     const spinStrength = rotations * 2 * Math.PI * 0.04;
 
-    // Player right = (-upY, upX). Positive dot → hit came from player's right.
-    const rightDot = nx * -this.parent.upY + ny * this.parent.upX;
-    this.spinVelocity = (rightDot > 0 ? 1 : -1) * spinStrength;
+    // Spin direction from tangential velocity (preserved through collision impulse).
+    const tx = -this.parent.upY;
+    const ty = this.parent.upX;
+    const vt = this.parent.vx * tx + this.parent.vy * ty;
+    this.spinVelocity = (vt > 0 ? 1 : -1) * spinStrength;
     this.currentStunFrames = this.stunFrames;
     this.spinAngle = Math.atan2(this.parent.upX, -this.parent.upY);
 
