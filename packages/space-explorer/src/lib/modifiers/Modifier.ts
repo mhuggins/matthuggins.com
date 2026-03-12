@@ -1,15 +1,7 @@
+import { Modifier as EngineModifier } from "@matthuggins/platforming-engine";
 import type { Part } from "../parts/Part";
 
-export abstract class Modifier {
-  constructor(public parent: Part) {}
-
-  abstract update(): void;
-
-  get isAlive(): boolean {
-    return true;
-  }
-
-  onCollide(_other: Part, _nx: number, _ny: number, _impactSpeed: number): void {}
-
-  onRender(_ctx: CanvasRenderingContext2D): void {}
+export abstract class Modifier extends EngineModifier {
+  // Narrow parent type to the concrete SpacePart for access to space-specific fields.
+  declare parent: Part;
 }

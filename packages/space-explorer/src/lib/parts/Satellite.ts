@@ -1,5 +1,6 @@
+import { Part as EnginePart } from "@matthuggins/platforming-engine";
+import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { Color } from "../../types";
-import { surfaceRadiusAt } from "../utils";
 import { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
@@ -41,7 +42,7 @@ export class Satellite extends Part {
     this.vy = Math.cos(cfg.angle) * cfg.orbitalRadius * angularVelocity;
   }
 
-  update(): void {
+  doUpdate(): void {
     if (this.mode === "kinematic") {
       const angularVelocity = (Math.PI * 2) / this.orbitalPeriod;
       this.angle += angularVelocity;
@@ -71,13 +72,7 @@ export class Satellite extends Part {
     }
   }
 
-  override onCollide(_other: Part, _nx: number, _ny: number, _impactSpeed: number): void {
-    if (this.mode === "kinematic") {
-      this.mode = "physics";
-    }
-  }
-
-  render(ctx: CanvasRenderingContext2D): void {
+  doRender(ctx: CanvasRenderingContext2D): void {
     // Draw faint orbital ring in kinematic mode
     if (this.mode === "kinematic") {
       ctx.beginPath();
@@ -106,6 +101,17 @@ export class Satellite extends Part {
 
     ctx.restore();
   }
+
+  override onCollide = (
+    _other: EnginePart,
+    _nx: number,
+    _ny: number,
+    _impactSpeed: number,
+  ): void => {
+    if (this.mode === "kinematic") {
+      this.mode = "physics";
+    }
+  };
 
   private drawSolarPanels(ctx: CanvasRenderingContext2D, s: number): void {
     const boomLen = s * 1.7;

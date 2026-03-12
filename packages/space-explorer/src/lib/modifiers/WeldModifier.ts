@@ -1,3 +1,4 @@
+import type { Input } from "../Input";
 import type { Part } from "../parts/Part";
 import { Modifier } from "./Modifier";
 
@@ -19,7 +20,7 @@ export class WeldModifier extends Modifier {
     this.offsetY = cfg.offsetY;
   }
 
-  update(): void {
+  update(_input: Input): void {
     this.parent.x = this.child.x + this.offsetX;
     this.parent.y = this.child.y + this.offsetY;
   }
