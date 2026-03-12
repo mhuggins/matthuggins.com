@@ -11,15 +11,15 @@ type ContactPairs = Map<string, [a: Part, b: Part]>;
 
 export class World<TInput extends Input = Input, TCamera extends Camera = Camera> {
   public readonly canvas: HTMLCanvasElement;
-  private container: HTMLElement;
+  public readonly camera: TCamera;
+
   protected ctx: CanvasRenderingContext2D;
   protected input: TInput;
-  public readonly camera: TCamera;
-  private collisionBuffer: number;
-  private separationBuffer: number;
-
   protected parts: Part[] = [];
 
+  private container: HTMLElement;
+  private collisionBuffer: number;
+  private separationBuffer: number;
   private rafId = 0;
   private contactPairs: ContactPairs = new Map();
 
