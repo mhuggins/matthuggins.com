@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "private": true,
+  "keywords": [],
+  "author": "Matt Huggins",
+  "license": "UNLICENSED",
   "type": "module",
   "main": "src/main.ts",
   "types": "src/main.ts",
@@ -20,9 +23,6 @@
     "test:watch": "vitest --watch",
     "test:lint": "pnpm run lint && pnpm run format && pnpm run typecheck && pnpm run test"
   },
-  "keywords": [],
-  "author": "Matt Huggins",
-  "license": "UNLICENSED",
   "dependencies": {
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.3.1"

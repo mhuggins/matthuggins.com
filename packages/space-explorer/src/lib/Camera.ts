@@ -1,4 +1,6 @@
-import { shortestAngleDiff } from "./utils";
+import { Camera as EngineCamera } from "@matthuggins/platforming-engine";
+import { shortestAngleDiff } from "../helpers/shortestAngleDiff";
+import type { World } from "./World";
 
 interface PlayerState {
   upX: number;
@@ -8,14 +10,25 @@ interface PlayerState {
   y: number;
 }
 
-export class Camera {
+export class Camera extends EngineCamera {
   angle = 0;
+  private world: World | undefined;
 
-  update(player: PlayerState): void {
+  setWorld(world: World): void {
+    this.world = world;
+  }
+
+  override reset = (): void => {
+    this.angle = 0;
+  };
+
+  override update = (): void => {
+    const player = this.world?.player;
+    if (!player) return;
     const targetAngle = Math.atan2(player.upX, -player.upY);
     const follow = player.onGround ? 0.18 : 0.12;
     this.angle += shortestAngleDiff(this.angle, targetAngle) * follow;
-  }
+  };
 
   worldToScreen(
     wx: number,

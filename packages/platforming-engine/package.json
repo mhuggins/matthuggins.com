@@ -1,5 +1,5 @@
 {
-  "name": "@matthuggins/space-explorer",
+  "name": "@matthuggins/platforming-engine",
   "version": "1.0.0",
   "description": "",
   "private": true,
@@ -24,20 +24,16 @@
     "test:lint": "pnpm run lint && pnpm run format && pnpm run typecheck && pnpm run test"
   },
   "devDependencies": {
-    "@matthuggins/platforming-engine": "workspace:*",
     "@matthuggins/tsconfig": "workspace:*",
     "@matthuggins/ui": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "jsdom": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"
   },
-  "peerDependencies": {
-    "react": "catalog:",
-    "react-dom": "catalog:"
+  "dependencies": {
+    "auto-bind": "^5.0.1"
   }
 }

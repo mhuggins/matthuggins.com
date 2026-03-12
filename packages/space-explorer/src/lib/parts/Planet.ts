@@ -1,5 +1,10 @@
+import { clamp } from "../../helpers/clamp";
+import {
+  GRAVITY_RADIUS_BASE,
+  GRAVITY_RADIUS_MULTIPLIER,
+} from "../../helpers/gravityStrengthForPlanets";
+import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { Color, PlanetDecoration, TerrainFeature } from "../../types";
-import { clamp, GRAVITY_RADIUS_BASE, GRAVITY_RADIUS_MULTIPLIER, surfaceRadiusAt } from "../utils";
 import { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 
@@ -48,16 +53,16 @@ export class Planet extends Part {
     this.mass = 4 * Math.PI * cfg.radius ** 2;
   }
 
-  override surfaceRadiusToward(x: number, y: number): number {
+  override surfaceRadiusToward = (x: number, y: number): number => {
     const angle = Math.atan2(y - this.y, x - this.x);
     return surfaceRadiusAt(this, angle);
-  }
+  };
 
-  update(): void {
+  doUpdate(): void {
     // Planets are static — no movement.
   }
 
-  render(ctx: CanvasRenderingContext2D): void {
+  doRender(ctx: CanvasRenderingContext2D): void {
     const player = this.world.player;
     const planets = this.world.planets;
 
