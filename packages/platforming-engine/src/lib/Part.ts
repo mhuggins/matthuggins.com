@@ -58,6 +58,12 @@ export abstract class Part {
     }
   }
 
+  onSeparate(other: Part): void {
+    for (const m of this.modifiers) {
+      m.onSeparate(other);
+    }
+  }
+
   protected updateModifiers(input: Input): void {
     for (const m of this.modifiers) {
       m.update(input);
