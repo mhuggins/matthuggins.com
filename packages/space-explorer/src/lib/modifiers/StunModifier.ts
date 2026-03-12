@@ -2,6 +2,7 @@ import { Part as EnginePart } from "@matthuggins/platforming-engine";
 import { angleToUpVector } from "../../helpers/angleToUpVector";
 import type { Input } from "../Input";
 import type { Part } from "../parts/Part";
+import { playCrashSound } from "../sounds";
 import { Modifier } from "./Modifier";
 import { SmokeModifier } from "./SmokeModifier";
 
@@ -43,6 +44,8 @@ export class StunModifier extends Modifier {
     if (impactSpeed < MIN_STUN_IMPACT_SPEED) {
       return;
     }
+
+    playCrashSound();
 
     const rotations = Math.min(4, 1 + impactSpeed * 0.15);
     const spinStrength = rotations * 2 * Math.PI * 0.04;
