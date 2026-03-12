@@ -4,8 +4,10 @@ import { Camera } from "./Camera";
 import { Input } from "./Input";
 import { Part } from "./Part";
 
-const COLLISION_BUFFER = 0.2; // contact slop: catches floating-point near-misses on exact surface snaps
-const SEPARATION_BUFFER = 4; // hysteresis: contact persists until clearly separated
+const DEFAULT_COLLISION_BUFFER = 0.2; // contact slop: catches floating-point near-misses on exact surface snaps
+const DEFAULT_SEPARATION_BUFFER = 4; // hysteresis: contact persists until clearly separated
+
+type ContactPairs = Map<string, [a: Part, b: Part]>;
 
 export class World<TInput extends Input = Input, TCamera extends Camera = Camera> {
   public readonly canvas: HTMLCanvasElement;
@@ -13,22 +15,28 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   protected ctx: CanvasRenderingContext2D;
   protected input: TInput;
   public readonly camera: TCamera;
+  private collisionBuffer: number;
+  private separationBuffer: number;
 
   protected parts: Part[] = [];
 
   private rafId = 0;
-  private contactPairs = new Set<string>();
+  private contactPairs: ContactPairs = new Map();
 
   constructor({
     canvas,
     container,
     input,
     camera,
+    collisionBuffer = DEFAULT_COLLISION_BUFFER,
+    separationBuffer = DEFAULT_SEPARATION_BUFFER,
   }: {
     canvas: HTMLCanvasElement;
     container: HTMLElement;
     input: TInput;
     camera: TCamera;
+    collisionBuffer?: number;
+    separationBuffer?: number;
   }) {
     autoBind(this);
     this.canvas = canvas;
@@ -36,6 +44,8 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
     this.ctx = canvas.getContext("2d")!;
     this.input = input;
     this.camera = camera;
+    this.collisionBuffer = collisionBuffer;
+    this.separationBuffer = separationBuffer;
 
     window.addEventListener("resize", this.handleResize);
     this.handleResize();
@@ -95,7 +105,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 
   private resolveCollisions(): void {
     const dynamic = this.parts.filter((p) => p.radius > 0);
-    const newContacts = new Set<string>();
+    const newContacts: ContactPairs = new Map();
 
     for (let i = 0; i < dynamic.length; i++) {
       for (let j = i + 1; j < dynamic.length; j++) {
@@ -115,13 +125,13 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
         const key = `${Math.min(a.id, b.id)}-${Math.max(a.id, b.id)}`;
         const wasContact = this.contactPairs.has(key);
-        const overlapping = dist <= ra + rb + COLLISION_BUFFER;
+        const overlapping = dist <= ra + rb + this.collisionBuffer;
 
         // Contact persists until the parts are clearly separated (hysteresis). This
         // prevents tiny terrain dips from breaking and immediately re-creating a
         // contact, which would fire onCollide on every step over uneven ground.
-        if (overlapping || (wasContact && dist <= ra + rb + SEPARATION_BUFFER)) {
-          newContacts.add(key);
+        if (overlapping || (wasContact && dist <= ra + rb + this.separationBuffer)) {
+          newContacts.set(key, [a, b]);
         }
 
         if (!overlapping) {
@@ -152,6 +162,14 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           a.onCollide(b, -nx, -ny, impactSpeed);
           b.onCollide(a, nx, ny, impactSpeed);
         }
+      }
+    }
+
+    // Fire onSeparate for pairs that were in contact last frame but no longer are.
+    for (const [key, [a, b]] of this.contactPairs) {
+      if (!newContacts.has(key)) {
+        a.onSeparate(b);
+        b.onSeparate(a);
       }
     }
 

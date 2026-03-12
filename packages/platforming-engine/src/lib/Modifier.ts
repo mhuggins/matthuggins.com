@@ -15,5 +15,7 @@ export abstract class Modifier {
 
   onCollide(_other: Part, _nx: number, _ny: number, _impactSpeed: number): void {}
 
+  onSeparate(_other: Part): void {}
+
   onRender(_ctx: CanvasRenderingContext2D): void {}
 }
