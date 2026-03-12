@@ -189,6 +189,14 @@ export class Player extends Part {
   }
 
   doUpdate(): void {
+    if (!this.inputsEnabled) {
+      stopWalkSound();
+
+      if (this.jetpackActive) {
+        stopJetpackSound();
+      }
+    }
+
     if (this.onGround) {
       this.x += this.vx;
       this.y += this.vy;

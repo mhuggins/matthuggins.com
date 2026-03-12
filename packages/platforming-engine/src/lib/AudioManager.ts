@@ -1,4 +1,4 @@
-type SoundSetup = (ctx: AudioContext) => void | (() => void);
+export type SoundSetup = (ctx: AudioContext) => void | (() => void);
 
 export class AudioManager {
   private context: AudioContext | null = null;
