@@ -227,10 +227,6 @@ export class Player extends Part {
   }
 
   override onCollide(other: Part, nx: number, ny: number, impactSpeed: number): void {
-    // Only knock the player airborne for dynamic (non-anchored) collisions.
-    // Planet sphere contacts while walking uphill are terrain-correction artifacts
-    // from the surfaceRadiusToward check; transitioning to air mode here would
-    // break ground contact and prevent jumping.
     if (this.onGround && !other.anchored) {
       this.onGround = false;
       this.mode = "air";

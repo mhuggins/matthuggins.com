@@ -29,6 +29,7 @@ export class StunModifier extends Modifier {
   }
 
   override onCollide(other: Part, nx: number, ny: number, impactSpeed: number): void {
+    console.log("collide!", this.parent.constructor.name, other.constructor.name);
     // Planet collisions are handled by Player.update() landing detection — the sphere
     // collision boundary is unreliable for anchored surfaces with valley terrain
     // (surfaceRadiusAt < planet.radius), which causes spurious high-speed contacts on
@@ -38,9 +39,6 @@ export class StunModifier extends Modifier {
     }
 
     if (impactSpeed < MIN_STUN_IMPACT_SPEED) {
-      return;
-    }
-    if (this.currentStunFrames > 0) {
       return;
     }
 
