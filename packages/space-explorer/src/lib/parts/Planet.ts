@@ -48,6 +48,11 @@ export class Planet extends Part {
     this.mass = 4 * Math.PI * cfg.radius ** 2;
   }
 
+  override surfaceRadiusToward(x: number, y: number): number {
+    const angle = Math.atan2(y - this.y, x - this.x);
+    return surfaceRadiusAt(this, angle);
+  }
+
   update(): void {
     // Planets are static — no movement.
   }

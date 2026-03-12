@@ -168,19 +168,21 @@ export class World {
 
     for (let i = 0; i < dynamic.length; i++) {
       for (let j = i + 1; j < dynamic.length; j++) {
-        // Skip sphere collision when either part is anchored. Anchored parts (planets)
-        // use surface-aware contact systems instead: player↔planet is handled by
-        // Player.update() landing detection (surfaceRadiusAt), and satellite↔planet
-        // is handled by Satellite.update(). The coarse sphere boundary is unreliable
-        // for terrain with valleys (surfaceRadiusAt < planet.radius).
         const a = dynamic[i];
         const b = dynamic[j];
-        if (a.anchored || b.anchored) {
+        if (a.anchored && b.anchored) {
           continue;
         }
 
+        // Use each part's terrain-aware surface radius rather than the raw bounding
+        // sphere. This keeps planet-player collision accurate in valleys where
+        // surfaceRadiusAt < planet.radius — the sphere check only fires when the
+        // non-anchored part is inside the actual surface, not just the bounding sphere.
+        const ra = a.surfaceRadiusToward(b.x, b.y);
+        const rb = b.surfaceRadiusToward(a.x, a.y);
+
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
-        if (dist >= a.radius + b.radius) {
+        if (dist >= ra + rb) {
           continue;
         }
 
@@ -192,7 +194,7 @@ export class World {
         const impactSpeed = Math.abs((a.vx - b.vx) * nx + (a.vy - b.vy) * ny);
 
         // Separate the pair, only moving non-anchored parts.
-        const overlap = a.radius + b.radius - dist;
+        const overlap = ra + rb - dist;
         const shareA = a.anchored ? 0 : b.anchored ? 1 : 0.5;
         const shareB = b.anchored ? 0 : a.anchored ? 1 : 0.5;
         a.x -= nx * overlap * shareA;

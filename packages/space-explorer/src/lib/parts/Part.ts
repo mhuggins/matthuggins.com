@@ -35,6 +35,15 @@ export abstract class Part {
   onDestroy(): void {}
 
   /**
+   * The effective collision radius toward a given world point. Overridden by
+   * Planet to return the terrain-accurate surface radius at that angle, so the
+   * sphere collision check uses the real surface rather than the bounding sphere.
+   */
+  surfaceRadiusToward(_x: number, _y: number): number {
+    return this.radius;
+  }
+
+  /**
    * Called by World.resolveCollisions() after the physics impulse has already
    * been applied. `nx`/`ny` is the push direction for `this` (pointing away
    * from `other`). Override to add part-specific collision side-effects.
