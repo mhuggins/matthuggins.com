@@ -3,6 +3,7 @@ import { applyCollisionImpulse } from "../helpers/applyCollisionImpulse";
 import { Camera } from "./Camera";
 import { Input } from "./Input";
 import { Part } from "./Part";
+import { RectangularPart } from "./RectangularPart";
 
 const DEFAULT_COLLISION_BUFFER = 0.2; // contact slop: catches floating-point near-misses on exact surface snaps
 const DEFAULT_SEPARATION_BUFFER = 4; // hysteresis: contact persists until clearly separated
@@ -104,7 +105,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   protected afterPhysics(): void {}
 
   private resolveCollisions(): void {
-    const dynamic = this.parts.filter((p) => p.radius > 0);
+    const dynamic = this.parts.filter((p) => p.radius > 0 || p instanceof RectangularPart);
     const newContacts: ContactPairs = new Map();
 
     for (let i = 0; i < dynamic.length; i++) {
@@ -115,22 +116,72 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           continue;
         }
 
-        // Use each part's terrain-aware surface radius rather than the raw bounding
-        // sphere. This keeps planet-player collision accurate in valleys where
-        // surfaceRadiusAt < planet.radius — the sphere check only fires when the
-        // non-anchored part is inside the actual surface, not just the bounding sphere.
-        const ra = a.surfaceRadiusToward(b.x, b.y);
-        const rb = b.surfaceRadiusToward(a.x, a.y);
+        const aIsRect = a instanceof RectangularPart;
+        const bIsRect = b instanceof RectangularPart;
 
-        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        let overlapping: boolean;
+        let touching: boolean;
+        let nx: number; // from a toward b
+        let ny: number;
+        let overlap: number;
+
         const key = `${Math.min(a.id, b.id)}-${Math.max(a.id, b.id)}`;
         const wasContact = this.contactPairs.has(key);
-        const overlapping = dist <= ra + rb + this.collisionBuffer;
 
-        // Contact persists until the parts are clearly separated (hysteresis). This
-        // prevents tiny terrain dips from breaking and immediately re-creating a
-        // contact, which would fire onCollide on every step over uneven ground.
-        if (overlapping || (wasContact && dist <= ra + rb + this.separationBuffer)) {
+        if (aIsRect || bIsRect) {
+          // One must be a circle for rect-circle collision; skip rect-rect.
+          if (aIsRect && bIsRect) continue;
+
+          const rect = aIsRect ? (a as RectangularPart) : (b as RectangularPart);
+          const circle = aIsRect ? b : a;
+
+          const contact = computeRectCircleContact(
+            rect,
+            circle,
+            this.collisionBuffer,
+            this.separationBuffer,
+          );
+          if (contact === null) continue;
+
+          // For one-way surfaces, gate contact based on approach direction so
+          // the circle can pass through from the back face.
+          //   New contact (wasContact=false): only form when actively approaching (dot < 0).
+          //   Existing contact (wasContact=true): break when clearly moving away (dot > 0).
+          //   Standing still (dot=0): existing contact maintained, new contact not formed.
+          if (rect.solidNormal !== null) {
+            const approachDot = circle.vx * rect.solidNormal.x + circle.vy * rect.solidNormal.y;
+            if (!wasContact && approachDot >= 0) continue;
+            if (wasContact && approachDot > 0) continue;
+          }
+
+          overlapping = contact.overlapping;
+          touching = contact.touching;
+          overlap = contact.overlap;
+
+          // contact.nx/ny points from rect toward circle.
+          // nx/ny in this loop must point from a toward b.
+          if (aIsRect) {
+            nx = contact.nx;
+            ny = contact.ny;
+          } else {
+            nx = -contact.nx;
+            ny = -contact.ny;
+          }
+        } else {
+          // Circle-circle: use terrain-aware surface radius.
+          const ra = a.surfaceRadiusToward(b.x, b.y);
+          const rb = b.surfaceRadiusToward(a.x, a.y);
+          const dist = Math.hypot(a.x - b.x, a.y - b.y);
+
+          nx = (b.x - a.x) / (dist || 0.001);
+          ny = (b.y - a.y) / (dist || 0.001);
+          overlapping = dist <= ra + rb + this.collisionBuffer;
+          touching = dist <= ra + rb + this.separationBuffer;
+          overlap = ra + rb - dist;
+        }
+
+        // Contact persists until the parts are clearly separated (hysteresis).
+        if (overlapping || (wasContact && touching)) {
           newContacts.set(key, [a, b]);
         }
 
@@ -138,24 +189,19 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           continue;
         }
 
-        // nx/ny points from a toward b.
-        const nx = (b.x - a.x) / (dist || 0.001);
-        const ny = (b.y - a.y) / (dist || 0.001);
-
         // Capture impact speed before velocities change.
         const impactSpeed = Math.abs((a.vx - b.vx) * nx + (a.vy - b.vy) * ny);
 
         // Separate the pair, only moving non-anchored parts.
-        const overlap = ra + rb - dist;
         const shareA = a.anchored ? 0 : b.anchored ? 1 : 0.5;
         const shareB = b.anchored ? 0 : a.anchored ? 1 : 0.5;
-        a.x -= nx * overlap * shareA;
-        a.y -= ny * overlap * shareA;
-        b.x += nx * overlap * shareB;
-        b.y += ny * overlap * shareB;
+        const separationOverlap = Math.max(0, overlap);
+        a.x -= nx * separationOverlap * shareA;
+        a.y -= ny * separationOverlap * shareA;
+        b.x += nx * separationOverlap * shareB;
+        b.y += ny * separationOverlap * shareB;
 
-        // Apply impulse once for both.
-        applyCollisionImpulse(a, b);
+        applyCollisionImpulse(a, b, nx, ny);
 
         // Only notify on first contact this pair has made.
         if (!wasContact) {
@@ -185,4 +231,68 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
     }
     ctx.restore();
   }
+}
+
+/**
+ * Computes contact data between a RectangularPart and a circle Part using the
+ * closest-point algorithm. Returns null if no contact (including one-way skip).
+ * The returned normal (nx, ny) points from rect toward circle.
+ */
+function computeRectCircleContact(
+  rect: RectangularPart,
+  circle: Part,
+  collisionBuffer: number,
+  separationBuffer: number,
+): { touching: boolean; overlapping: boolean; nx: number; ny: number; overlap: number } | null {
+  // One-way check: only register contact when circle is on the positive (outward) side.
+  if (rect.solidNormal !== null) {
+    const dx = circle.x - rect.x;
+    const dy = circle.y - rect.y;
+    if (dx * rect.solidNormal.x + dy * rect.solidNormal.y <= 0) {
+      return null;
+    }
+  }
+
+  // Transform circle center into rect's local frame (rotate by -tiltAngle).
+  const cx = circle.x - rect.x;
+  const cy = circle.y - rect.y;
+  const cosA = Math.cos(-rect.tiltAngle);
+  const sinA = Math.sin(-rect.tiltAngle);
+  const localX = cx * cosA - cy * sinA;
+  const localY = cx * sinA + cy * cosA;
+
+  // Closest point on rect boundary to circle center.
+  const hw = rect.width / 2;
+  const hh = rect.height / 2;
+  const closestX = Math.max(-hw, Math.min(hw, localX));
+  const closestY = Math.max(-hh, Math.min(hh, localY));
+
+  // Distance vector from closest point to circle center (in local frame).
+  const dvx = localX - closestX;
+  const dvy = localY - closestY;
+  const distLen = Math.hypot(dvx, dvy);
+
+  const overlapping = distLen <= circle.radius + collisionBuffer;
+  const touching = distLen <= circle.radius + separationBuffer;
+
+  if (!touching) return null;
+
+  let nx: number;
+  let ny: number;
+
+  if (distLen < 0.001) {
+    // Circle center is at or inside the rect — use solidNormal as fallback direction.
+    nx = rect.solidNormal ? rect.solidNormal.x : 0;
+    ny = rect.solidNormal ? rect.solidNormal.y : 1;
+  } else {
+    // Rotate local normal back to world frame by +tiltAngle.
+    const localNx = dvx / distLen;
+    const localNy = dvy / distLen;
+    const cosB = Math.cos(rect.tiltAngle);
+    const sinB = Math.sin(rect.tiltAngle);
+    nx = localNx * cosB - localNy * sinB;
+    ny = localNx * sinB + localNy * cosB;
+  }
+
+  return { touching, overlapping, nx, ny, overlap: circle.radius - distLen };
 }
