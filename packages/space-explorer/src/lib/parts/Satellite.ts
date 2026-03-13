@@ -1,8 +1,8 @@
-import { Part as EnginePart } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, Input, RectangularPart } from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { Color } from "../../types";
-import { World } from "../World";
-import { Part, RenderLayer } from "./Part";
+import type { World } from "../World";
+import { RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
 
 interface SatelliteConfig {
@@ -10,13 +10,16 @@ interface SatelliteConfig {
   orbitalRadius: number;
   orbitalPeriod: number;
   angle: number;
-  radius: number;
+  width: number;
+  height: number;
   mass: number;
   color: Color;
 }
 
-export class Satellite extends Part {
+export class Satellite extends RectangularPart {
   readonly layer = RenderLayer.WORLD;
+  declare world: World;
+  zIndex = 0;
 
   orbitalRadius: number;
   orbitalPeriod: number;
@@ -31,9 +34,11 @@ export class Satellite extends Part {
     this.orbitalRadius = cfg.orbitalRadius;
     this.orbitalPeriod = cfg.orbitalPeriod;
     this.angle = cfg.angle;
-    this.radius = cfg.radius;
+    this.width = cfg.width;
+    this.height = cfg.height;
     this.mass = cfg.mass;
     this.color = cfg.color;
+    this.tiltAngle = cfg.angle + Math.PI / 2; // broadside tangent to orbit
 
     const angularVelocity = (Math.PI * 2) / cfg.orbitalPeriod;
     this.x = cfg.planet.x + Math.cos(cfg.angle) * cfg.orbitalRadius;
@@ -42,7 +47,15 @@ export class Satellite extends Part {
     this.vy = Math.cos(cfg.angle) * cfg.orbitalRadius * angularVelocity;
   }
 
-  doUpdate(): void {
+  override update = (_input: Input): void => {
+    this.doUpdate();
+  };
+
+  override render = (ctx: CanvasRenderingContext2D): void => {
+    this.doRender(ctx);
+  };
+
+  private doUpdate(): void {
     if (this.mode === "kinematic") {
       const angularVelocity = (Math.PI * 2) / this.orbitalPeriod;
       this.angle += angularVelocity;
@@ -50,17 +63,17 @@ export class Satellite extends Part {
       this.y = this.parentPlanet.y + Math.sin(this.angle) * this.orbitalRadius;
       this.vx = -Math.sin(this.angle) * this.orbitalRadius * angularVelocity;
       this.vy = Math.cos(this.angle) * this.orbitalRadius * angularVelocity;
+      this.tiltAngle = this.angle + Math.PI / 2; // stay broadside to orbit
     } else {
-      const g = this.world.getBlendedGravity(this.x, this.y);
-      this.vx += g.gx;
-      this.vy += g.gy;
+      // Physics mode — gravity applied by engine applyGravity; just integrate position
       this.x += this.vx;
       this.y += this.vy;
 
       // Crash into parent planet — respawn kinematically
       const dToPlanet = Math.hypot(this.x - this.parentPlanet.x, this.y - this.parentPlanet.y);
       const surfAngle = Math.atan2(this.y - this.parentPlanet.y, this.x - this.parentPlanet.x);
-      if (dToPlanet < surfaceRadiusAt(this.parentPlanet, surfAngle) + this.radius) {
+      const collisionRadius = this.width / 4; // approximate bounding radius
+      if (dToPlanet < surfaceRadiusAt(this.parentPlanet, surfAngle) + collisionRadius) {
         this.mode = "kinematic";
         this.angle = Math.random() * Math.PI * 2;
         this.x = this.parentPlanet.x + Math.cos(this.angle) * this.orbitalRadius;
@@ -68,11 +81,12 @@ export class Satellite extends Part {
         const av = (Math.PI * 2) / this.orbitalPeriod;
         this.vx = -Math.sin(this.angle) * this.orbitalRadius * av;
         this.vy = Math.cos(this.angle) * this.orbitalRadius * av;
+        this.tiltAngle = this.angle + Math.PI / 2;
       }
     }
   }
 
-  doRender(ctx: CanvasRenderingContext2D): void {
+  private doRender(ctx: CanvasRenderingContext2D): void {
     // Draw faint orbital ring in kinematic mode
     if (this.mode === "kinematic") {
       ctx.beginPath();
@@ -89,7 +103,7 @@ export class Satellite extends Part {
         ? this.angle + Math.PI / 2
         : Math.atan2(this.vy, this.vx) + Math.PI / 2;
 
-    const s = this.radius;
+    const s = this.width / 4; // render scale (equivalent to old radius)
 
     ctx.save();
     ctx.translate(this.x, this.y);

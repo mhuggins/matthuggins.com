@@ -1,5 +1,5 @@
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
-import { World } from "../World";
+import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 
 interface AsteroidConfig {
@@ -16,14 +16,11 @@ export class Asteroid extends Part {
     super(world);
     this.radius = cfg.radius;
     this.mass = cfg.radius ** 2;
+    this.gravityScale = 0.5; // curves toward planets at half-gravity rate
     this.vertexOffsets = cfg.vertexOffsets;
   }
 
   doUpdate(): void {
-    // Gravity — 50% of full gravity so they curve but usually pass through
-    const g = this.world.getBlendedGravity(this.x, this.y);
-    this.vx += g.gx * 0.5;
-    this.vy += g.gy * 0.5;
     this.x += this.vx;
     this.y += this.vy;
 

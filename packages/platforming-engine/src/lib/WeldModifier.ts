@@ -1,6 +1,6 @@
-import type { Input } from "../Input";
-import type { Part } from "../parts/Part";
+import type { Input } from "./Input";
 import { Modifier } from "./Modifier";
+import type { Part } from "./Part";
 
 interface WeldModifierConfig {
   child: Part;

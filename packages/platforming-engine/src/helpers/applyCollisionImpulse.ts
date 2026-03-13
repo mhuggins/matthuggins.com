@@ -7,11 +7,15 @@ export function applyCollisionImpulse(
   const relVx = a.vx - b.vx;
   const relVy = a.vy - b.vy;
   const relDotN = relVx * nx + relVy * ny;
-  if (relDotN >= 0) return;
+  if (relDotN >= 0) {
+    return;
+  }
 
   const invMassA = a.anchored ? 0 : 1 / a.mass;
   const invMassB = b.anchored ? 0 : 1 / b.mass;
-  if (invMassA + invMassB === 0) return;
+  if (invMassA + invMassB === 0) {
+    return;
+  }
 
   const j = (2 * relDotN) / (invMassA + invMassB);
   if (!a.anchored) {

@@ -1,14 +1,17 @@
 import autoBind from "auto-bind";
 import { applyCollisionImpulse } from "../helpers/applyCollisionImpulse";
 import { Camera } from "./Camera";
+import { CircularPart } from "./CircularPart";
 import { Input } from "./Input";
 import { Part } from "./Part";
+import { Player } from "./Player";
 import { RectangularPart } from "./RectangularPart";
 
 const DEFAULT_COLLISION_BUFFER = 0.2; // contact slop: catches floating-point near-misses on exact surface snaps
 const DEFAULT_SEPARATION_BUFFER = 4; // hysteresis: contact persists until clearly separated
 
-type ContactPairs = Map<string, [a: Part, b: Part]>;
+type ContactEntry = { a: Part; b: Part; nx: number; ny: number };
+// nx/ny point from a toward b
 
 export class World<TInput extends Input = Input, TCamera extends Camera = Camera> {
   public readonly canvas: HTMLCanvasElement;
@@ -17,12 +20,12 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   protected ctx: CanvasRenderingContext2D;
   protected input: TInput;
   protected parts: Part[] = [];
+  protected contactPairs: Map<string, ContactEntry> = new Map();
 
   private container: HTMLElement;
   private collisionBuffer: number;
   private separationBuffer: number;
   private rafId = 0;
-  private contactPairs: ContactPairs = new Map();
 
   constructor({
     canvas,
@@ -89,6 +92,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   }
 
   tick(): void {
+    this.applyGravity();
     for (const part of [...this.parts]) {
       part.inputsEnabled = true;
       part.update(this.input);
@@ -102,11 +106,92 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   }
 
   // Hook for subclasses to run logic after physics but before camera/render each tick.
-  protected afterPhysics(): void {}
+  protected afterPhysics(): void {
+    this.updatePlayerGrounding();
+  }
+
+  protected applyGravity(): void {
+    const sources = this.parts.filter((p) => p.gravity > 0);
+    for (const target of this.parts) {
+      if (target.anchored || target.mass === 0) {
+        continue;
+      }
+
+      for (const source of sources) {
+        if (source === target) {
+          continue;
+        }
+
+        const dx = source.x - target.x;
+        const dy = source.y - target.y;
+        const dist = Math.hypot(dx, dy) || 0.001;
+        const force = this.gravityForce(source, target, dist);
+        target.vx += (dx / dist) * force * target.gravityScale;
+        target.vy += (dy / dist) * force * target.gravityScale;
+      }
+    }
+  }
+
+  // Override in game World for custom falloff curves.
+  protected gravityForce(source: Part, _target: Part, _dist: number): number {
+    return source.gravity; // naive constant; games override with smoothstep etc.
+  }
+
+  private updatePlayerGrounding(): void {
+    for (const part of this.parts) {
+      if (!(part instanceof Player)) {
+        continue;
+      }
+
+      let bestPart: Part | null = null;
+      let bestNx = 0,
+        bestNy = 0;
+      let bestDot = Math.cos(part.gradability); // threshold
+
+      for (const entry of this.contactPairs.values()) {
+        let other: Part, nx: number, ny: number;
+        if (entry.a === part) {
+          other = entry.b;
+          nx = -entry.nx;
+          ny = -entry.ny; // flip: toward player
+        } else if (entry.b === part) {
+          other = entry.a;
+          nx = entry.nx;
+          ny = entry.ny;
+        } else {
+          continue;
+        }
+
+        const upDot = nx * part.upX + ny * part.upY;
+        if (upDot > bestDot && part.canGroundOn(other)) {
+          bestDot = upDot;
+          bestPart = other;
+          bestNx = nx;
+          bestNy = ny;
+        }
+      }
+
+      const wasGrounded = part.groundedOn !== null;
+      part.groundedOn = bestPart;
+
+      if (bestPart !== null) {
+        part.groundedNormal = { x: bestNx, y: bestNy };
+        part.surfaceTangent = { x: -bestNy, y: bestNx };
+        part.upX = bestNx;
+        part.upY = bestNy;
+      }
+
+      if (!wasGrounded && bestPart !== null) {
+        part.onLand(bestPart);
+      } else if (wasGrounded && bestPart === null) {
+        part.onLeaveGround();
+      }
+    }
+  }
 
   private resolveCollisions(): void {
-    const dynamic = this.parts.filter((p) => p.radius > 0 || p instanceof RectangularPart);
-    const newContacts: ContactPairs = new Map();
+    const dynamic = this.parts.filter((p) => p.shape !== null);
+    const newContacts: Map<string, ContactEntry> = new Map();
 
     for (let i = 0; i < dynamic.length; i++) {
       for (let j = i + 1; j < dynamic.length; j++) {
@@ -116,8 +201,8 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           continue;
         }
 
-        const aIsRect = a instanceof RectangularPart;
-        const bIsRect = b instanceof RectangularPart;
+        const aIsRect = a.shape === "rect";
+        const bIsRect = b.shape === "rect";
 
         let overlapping: boolean;
         let touching: boolean;
@@ -130,10 +215,12 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 
         if (aIsRect || bIsRect) {
           // One must be a circle for rect-circle collision; skip rect-rect.
-          if (aIsRect && bIsRect) continue;
+          if (aIsRect && bIsRect) {
+            continue;
+          }
 
-          const rect = aIsRect ? (a as RectangularPart) : (b as RectangularPart);
-          const circle = aIsRect ? b : a;
+          const rect = (aIsRect ? a : b) as unknown as RectangularPart;
+          const circle = (aIsRect ? b : a) as unknown as CircularPart;
 
           const contact = computeRectCircleContact(
             rect,
@@ -141,17 +228,14 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
             this.collisionBuffer,
             this.separationBuffer,
           );
-          if (contact === null) continue;
+          if (contact === null) {
+            continue;
+          }
 
-          // For one-way surfaces, gate contact based on approach direction so
-          // the circle can pass through from the back face.
-          //   New contact (wasContact=false): only form when actively approaching (dot < 0).
-          //   Existing contact (wasContact=true): break when clearly moving away (dot > 0).
-          //   Standing still (dot=0): existing contact maintained, new contact not formed.
-          if (rect.solidNormal !== null) {
-            const approachDot = circle.vx * rect.solidNormal.x + circle.vy * rect.solidNormal.y;
-            if (!wasContact && approachDot >= 0) continue;
-            if (wasContact && approachDot > 0) continue;
+          // Skip contact when the rect surface is permeable in this direction.
+          // contact.nx/ny points from rect toward circle.
+          if (rect.isPermeable(contact.nx, contact.ny)) {
+            continue;
           }
 
           overlapping = contact.overlapping;
@@ -169,8 +253,10 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           }
         } else {
           // Circle-circle: use terrain-aware surface radius.
-          const ra = a.surfaceRadiusToward(b.x, b.y);
-          const rb = b.surfaceRadiusToward(a.x, a.y);
+          const ca = a as unknown as CircularPart;
+          const cb = b as unknown as CircularPart;
+          const ra = ca.surfaceRadiusToward(b.x, b.y);
+          const rb = cb.surfaceRadiusToward(a.x, a.y);
           const dist = Math.hypot(a.x - b.x, a.y - b.y);
 
           nx = (b.x - a.x) / (dist || 0.001);
@@ -182,7 +268,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 
         // Contact persists until the parts are clearly separated (hysteresis).
         if (overlapping || (wasContact && touching)) {
-          newContacts.set(key, [a, b]);
+          newContacts.set(key, { a, b, nx, ny });
         }
 
         if (!overlapping) {
@@ -212,10 +298,10 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
     }
 
     // Fire onSeparate for pairs that were in contact last frame but no longer are.
-    for (const [key, [a, b]] of this.contactPairs) {
+    for (const [key, entry] of this.contactPairs) {
       if (!newContacts.has(key)) {
-        a.onSeparate(b);
-        b.onSeparate(a);
+        entry.a.onSeparate(entry.b);
+        entry.b.onSeparate(entry.a);
       }
     }
 
@@ -234,25 +320,16 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 }
 
 /**
- * Computes contact data between a RectangularPart and a circle Part using the
- * closest-point algorithm. Returns null if no contact (including one-way skip).
+ * Computes contact data between a RectangularPart and a CircularPart using the
+ * closest-point algorithm. Returns null if no contact.
  * The returned normal (nx, ny) points from rect toward circle.
  */
 function computeRectCircleContact(
   rect: RectangularPart,
-  circle: Part,
+  circle: CircularPart,
   collisionBuffer: number,
   separationBuffer: number,
 ): { touching: boolean; overlapping: boolean; nx: number; ny: number; overlap: number } | null {
-  // One-way check: only register contact when circle is on the positive (outward) side.
-  if (rect.solidNormal !== null) {
-    const dx = circle.x - rect.x;
-    const dy = circle.y - rect.y;
-    if (dx * rect.solidNormal.x + dy * rect.solidNormal.y <= 0) {
-      return null;
-    }
-  }
-
   // Transform circle center into rect's local frame (rotate by -tiltAngle).
   const cx = circle.x - rect.x;
   const cy = circle.y - rect.y;
@@ -275,15 +352,26 @@ function computeRectCircleContact(
   const overlapping = distLen <= circle.radius + collisionBuffer;
   const touching = distLen <= circle.radius + separationBuffer;
 
-  if (!touching) return null;
+  if (!touching) {
+    return null;
+  }
 
   let nx: number;
   let ny: number;
 
   if (distLen < 0.001) {
-    // Circle center is at or inside the rect — use solidNormal as fallback direction.
-    nx = rect.solidNormal ? rect.solidNormal.x : 0;
-    ny = rect.solidNormal ? rect.solidNormal.y : 1;
+    // Circle center is at or inside the rect — use faceNormal as fallback,
+    // oriented toward the side the circle is on so isPermeable works correctly.
+    if (rect.faceNormal) {
+      const dx = circle.x - rect.x;
+      const dy = circle.y - rect.y;
+      const side = dx * rect.faceNormal.x + dy * rect.faceNormal.y;
+      nx = side >= 0 ? rect.faceNormal.x : -rect.faceNormal.x;
+      ny = side >= 0 ? rect.faceNormal.y : -rect.faceNormal.y;
+    } else {
+      nx = 0;
+      ny = 1;
+    }
   } else {
     // Rotate local normal back to world frame by +tiltAngle.
     const localNx = dvx / distLen;
