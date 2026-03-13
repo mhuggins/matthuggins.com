@@ -7,13 +7,15 @@ export abstract class Part {
   private static nextId = 0;
 
   readonly id = Part.nextId++;
+  readonly shape: "circle" | "rect" | null = null;
 
   x = 0;
   y = 0;
   vx = 0;
   vy = 0;
   mass = 0;
-  radius = 0;
+  gravity: number = 0;
+  gravityScale: number = 1.0;
   anchored = false;
   inputsEnabled = true;
   modifiers: Modifier[] = [];
@@ -39,12 +41,12 @@ export abstract class Part {
   onDestroy(): void {}
 
   /**
-   * The effective collision radius toward a given world point. Overridden by
-   * Planet to return the terrain-accurate surface radius at that angle, so the
-   * sphere collision check uses the real surface rather than the bounding sphere.
+   * Returns true to skip collision resolution for this contact.
+   * `nx`/`ny` is the contact normal pointing from this part toward the
+   * colliding circle. Override in one-way surfaces (e.g. platforms).
    */
-  surfaceRadiusToward(_x: number, _y: number): number {
-    return this.radius;
+  isPermeable(_nx: number, _ny: number): boolean {
+    return false;
   }
 
   /**

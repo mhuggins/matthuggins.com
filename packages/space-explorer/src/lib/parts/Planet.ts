@@ -5,7 +5,7 @@ import {
 } from "../../helpers/gravityStrengthForPlanets";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { Color, PlanetDecoration, TerrainFeature } from "../../types";
-import { World } from "../World";
+import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 
 // Assumed gravity range across all planets — used to normalize visual intensity.
@@ -33,7 +33,6 @@ export class Planet extends Part {
   override anchored = true;
 
   name: string;
-  gravity: number;
   color: Color;
   ringColor: Color;
   deco: PlanetDecoration[];
@@ -45,7 +44,7 @@ export class Planet extends Part {
     this.y = cfg.y;
     this.name = cfg.name;
     this.radius = cfg.radius;
-    this.gravity = cfg.gravity;
+    this.gravity = cfg.gravity; // engine field — used by applyGravity
     this.color = cfg.color;
     this.ringColor = cfg.ringColor;
     this.deco = cfg.deco;

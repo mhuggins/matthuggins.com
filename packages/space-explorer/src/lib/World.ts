@@ -1,4 +1,5 @@
-import { World as EngineWorld } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, World as EngineWorld } from "@matthuggins/platforming-engine";
+import { clamp } from "../helpers/clamp";
 import { gravityVectorForPlanet } from "../helpers/gravityVectorForPlanet";
 import { roundRect } from "../helpers/roundRect";
 import { surfaceRadiusAt } from "../helpers/surfaceRadiusAt";
@@ -117,7 +118,17 @@ export class World extends EngineWorld<Input, Camera> {
     return best;
   };
 
+  protected override gravityForce(source: EnginePart, _target: EnginePart, dist: number): number {
+    const planet = source as Planet;
+    const altitude = Math.max(0, dist - planet.radius);
+    const influence = planet.radius * 2.0 + 240;
+    const t = clamp(altitude / influence, 0, 1);
+    const falloff = 1 - t * t * (3 - 2 * t);
+    return planet.gravity * (0.015 + 0.985 * falloff);
+  }
+
   protected override afterPhysics(): void {
+    super.afterPhysics();
     this.tickAsteroidSpawner();
   }
 
