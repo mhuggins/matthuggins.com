@@ -1,5 +1,6 @@
 import { Color } from "../types";
 import { Planet, PlanetConfig } from "./parts/Planet";
+import { Platform } from "./parts/Platform";
 import { Player } from "./parts/Player";
 import { Satellite } from "./parts/Satellite";
 import { World } from "./World";
@@ -19,6 +20,120 @@ export function createWorld(...args: WorldArgs): World {
     for (const sat of createSatellites(planet)) {
       world.add(sat);
     }
+  }
+
+  // Add platforms
+  const planets = world.planets;
+  const [azure, cinder, verdant, violet] = planets;
+
+  if (azure) {
+    // Ground-level block (resting on the surface)
+    world.add(
+      new Platform(world, {
+        planet: azure,
+        angle: 2.6,
+        altitude: 0,
+        width: 290,
+        height: 22,
+        color: "#7ba3e0",
+      }),
+    );
+    // Floating platform, moderate height
+    world.add(
+      new Platform(world, {
+        planet: azure,
+        angle: -0.5,
+        altitude: 60,
+        width: 110,
+        height: 18,
+        color: "#5a8ad4",
+      }),
+    );
+    // Higher floating platform
+    world.add(
+      new Platform(world, {
+        planet: azure,
+        angle: 0.8,
+        altitude: 140,
+        width: 80,
+        height: 18,
+        color: "#4a7ac4",
+      }),
+    );
+  }
+
+  if (cinder) {
+    // Ground-level block
+    world.add(
+      new Platform(world, {
+        planet: cinder,
+        angle: 1.6,
+        altitude: 0,
+        width: 80,
+        height: 24,
+        color: "#c07850",
+      }),
+    );
+    // Floating platform
+    world.add(
+      new Platform(world, {
+        planet: cinder,
+        angle: 3.8,
+        altitude: 70,
+        width: 100,
+        height: 20,
+        color: "#b06840",
+      }),
+    );
+  }
+
+  if (verdant) {
+    // Floating step platforms — low, mid, high
+    world.add(
+      new Platform(world, {
+        planet: verdant,
+        angle: 0.2,
+        altitude: 40,
+        width: 80,
+        height: 18,
+        color: "#3aaa72",
+      }),
+    );
+    world.add(
+      new Platform(world, {
+        planet: verdant,
+        angle: -0.3,
+        altitude: 100,
+        width: 70,
+        height: 18,
+        color: "#2a9a62",
+      }),
+    );
+  }
+
+  if (violet) {
+    // Ground-level block
+    world.add(
+      new Platform(world, {
+        planet: violet,
+        angle: 2.2,
+        altitude: 0,
+        width: 85,
+        height: 22,
+        color: "#9060c0",
+      }),
+    );
+    // High floating platform
+    world.add(
+      new Platform(world, {
+        planet: violet,
+        angle: 4.8,
+        altitude: 110,
+        width: 95,
+        height: 18,
+        color: "#7845a8",
+      }),
+    );
   }
 
   // Add player

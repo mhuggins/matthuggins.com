@@ -8,6 +8,7 @@ import { Input } from "./Input";
 import { Asteroid } from "./parts/Asteroid";
 import { Part, RenderLayer } from "./parts/Part";
 import { Planet } from "./parts/Planet";
+import { Platform } from "./parts/Platform";
 import { Player } from "./parts/Player";
 
 const MAX_NEAREST_PLANETS = 10;
@@ -48,6 +49,10 @@ export class World extends EngineWorld<Input, Camera> {
 
   get planets(): Planet[] {
     return this.parts.filter((p): p is Planet => p instanceof Planet);
+  }
+
+  get platforms(): Platform[] {
+    return this.parts.filter((p): p is Platform => p instanceof Platform);
   }
 
   get player(): Player {
