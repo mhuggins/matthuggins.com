@@ -35,12 +35,10 @@ export class Platform extends RectangularPart {
     this.mass = 1e9;
 
     this.tiltAngle = cfg.angle + Math.PI / 2;
-    // topNormal / solidNormal: outward radial direction.
-    // solidNormal keeps the physics one-way (top face only), which prevents
-    // the platform side from acting as a wall when the player approaches from
-    // the planet surface. Below-surface collision is handled in Player.doUpdate.
+    // topNormal: outward radial direction (the "up" side of the platform).
+    // faceNormal is used as a fallback when the circle center is inside the rect.
     this.topNormal = { x: Math.cos(cfg.angle), y: Math.sin(cfg.angle) };
-    this.solidNormal = this.topNormal;
+    this.faceNormal = this.topNormal;
 
     const surfR = surfaceRadiusAt(cfg.planet, cfg.angle);
     const centerRadius = surfR + cfg.altitude + cfg.height / 2;
@@ -51,6 +49,14 @@ export class Platform extends RectangularPart {
   /** Distance from planet center to the walkable top surface of this platform. */
   get topRadius(): number {
     return surfaceRadiusAt(this.planet, this.angle) + this.altitude + this.height;
+  }
+
+  /**
+   * Permeable when the contact normal points away from topNormal — i.e. the
+   * player is approaching from the underside. Top and side contacts remain solid.
+   */
+  override isPermeable(nx: number, ny: number): boolean {
+    return nx * this.topNormal.x + ny * this.topNormal.y < 0;
   }
 
   override update = (_input: Input): void => {
