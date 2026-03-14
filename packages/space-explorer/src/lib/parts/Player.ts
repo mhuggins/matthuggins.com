@@ -26,6 +26,7 @@ const AIR_ROTATE_SPEED = 0.01;
 
 export class Player extends Part {
   readonly layer = RenderLayer.PLAYER;
+  override readonly isPlayer = true;
 
   // Engine-player interface fields — used by engine World's updatePlayerGrounding
   jumpStrength: number = JUMP_STRENGTH;
@@ -59,12 +60,6 @@ export class Player extends Part {
   /** Engine callback: veto grounding on specific surfaces (e.g. jump cooldown). */
   canGroundOn(surface: EnginePart): boolean {
     if (surface instanceof Platform && this.platformLandingCooldown > 0) return false;
-    // Don't land on a planet when moving away from it (just jumped)
-    const dx = surface.x - this.x;
-    const dy = surface.y - this.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    const radialSpeed = this.vx * (dx / dist) + this.vy * (dy / dist);
-    if (!(surface instanceof Platform) && radialSpeed < 0) return false;
     return true;
   }
 
@@ -129,10 +124,6 @@ export class Player extends Part {
       this.hasUsedJetpackThisAirborne = false;
       this.fuel = this.maxFuel;
       this.mode = "grounded";
-
-      if (this.platformLandingCooldown > 0) {
-        this.platformLandingCooldown--;
-      }
 
       const platform = this.activePlatform;
 
@@ -236,6 +227,10 @@ export class Player extends Part {
     } else {
       this.jetpackActive = false;
       this.mode = "air";
+
+      if (this.platformLandingCooldown > 0) {
+        this.platformLandingCooldown--;
+      }
 
       const blendedG = this.world.getBlendedGravity(this.x, this.y);
 
