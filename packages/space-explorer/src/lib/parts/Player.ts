@@ -1,4 +1,8 @@
-import { Part as EnginePart, Player as EnginePlayer } from "@matthuggins/platforming-engine";
+import {
+  Part as EnginePart,
+  Player as EnginePlayer,
+  type Point,
+} from "@matthuggins/platforming-engine";
 import { angleToUpVector } from "../../helpers/angleToUpVector";
 import { clamp } from "../../helpers/clamp";
 import { clampVelocity } from "../../helpers/clampVelocity";
@@ -17,9 +21,11 @@ import {
 } from "../sounds";
 import { World } from "../World";
 import { RenderLayer } from "./Part";
-import type { Planet } from "./Planet";
+import { Planet } from "./Planet";
 import { Platform } from "./Platform";
 
+const PLAYER_WIDTH = 16;
+const PLAYER_HEIGHT = 24;
 const JUMP_STRENGTH = 7.8;
 const JETPACK_FORCE = 0.35;
 const JETPACK_DRAIN = 0; // 0.0125;
@@ -42,10 +48,8 @@ export class Player extends PlayerPart {
   override jumpStrength: number = JUMP_STRENGTH;
   override gradability: number = Math.PI / 3; // 60° max slope
   override groundedOn: EnginePart | null = null;
-  override groundedNormal: { x: number; y: number } = { x: 0, y: -1 };
-  override surfaceTangent: { x: number; y: number } = { x: 1, y: 0 };
-  override radius = 12;
-
+  override groundedNormal: Point = { x: 0, y: -1 };
+  override surfaceTangent: Point = { x: 1, y: 0 };
   currentPlanet!: Planet;
   activePlanet: Planet | undefined = undefined;
   activePlatform: Platform | undefined = undefined;
@@ -84,6 +88,9 @@ export class Player extends PlayerPart {
       this.currentPlanet = surface.planet;
     } else {
       this.activePlatform = undefined;
+      if (surface instanceof Planet) {
+        this.currentPlanet = surface;
+      }
     }
     this.jetpackArmed = false;
     this.jetpackActive = false;
@@ -100,7 +107,7 @@ export class Player extends PlayerPart {
   reset(): void {
     const p = this.world.planets[0];
     this.x = p ? p.x : 0;
-    this.y = p ? p.y - surfaceRadiusAt(p, -Math.PI / 2) - this.radius : 0;
+    this.y = p ? p.y - surfaceRadiusAt(p, -Math.PI / 2) - PLAYER_HEIGHT / 2 : 0;
     this.vx = 0;
     this.vy = 0;
     this.groundedOn = null;
@@ -153,7 +160,7 @@ export class Player extends PlayerPart {
         const dx = this.x - planet.x;
         const dy = this.y - planet.y;
         const tangComp = dx * tangentX + dy * tangentY;
-        const halfEdge = platform.width / 2 + this.radius;
+        const halfEdge = platform.width / 2 + PLAYER_WIDTH / 2;
 
         if (Math.abs(tangComp) > halfEdge) {
           // Walked off the edge — transition to air.
@@ -163,7 +170,7 @@ export class Player extends PlayerPart {
           this.platformLandingCooldown = 5;
         } else {
           // Snap to platform top surface, preserving tangential offset
-          const targetRadial = platform.topRadius + this.radius;
+          const targetRadial = platform.topRadius + PLAYER_HEIGHT / 2;
           this.x = planet.x + radialX * targetRadial + tangentX * tangComp;
           this.y = planet.y + radialY * targetRadial + tangentY * tangComp;
 
@@ -199,15 +206,19 @@ export class Player extends PlayerPart {
         const planet = this.currentPlanet;
         this.activePlanet = planet;
 
-        const radialX = this.groundedNormal.x;
-        const radialY = this.groundedNormal.y;
-        const tangentX = this.surfaceTangent.x;
-        const tangentY = this.surfaceTangent.y;
-        const up = this.groundedNormal;
-
+        // Derive snap direction and walk tangent from the player's actual
+        // angle relative to the planet center.  Using the groundedNormal
+        // (from the height-field contact) would be wrong here because that
+        // normal is computed at the deepest polygon *vertex*, which on a
+        // convex surface is a trailing bottom corner — not the player center.
         const playerAngle = Math.atan2(this.y - planet.y, this.x - planet.x);
+        const radialX = Math.cos(playerAngle);
+        const radialY = Math.sin(playerAngle);
+        const tangentX = -radialY;
+        const tangentY = radialX;
+
         const surfR = surfaceRadiusAt(planet, playerAngle);
-        const targetDist = surfR + this.radius;
+        const targetDist = surfR + PLAYER_HEIGHT / 2;
 
         this.x = planet.x + radialX * targetDist;
         this.y = planet.y + radialY * targetDist;
@@ -216,6 +227,8 @@ export class Player extends PlayerPart {
         this.vx = tangentX * walkSpeed * move;
         this.vy = tangentY * walkSpeed * move;
 
+        // Keep terrain-aware grounded normal for visual orientation.
+        const up = this.groundedNormal;
         this.upX = up.x;
         this.upY = up.y;
         this.freeAngle = Math.atan2(this.upX, -this.upY);
@@ -309,6 +322,8 @@ export class Player extends PlayerPart {
   }
 
   doUpdate(): void {
+    this.rotation = this.freeAngle;
+
     if (!this.inputsEnabled) {
       stopWalkSound();
       if (this.jetpackActive) {
@@ -333,8 +348,8 @@ export class Player extends PlayerPart {
         // Player must be on the inward (bottom) side of the platform.
         if (pdx * sn.x + pdy * sn.y >= 0) continue;
 
-        const cosA = Math.cos(-platform.tiltAngle);
-        const sinA = Math.sin(-platform.tiltAngle);
+        const cosA = Math.cos(-platform.rotation);
+        const sinA = Math.sin(-platform.rotation);
         const localX = pdx * cosA - pdy * sinA;
         const localY = pdx * sinA + pdy * cosA;
         const hw = platform.width / 2;
@@ -342,7 +357,7 @@ export class Player extends PlayerPart {
         const closestX = Math.max(-hw, Math.min(hw, localX));
         const closestY = Math.max(-hh, Math.min(hh, localY));
         const distLen = Math.hypot(localX - closestX, localY - closestY);
-        if (distLen >= this.radius) continue;
+        if (distLen >= PLAYER_HEIGHT / 2) continue;
 
         // Kill velocity component directed toward the platform top.
         const approachSpeed = this.vx * sn.x + this.vy * sn.y;
@@ -352,7 +367,7 @@ export class Player extends PlayerPart {
         }
 
         // Push player out of overlap in the inward direction.
-        const overlap = this.radius - distLen;
+        const overlap = PLAYER_HEIGHT / 2 - distLen;
         this.x -= sn.x * overlap;
         this.y -= sn.y * overlap;
         break;
@@ -375,6 +390,10 @@ export class Player extends PlayerPart {
       m.onCollide(other, nx, ny, impactSpeed);
     }
   };
+
+  protected override isOffScreen(): boolean {
+    return false; // player renders at screen center, always visible
+  }
 
   doRender(ctx: CanvasRenderingContext2D): void {
     const canvas = this.world.canvas;

@@ -1,8 +1,8 @@
-import { Part as EnginePart, RectangularPart } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, rectPolygon } from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { Color } from "../../types";
 import type { World } from "../World";
-import { RenderLayer } from "./Part";
+import { Part, RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
 
 interface SatelliteConfig {
@@ -16,14 +16,14 @@ interface SatelliteConfig {
   color: Color;
 }
 
-export class Satellite extends RectangularPart {
+export class Satellite extends Part {
   readonly layer = RenderLayer.WORLD;
-  declare world: World;
-  zIndex = 0;
 
   orbitalRadius: number;
   orbitalPeriod: number;
   angle: number;
+  width: number;
+  height: number;
   mode: "kinematic" | "physics" = "kinematic";
   color: Color;
   parentPlanet: Planet;
@@ -38,7 +38,9 @@ export class Satellite extends RectangularPart {
     this.height = cfg.height;
     this.mass = cfg.mass;
     this.color = cfg.color;
-    this.tiltAngle = cfg.angle + Math.PI / 2; // broadside tangent to orbit
+
+    this.polygon = rectPolygon(cfg.width, cfg.height);
+    this.rotation = cfg.angle + Math.PI / 2; // broadside tangent to orbit
 
     const angularVelocity = (Math.PI * 2) / cfg.orbitalPeriod;
     this.x = cfg.planet.x + Math.cos(cfg.angle) * cfg.orbitalRadius;
@@ -55,7 +57,7 @@ export class Satellite extends RectangularPart {
       this.y = this.parentPlanet.y + Math.sin(this.angle) * this.orbitalRadius;
       this.vx = -Math.sin(this.angle) * this.orbitalRadius * angularVelocity;
       this.vy = Math.cos(this.angle) * this.orbitalRadius * angularVelocity;
-      this.tiltAngle = this.angle + Math.PI / 2; // stay broadside to orbit
+      this.rotation = this.angle + Math.PI / 2; // stay broadside to orbit
     } else {
       // Physics mode — gravity applied by engine applyGravity; just integrate position
       this.x += this.vx;
@@ -73,7 +75,7 @@ export class Satellite extends RectangularPart {
         const av = (Math.PI * 2) / this.orbitalPeriod;
         this.vx = -Math.sin(this.angle) * this.orbitalRadius * av;
         this.vy = Math.cos(this.angle) * this.orbitalRadius * av;
-        this.tiltAngle = this.angle + Math.PI / 2;
+        this.rotation = this.angle + Math.PI / 2;
       }
     }
   }

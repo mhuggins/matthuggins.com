@@ -1,4 +1,4 @@
-import { CircularPart as EngineCircularPart } from "@matthuggins/platforming-engine";
+import { Part as EnginePart } from "@matthuggins/platforming-engine";
 import type { World } from "../World";
 
 export enum RenderLayer {
@@ -7,7 +7,7 @@ export enum RenderLayer {
   HUD = 2,
 }
 
-export abstract class Part extends EngineCircularPart {
+export abstract class Part extends EnginePart {
   // Narrow world type to the concrete SpaceWorld for access to game-specific methods.
   declare world: World;
 

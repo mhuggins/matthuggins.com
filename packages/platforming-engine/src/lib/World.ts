@@ -1,17 +1,24 @@
 import autoBind from "auto-bind";
 import { applyCollisionImpulse } from "../helpers/applyCollisionImpulse";
 import { Camera } from "./Camera";
-import { CircularPart } from "./CircularPart";
+import { HeightFieldPart } from "./HeightFieldPart";
 import { Input } from "./Input";
 import { Part } from "./Part";
 import { Player } from "./Player";
-import { RectangularPart } from "./RectangularPart";
 
 const DEFAULT_COLLISION_BUFFER = 0.2; // contact slop: catches floating-point near-misses on exact surface snaps
 const DEFAULT_SEPARATION_BUFFER = 4; // hysteresis: contact persists until clearly separated
 
 type ContactEntry = { a: Part; b: Part; nx: number; ny: number };
 // nx/ny point from a toward b
+
+type ContactResult = {
+  nx: number; // from a toward b
+  ny: number;
+  overlap: number; // positive = penetrating, negative = gap
+  overlapping: boolean;
+  touching: boolean;
+};
 
 export class World<TInput extends Input = Input, TCamera extends Camera = Camera> {
   public readonly canvas: HTMLCanvasElement;
@@ -113,7 +120,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   protected applyGravity(): void {
     const sources = this.parts.filter((p) => p.gravity > 0);
     for (const target of this.parts) {
-      if (target.anchored || target.mass === 0) {
+      if (target.anchored || target.mass === 0 || !target.obeysGravity) {
         continue;
       }
 
@@ -211,83 +218,44 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   }
 
   private resolveCollisions(): void {
-    const dynamic = this.parts.filter((p) => p.shape !== null);
+    const cb = this.collisionBuffer;
+    const sb = this.separationBuffer;
+
+    const collidable = this.parts.filter((p) => p.canCollide);
     const newContacts: Map<string, ContactEntry> = new Map();
 
-    for (let i = 0; i < dynamic.length; i++) {
-      for (let j = i + 1; j < dynamic.length; j++) {
-        const a = dynamic[i];
-        const b = dynamic[j];
+    for (let i = 0; i < collidable.length; i++) {
+      for (let j = i + 1; j < collidable.length; j++) {
+        const a = collidable[i];
+        const b = collidable[j];
         if (a.anchored && b.anchored) {
           continue;
         }
 
-        const aIsRect = a.shape === "rect";
-        const bIsRect = b.shape === "rect";
-
-        let overlapping: boolean;
-        let touching: boolean;
-        let nx: number; // from a toward b
-        let ny: number;
-        let overlap: number;
+        // Broad-phase: skip pairs that are clearly too far apart.
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const maxDist = a.boundingRadius + b.boundingRadius + sb;
+        if (dx * dx + dy * dy > maxDist * maxDist) continue;
 
         const key = `${Math.min(a.id, b.id)}-${Math.max(a.id, b.id)}`;
         const wasContact = this.contactPairs.has(key);
 
-        if (aIsRect || bIsRect) {
-          // One must be a circle for rect-circle collision; skip rect-rect.
-          if (aIsRect && bIsRect) {
-            continue;
-          }
-
-          const rect = (aIsRect ? a : b) as unknown as RectangularPart;
-          const circle = (aIsRect ? b : a) as unknown as CircularPart;
-
-          const contact = computeRectCircleContact(
-            rect,
-            circle,
-            this.collisionBuffer,
-            this.separationBuffer,
-          );
-          if (contact === null) {
-            continue;
-          }
-
-          // Skip contact when the rect surface is permeable in this direction.
-          // contact.nx/ny points from rect toward circle; also pass circle
-          // position so implementations can use the player's side of the surface.
-          if (rect.isPermeable(contact.nx, contact.ny, circle.x, circle.y)) {
-            continue;
-          }
-
-          overlapping = contact.overlapping;
-          touching = contact.touching;
-          overlap = contact.overlap;
-
-          // contact.nx/ny points from rect toward circle.
-          // nx/ny in this loop must point from a toward b.
-          if (aIsRect) {
-            nx = contact.nx;
-            ny = contact.ny;
-          } else {
-            nx = -contact.nx;
-            ny = -contact.ny;
-          }
-        } else if (a instanceof CircularPart && b instanceof CircularPart) {
-          // Circle-circle: use terrain-aware surface radius.
-          const ra = a.surfaceRadiusToward(b.x, b.y);
-          const rb = b.surfaceRadiusToward(a.x, a.y);
-          const dist = Math.hypot(a.x - b.x, a.y - b.y);
-
-          nx = (b.x - a.x) / (dist || 0.001);
-          ny = (b.y - a.y) / (dist || 0.001);
-          overlapping = dist <= ra + rb + this.collisionBuffer;
-          touching = dist <= ra + rb + this.separationBuffer;
-          overlap = ra + rb - dist;
-        } else {
-          // TODO: Change `World.addPart()` to only accept `RectangularPart | CircularPart` typed parts
-          throw new Error("Parts must extend RectangularPart or CircularPart");
+        const contact = findContact(a, b, cb, sb);
+        if (contact === null) {
+          continue;
         }
+
+        // Check permeability — pass the normal pointing FROM that part TOWARD the other.
+        // contact.nx/ny points from a toward b.
+        if (a.isPermeable(contact.nx, contact.ny, b.x, b.y)) {
+          continue;
+        }
+        if (b.isPermeable(-contact.nx, -contact.ny, a.x, a.y)) {
+          continue;
+        }
+
+        const { nx, ny, overlap, overlapping, touching } = contact;
 
         // Contact persists until the parts are clearly separated (hysteresis).
         if (overlapping || (wasContact && touching)) {
@@ -342,68 +310,272 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   }
 }
 
-/**
- * Computes contact data between a RectangularPart and a CircularPart using the
- * closest-point algorithm. Returns null if no contact.
- * The returned normal (nx, ny) points from rect toward circle.
- */
-function computeRectCircleContact(
-  rect: RectangularPart,
-  circle: CircularPart,
-  collisionBuffer: number,
-  separationBuffer: number,
-): { touching: boolean; overlapping: boolean; nx: number; ny: number; overlap: number } | null {
-  // Transform circle center into rect's local frame (rotate by -tiltAngle).
-  const cx = circle.x - rect.x;
-  const cy = circle.y - rect.y;
-  const cosA = Math.cos(-rect.tiltAngle);
-  const sinA = Math.sin(-rect.tiltAngle);
-  const localX = cx * cosA - cy * sinA;
-  const localY = cx * sinA + cy * cosA;
+// ─── Contact dispatch ──────────────────────────────────────────────────────
 
-  // Closest point on rect boundary to circle center.
-  const hw = rect.width / 2;
-  const hh = rect.height / 2;
-  const closestX = Math.max(-hw, Math.min(hw, localX));
-  const closestY = Math.max(-hh, Math.min(hh, localY));
-
-  // Distance vector from closest point to circle center (in local frame).
-  const dvx = localX - closestX;
-  const dvy = localY - closestY;
-  const distLen = Math.hypot(dvx, dvy);
-
-  const overlapping = distLen <= circle.radius + collisionBuffer;
-  const touching = distLen <= circle.radius + separationBuffer;
-
-  if (!touching) {
-    return null;
+function findContact(a: Part, b: Part, cb: number, sb: number): ContactResult | null {
+  // Height field (planet) always uses its own contact algorithm.
+  if (a instanceof HeightFieldPart) {
+    return heightFieldContact(a, b, cb, sb);
+  }
+  if (b instanceof HeightFieldPart) {
+    // heightFieldContact returns nx from the height field toward the other part.
+    // We need nx from a toward b, so flip.
+    const c = heightFieldContact(b, a, cb, sb);
+    return c ? { ...c, nx: -c.nx, ny: -c.ny } : null;
   }
 
-  let nx: number;
-  let ny: number;
+  if (a.smooth && b.smooth) return circleCircleContact(a, b, cb, sb);
+  if (a.smooth) return circlePolyContact(a, b, cb, sb);
+  if (b.smooth) {
+    // circlePolyContact(circle=b, poly=a) returns nx from b toward a — flip.
+    const c = circlePolyContact(b, a, cb, sb);
+    return c ? { ...c, nx: -c.nx, ny: -c.ny } : null;
+  }
+  return polyPolyContact(a, b, cb, sb);
+}
 
-  if (distLen < 0.001) {
-    // Circle center is at or inside the rect — use faceNormal as fallback,
-    // oriented toward the side the circle is on so isPermeable works correctly.
-    if (rect.faceNormal) {
-      const dx = circle.x - rect.x;
-      const dy = circle.y - rect.y;
-      const side = dx * rect.faceNormal.x + dy * rect.faceNormal.y;
-      nx = side >= 0 ? rect.faceNormal.x : -rect.faceNormal.x;
-      ny = side >= 0 ? rect.faceNormal.y : -rect.faceNormal.y;
-    } else {
-      nx = 0;
-      ny = 1;
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+/** Bounding radius of a smooth part, derived from its polygon vertices. */
+function partRadius(p: Part): number {
+  if (p.polygon.length === 0) return 0;
+  return Math.max(...p.polygon.map((v) => Math.hypot(v.x, v.y)));
+}
+
+// ─── Circle–circle ─────────────────────────────────────────────────────────
+
+function circleCircleContact(a: Part, b: Part, cb: number, sb: number): ContactResult | null {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const dist = Math.hypot(dx, dy) || 0.001;
+  const overlap = partRadius(a) + partRadius(b) - dist;
+  if (overlap < -sb) return null;
+  return {
+    nx: dx / dist,
+    ny: dy / dist,
+    overlap,
+    overlapping: overlap >= -cb,
+    touching: overlap >= -sb,
+  };
+}
+
+// ─── Circle–polygon SAT ────────────────────────────────────────────────────
+// Returns nx/ny pointing from `circle` (a) toward `poly` (b).
+
+function circlePolyContact(circle: Part, poly: Part, cb: number, sb: number): ContactResult | null {
+  const verts = poly.worldVertices();
+  const n = verts.length;
+  if (n === 0) return null;
+
+  let minOverlap = Infinity;
+  let bestAx = 0,
+    bestAy = 0;
+
+  function testAxis(ax: number, ay: number): boolean {
+    const cp = circle.x * ax + circle.y * ay;
+    const r = partRadius(circle);
+    const cMin = cp - r;
+    const cMax = cp + r;
+
+    let pMin = Infinity,
+      pMax = -Infinity;
+    for (const v of verts) {
+      const p = v.x * ax + v.y * ay;
+      if (p < pMin) pMin = p;
+      if (p > pMax) pMax = p;
     }
-  } else {
-    // Rotate local normal back to world frame by +tiltAngle.
-    const localNx = dvx / distLen;
-    const localNy = dvy / distLen;
-    const cosB = Math.cos(rect.tiltAngle);
-    const sinB = Math.sin(rect.tiltAngle);
-    nx = localNx * cosB - localNy * sinB;
-    ny = localNx * sinB + localNy * cosB;
+
+    const overlap = Math.min(cMax - pMin, pMax - cMin);
+    if (overlap < -sb) return false;
+
+    if (overlap < minOverlap) {
+      minOverlap = overlap;
+      bestAx = ax;
+      bestAy = ay;
+    }
+    return true;
   }
 
-  return { touching, overlapping, nx, ny, overlap: circle.radius - distLen };
+  // Test all polygon edge normals.
+  for (let i = 0; i < n; i++) {
+    const v1 = verts[i];
+    const v2 = verts[(i + 1) % n];
+    const ex = v2.x - v1.x;
+    const ey = v2.y - v1.y;
+    const len = Math.hypot(ex, ey);
+    if (len < 0.001) continue;
+    if (!testAxis(ey / len, -ex / len)) return null;
+  }
+
+  // Test axis from closest polygon vertex to circle center.
+  let closestDist = Infinity;
+  let closestV = verts[0];
+  for (const v of verts) {
+    const d = Math.hypot(circle.x - v.x, circle.y - v.y);
+    if (d < closestDist) {
+      closestDist = d;
+      closestV = v;
+    }
+  }
+  const vx = circle.x - closestV.x;
+  const vy = circle.y - closestV.y;
+  const vlen = Math.hypot(vx, vy);
+  if (vlen > 0.001 && !testAxis(vx / vlen, vy / vlen)) return null;
+
+  if (minOverlap < -sb) return null;
+
+  // Orient normal from circle (a) toward poly (b).
+  const circleProj = circle.x * bestAx + circle.y * bestAy;
+  const polyProj = poly.x * bestAx + poly.y * bestAy;
+  const sign = polyProj >= circleProj ? 1 : -1;
+
+  return {
+    nx: bestAx * sign,
+    ny: bestAy * sign,
+    overlap: minOverlap,
+    overlapping: minOverlap >= -cb,
+    touching: minOverlap >= -sb,
+  };
+}
+
+// ─── Polygon–polygon SAT ───────────────────────────────────────────────────
+
+function polyPolyContact(a: Part, b: Part, cb: number, sb: number): ContactResult | null {
+  const vertsA = a.worldVertices();
+  const vertsB = b.worldVertices();
+  if (vertsA.length === 0 || vertsB.length === 0) return null;
+
+  let minOverlap = Infinity;
+  let bestAx = 0,
+    bestAy = 0;
+
+  function testAxis(ax: number, ay: number): boolean {
+    let aMin = Infinity,
+      aMax = -Infinity;
+    for (const v of vertsA) {
+      const p = v.x * ax + v.y * ay;
+      if (p < aMin) aMin = p;
+      if (p > aMax) aMax = p;
+    }
+
+    let bMin = Infinity,
+      bMax = -Infinity;
+    for (const v of vertsB) {
+      const p = v.x * ax + v.y * ay;
+      if (p < bMin) bMin = p;
+      if (p > bMax) bMax = p;
+    }
+
+    const overlap = Math.min(aMax - bMin, bMax - aMin);
+    if (overlap < -sb) return false;
+
+    if (overlap < minOverlap) {
+      minOverlap = overlap;
+      bestAx = ax;
+      bestAy = ay;
+    }
+    return true;
+  }
+
+  for (const verts of [vertsA, vertsB]) {
+    const n = verts.length;
+    for (let i = 0; i < n; i++) {
+      const v1 = verts[i];
+      const v2 = verts[(i + 1) % n];
+      const ex = v2.x - v1.x;
+      const ey = v2.y - v1.y;
+      const len = Math.hypot(ex, ey);
+      if (len < 0.001) continue;
+      if (!testAxis(ey / len, -ex / len)) return null;
+    }
+  }
+
+  if (minOverlap < -sb) return null;
+
+  // Orient normal from a toward b.
+  const aProj = a.x * bestAx + a.y * bestAy;
+  const bProj = b.x * bestAx + b.y * bestAy;
+  const sign = bProj >= aProj ? 1 : -1;
+
+  return {
+    nx: bestAx * sign,
+    ny: bestAy * sign,
+    overlap: minOverlap,
+    overlapping: minOverlap >= -cb,
+    touching: minOverlap >= -sb,
+  };
+}
+
+// ─── Height field contact ──────────────────────────────────────────────────
+// Returns nx/ny pointing from `planet` (outward from surface) toward `other`.
+
+function heightFieldContact(
+  planet: HeightFieldPart,
+  other: Part,
+  cb: number,
+  sb: number,
+): ContactResult | null {
+  let bestPenetration = -Infinity;
+  let bestAngle = 0;
+
+  if (other.smooth) {
+    // Circle: test the closest point on the circle toward the planet center.
+    const dx = other.x - planet.x;
+    const dy = other.y - planet.y;
+    const dist = Math.hypot(dx, dy) || 0.001;
+    const angle = Math.atan2(dy, dx);
+    const surfaceR = planet.surfaceRadiusAt(angle);
+    bestPenetration = surfaceR - (dist - partRadius(other));
+    bestAngle = angle;
+  } else {
+    // Polygon: find the deepest-penetrating vertex.
+    const verts = other.worldVertices();
+    for (const v of verts) {
+      const dx = v.x - planet.x;
+      const dy = v.y - planet.y;
+      const dist = Math.hypot(dx, dy) || 0.001;
+      const angle = Math.atan2(dy, dx);
+      const surfaceR = planet.surfaceRadiusAt(angle);
+      const penetration = surfaceR - dist;
+      if (penetration > bestPenetration) {
+        bestPenetration = penetration;
+        bestAngle = angle;
+      }
+    }
+  }
+
+  if (bestPenetration < -sb) return null;
+
+  // Derive contact normal from the terrain gradient at the contact angle.
+  const epsilon = 0.005;
+  const r0 = planet.surfaceRadiusAt(bestAngle - epsilon);
+  const r1 = planet.surfaceRadiusAt(bestAngle + epsilon);
+  const p0x = Math.cos(bestAngle - epsilon) * r0;
+  const p0y = Math.sin(bestAngle - epsilon) * r0;
+  const p1x = Math.cos(bestAngle + epsilon) * r1;
+  const p1y = Math.sin(bestAngle + epsilon) * r1;
+
+  const tx = p1x - p0x;
+  const ty = p1y - p0y;
+  const tlen = Math.hypot(tx, ty) || 0.001;
+
+  // Normal perpendicular to the surface tangent.
+  let nx = -ty / tlen;
+  let ny = tx / tlen;
+
+  // Ensure it points from planet toward other (outward).
+  const dx = other.x - planet.x;
+  const dy = other.y - planet.y;
+  if (dx * nx + dy * ny < 0) {
+    nx = -nx;
+    ny = -ny;
+  }
+
+  return {
+    nx,
+    ny,
+    overlap: bestPenetration,
+    overlapping: bestPenetration >= -cb,
+    touching: bestPenetration >= -sb,
+  };
 }

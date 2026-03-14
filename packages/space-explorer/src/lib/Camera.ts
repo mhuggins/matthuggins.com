@@ -1,4 +1,4 @@
-import { Camera as EngineCamera } from "@matthuggins/platforming-engine";
+import { Camera as EngineCamera, type Point } from "@matthuggins/platforming-engine";
 import { shortestAngleDiff } from "../helpers/shortestAngleDiff";
 import type { World } from "./World";
 
@@ -30,12 +30,7 @@ export class Camera extends EngineCamera {
     this.angle += shortestAngleDiff(this.angle, targetAngle) * follow;
   };
 
-  worldToScreen(
-    wx: number,
-    wy: number,
-    player: PlayerState,
-    canvas: HTMLCanvasElement,
-  ): { x: number; y: number } {
+  worldToScreen(wx: number, wy: number, player: PlayerState, canvas: HTMLCanvasElement): Point {
     const cx = canvas.clientWidth / 2;
     const cy = canvas.clientHeight / 2;
     const dx = wx - player.x;

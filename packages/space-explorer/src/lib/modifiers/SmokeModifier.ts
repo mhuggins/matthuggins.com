@@ -44,8 +44,9 @@ export class SmokeModifier extends Modifier {
     const isy = iwx * cs + iwy * cc;
 
     // Spawn particles at the contact point on the player's edge.
-    const cx = isx * parent.radius;
-    const cy = isy * parent.radius;
+    const r = Math.max(...parent.polygon.map((v) => Math.hypot(v.x, v.y)));
+    const cx = isx * r;
+    const cy = isy * r;
     const baseAngle = Math.atan2(isy, isx);
 
     this.particles = Array.from({ length: cfg.particles ?? DEFAULT_PARTICLE_COUNT }, () => {

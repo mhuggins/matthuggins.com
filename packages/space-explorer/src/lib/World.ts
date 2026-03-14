@@ -1,4 +1,5 @@
-import { World as EngineWorld } from "@matthuggins/platforming-engine";
+import { type Part as EnginePart, World as EngineWorld } from "@matthuggins/platforming-engine";
+import { gravityStrengthForPlanet } from "../helpers/gravityStrengthForPlanets";
 import { gravityVectorForPlanet } from "../helpers/gravityVectorForPlanet";
 import { roundRect } from "../helpers/roundRect";
 import { surfaceRadiusAt } from "../helpers/surfaceRadiusAt";
@@ -128,7 +129,15 @@ export class World extends EngineWorld<Input, Camera> {
   };
 
   protected override afterPhysics(): void {
+    super.afterPhysics();
     this.tickAsteroidSpawner();
+  }
+
+  protected override gravityForce(source: EnginePart, target: EnginePart, _dist: number): number {
+    if (source instanceof Planet) {
+      return gravityStrengthForPlanet(source, target.x, target.y);
+    }
+    return source.gravity;
   }
 
   override render = (): void => {

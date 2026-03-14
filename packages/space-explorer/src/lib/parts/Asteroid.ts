@@ -1,6 +1,7 @@
-import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
+import { Part as EnginePart } from "@matthuggins/platforming-engine";
 import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
+import { Planet } from "./Planet";
 
 interface AsteroidConfig {
   radius: number;
@@ -10,6 +11,7 @@ interface AsteroidConfig {
 export class Asteroid extends Part {
   readonly layer = RenderLayer.WORLD;
 
+  readonly radius: number;
   vertexOffsets: number[];
 
   constructor(world: World, cfg: AsteroidConfig) {
@@ -18,7 +20,28 @@ export class Asteroid extends Part {
     this.mass = cfg.radius ** 2;
     this.gravityScale = 0.5; // curves toward planets at half-gravity rate
     this.vertexOffsets = cfg.vertexOffsets;
+
+    // Build collision polygon from vertex offsets.
+    const numVerts = cfg.vertexOffsets.length;
+    this.polygon = cfg.vertexOffsets.map((offset, i) => {
+      const angle = (i / numVerts) * Math.PI * 2;
+      return {
+        x: Math.cos(angle) * cfg.radius * offset,
+        y: Math.sin(angle) * cfg.radius * offset,
+      };
+    });
   }
+
+  override onCollide = (
+    other: EnginePart,
+    _nx: number,
+    _ny: number,
+    _impactSpeed: number,
+  ): void => {
+    if (other instanceof Planet) {
+      this.world.remove(this);
+    }
+  };
 
   doUpdate(): void {
     this.x += this.vx;
@@ -30,17 +53,6 @@ export class Asteroid extends Part {
     );
     if (nearestPlanetDist > 3000) {
       this.world.remove(this);
-      return;
-    }
-
-    // Collision with planets
-    for (const planet of this.world.planets) {
-      const d = Math.hypot(this.x - planet.x, this.y - planet.y);
-      const surfAngle = Math.atan2(this.y - planet.y, this.x - planet.x);
-      if (d < surfaceRadiusAt(planet, surfAngle) + this.radius) {
-        this.world.remove(this);
-        return;
-      }
     }
   }
 
