@@ -11,6 +11,7 @@ import { Part, RenderLayer } from "./parts/Part";
 import { Planet } from "./parts/Planet";
 import { Platform } from "./parts/Platform";
 import { Player } from "./parts/Player";
+import { updateAudioListener } from "./sounds";
 
 const MAX_NEAREST_PLANETS = 10;
 const MIN_CONTRIBUTION = 0.02;
@@ -131,6 +132,9 @@ export class World extends EngineWorld<Input, Camera> {
   protected override afterPhysics(): void {
     super.afterPhysics();
     this.tickAsteroidSpawner();
+
+    const player = this.player;
+    updateAudioListener(player.x, player.y);
   }
 
   protected override gravityForce(source: EnginePart, target: EnginePart, _dist: number): number {

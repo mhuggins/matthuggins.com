@@ -36,7 +36,7 @@ export class Asteroid extends Part {
 
   override onCollide = (other: EnginePart, nx: number, ny: number, _impactSpeed: number): void => {
     this.world.remove(this);
-    playAsteroidCrashSound({ mass: this.mass });
+    playAsteroidCrashSound({ mass: this.mass }, { source: this });
 
     if (this.radius > MIN_SPLIT_RADIUS) {
       this.spawnFragments(other, nx, ny);
