@@ -301,9 +301,10 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 
   render(): void {
     const ctx = this.ctx;
+    const sortedParts = this.parts.sort((a, b) => a.zIndex - b.zIndex);
 
     ctx.save();
-    for (const part of this.parts) {
+    for (const part of sortedParts) {
       part.render(ctx);
     }
     ctx.restore();
