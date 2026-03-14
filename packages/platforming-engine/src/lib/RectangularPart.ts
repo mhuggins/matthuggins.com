@@ -1,7 +1,8 @@
 import { Part } from "./Part";
 
-export class RectangularPart extends Part {
+export abstract class RectangularPart extends Part {
   override readonly shape = "rect" as const;
+
   width = 0;
   height = 0;
   tiltAngle = 0; // world-space rotation of the rectangle (radians)

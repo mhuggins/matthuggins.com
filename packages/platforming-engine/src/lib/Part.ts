@@ -8,7 +8,6 @@ export abstract class Part {
 
   readonly id = Part.nextId++;
   readonly shape: "circle" | "rect" | null = null;
-  readonly isPlayer: boolean = false;
 
   x = 0;
   y = 0;
@@ -31,9 +30,14 @@ export abstract class Part {
 
   update(input: Input): void {
     this.updateModifiers(input);
+    if (this.inputsEnabled) {
+      this.applyInputs(input);
+    }
+    this.doUpdate();
   }
 
   render(ctx: CanvasRenderingContext2D): void {
+    this.doRender(ctx);
     this.renderModifiers(ctx);
   }
 
@@ -66,6 +70,11 @@ export abstract class Part {
       m.onSeparate(other);
     }
   }
+
+  protected abstract doUpdate(): void;
+  protected abstract doRender(ctx: CanvasRenderingContext2D): void;
+
+  protected applyInputs(_input: Input): void {}
 
   protected updateModifiers(input: Input): void {
     for (const m of this.modifiers) {
