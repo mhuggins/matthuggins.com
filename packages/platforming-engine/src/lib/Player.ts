@@ -2,6 +2,7 @@ import { CircularPart } from "./CircularPart";
 import { Part } from "./Part";
 
 export abstract class Player extends CircularPart {
+  override readonly isPlayer = true;
   jumpStrength: number = 7;
   gradability: number = Math.PI / 3; // 60° — max traversable slope
   groundedOn: Part | null = null;

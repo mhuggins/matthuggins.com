@@ -52,11 +52,17 @@ export class Platform extends RectangularPart {
   }
 
   /**
-   * Permeable when the contact normal points away from topNormal — i.e. the
-   * player is approaching from the underside. Top and side contacts remain solid.
+   * Permeable when the player center is on the underside of the platform AND
+   * the contact normal points away from topNormal. Requiring both conditions
+   * prevents corner contacts on tilted platforms from incorrectly passing through
+   * when the player approaches from the side.
    */
-  override isPermeable(nx: number, ny: number): boolean {
-    return nx * this.topNormal.x + ny * this.topNormal.y < 0;
+  override isPermeable(nx: number, ny: number, cx?: number, cy?: number): boolean {
+    const normalAway = nx * this.topNormal.x + ny * this.topNormal.y < 0;
+    if (!normalAway) return false;
+    if (cx === undefined || cy === undefined) return true;
+    const playerSide = (cx - this.x) * this.topNormal.x + (cy - this.y) * this.topNormal.y;
+    return playerSide < 0;
   }
 
   override update = (_input: Input): void => {
