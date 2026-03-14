@@ -1,4 +1,4 @@
-import { Part as EnginePart } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, Player as EnginePlayer } from "@matthuggins/platforming-engine";
 import { angleToUpVector } from "../../helpers/angleToUpVector";
 import { clamp } from "../../helpers/clamp";
 import { clampVelocity } from "../../helpers/clampVelocity";
@@ -15,7 +15,8 @@ import {
   stopJetpackSound,
   stopWalkSound,
 } from "../sounds";
-import { Part, RenderLayer } from "./Part";
+import { World } from "../World";
+import { RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
 import { Platform } from "./Platform";
 
@@ -24,18 +25,27 @@ const JETPACK_FORCE = 0.35;
 const JETPACK_DRAIN = 0; // 0.0125;
 const AIR_ROTATE_SPEED = 0.01;
 
-export class Player extends Part {
+abstract class PlayerPart extends EnginePlayer {
+  // Narrow world type to the concrete SpaceWorld for access to game-specific methods.
+  declare world: World;
+
+  abstract readonly layer: RenderLayer;
+  zIndex = 0;
+  override upX = 0;
+  override upY = -1;
+}
+
+export class Player extends PlayerPart {
   readonly layer = RenderLayer.PLAYER;
-  override readonly isPlayer = true;
 
   // Engine-player interface fields — used by engine World's updatePlayerGrounding
-  jumpStrength: number = JUMP_STRENGTH;
-  gradability: number = Math.PI / 3; // 60° max slope
-  groundedOn: EnginePart | null = null;
-  groundedNormal: { x: number; y: number } = { x: 0, y: -1 };
-  surfaceTangent: { x: number; y: number } = { x: 1, y: 0 };
-
+  override jumpStrength: number = JUMP_STRENGTH;
+  override gradability: number = Math.PI / 3; // 60° max slope
+  override groundedOn: EnginePart | null = null;
+  override groundedNormal: { x: number; y: number } = { x: 0, y: -1 };
+  override surfaceTangent: { x: number; y: number } = { x: 1, y: 0 };
   override radius = 12;
+
   currentPlanet!: Planet;
   activePlanet: Planet | undefined = undefined;
   activePlatform: Platform | undefined = undefined;
@@ -48,6 +58,7 @@ export class Player extends Part {
   maxFuel = 1;
   jumpAngularVelocity = 0;
   jumpAngularVelocityMax = 0;
+
   private prevJetpackActive = false;
   private prevWalkActive = false;
   private platformLandingCooldown = 0;
@@ -58,13 +69,15 @@ export class Player extends Part {
   }
 
   /** Engine callback: veto grounding on specific surfaces (e.g. jump cooldown). */
-  canGroundOn(surface: EnginePart): boolean {
-    if (surface instanceof Platform && this.platformLandingCooldown > 0) return false;
+  override canGroundOn(surface: EnginePart): boolean {
+    if (surface instanceof Platform && this.platformLandingCooldown > 0) {
+      return false;
+    }
     return true;
   }
 
   /** Engine callback: fires when the player first lands on a surface. */
-  onLand(surface: EnginePart): void {
+  override onLand(surface: EnginePart): void {
     playLandSound();
     if (surface instanceof Platform) {
       this.activePlatform = surface;
@@ -79,7 +92,7 @@ export class Player extends Part {
   }
 
   /** Engine callback: fires when the player leaves the ground. */
-  onLeaveGround(): void {
+  override onLeaveGround(): void {
     this.activePlatform = undefined;
     this.mode = "air";
   }
@@ -109,7 +122,7 @@ export class Player extends Part {
     this.platformLandingCooldown = 0;
   }
 
-  override applyInputs(input: Input): void {
+  protected override applyInputs(input: Input): void {
     const move =
       (input.isDown("KeyD") || input.isDown("ArrowRight") ? 1 : 0) -
       (input.isDown("KeyA") || input.isDown("ArrowLeft") ? 1 : 0);

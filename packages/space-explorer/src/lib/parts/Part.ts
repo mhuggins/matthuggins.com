@@ -1,4 +1,4 @@
-import { CircularPart as EngineCircularPart, Input } from "@matthuggins/platforming-engine";
+import { CircularPart as EngineCircularPart } from "@matthuggins/platforming-engine";
 import type { World } from "../World";
 
 export enum RenderLayer {
@@ -15,22 +15,4 @@ export abstract class Part extends EngineCircularPart {
   zIndex = 0;
   upX = 0;
   upY = -1;
-
-  override update = (input: Input): void => {
-    this.updateModifiers(input);
-    if (this.inputsEnabled) {
-      this.applyInputs(input);
-    }
-    this.doUpdate();
-  };
-
-  override render = (ctx: CanvasRenderingContext2D): void => {
-    this.doRender(ctx);
-    this.renderModifiers(ctx);
-  };
-
-  applyInputs(_input: Input): void {}
-
-  abstract doUpdate(): void;
-  abstract doRender(ctx: CanvasRenderingContext2D): void;
 }

@@ -1,4 +1,4 @@
-import { Input, RectangularPart } from "@matthuggins/platforming-engine";
+import { RectangularPart } from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { World } from "../World";
 import { RenderLayer } from "./Part";
@@ -65,11 +65,9 @@ export class Platform extends RectangularPart {
     return playerSide < 0;
   }
 
-  override update = (_input: Input): void => {
-    // Static — no update needed.
-  };
+  protected override doUpdate(): void {}
 
-  override render = (ctx: CanvasRenderingContext2D): void => {
+  protected override doRender(ctx: CanvasRenderingContext2D): void {
     ctx.save();
     ctx.translate(this.x, this.y);
     // Rotate so the rectangle is tangent to the planet surface:
@@ -101,5 +99,5 @@ export class Platform extends RectangularPart {
     ctx.strokeRect(-w / 2 + 0.5, -h / 2 + 0.5, w - 1, h - 1);
 
     ctx.restore();
-  };
+  }
 }

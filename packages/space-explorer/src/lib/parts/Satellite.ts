@@ -1,4 +1,4 @@
-import { Part as EnginePart, Input, RectangularPart } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, RectangularPart } from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { Color } from "../../types";
 import type { World } from "../World";
@@ -47,15 +47,7 @@ export class Satellite extends RectangularPart {
     this.vy = Math.cos(cfg.angle) * cfg.orbitalRadius * angularVelocity;
   }
 
-  override update = (_input: Input): void => {
-    this.doUpdate();
-  };
-
-  override render = (ctx: CanvasRenderingContext2D): void => {
-    this.doRender(ctx);
-  };
-
-  private doUpdate(): void {
+  protected override doUpdate(): void {
     if (this.mode === "kinematic") {
       const angularVelocity = (Math.PI * 2) / this.orbitalPeriod;
       this.angle += angularVelocity;
@@ -86,7 +78,7 @@ export class Satellite extends RectangularPart {
     }
   }
 
-  private doRender(ctx: CanvasRenderingContext2D): void {
+  protected override doRender(ctx: CanvasRenderingContext2D): void {
     // Draw faint orbital ring in kinematic mode
     if (this.mode === "kinematic") {
       ctx.beginPath();
