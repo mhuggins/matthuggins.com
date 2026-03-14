@@ -1,8 +1,13 @@
-export type SoundSetup = (ctx: AudioContext) => void | (() => void);
+export type SoundParams = Record<string, number>;
+export type SoundSetup<T extends SoundParams = SoundParams> = (
+  ctx: AudioContext,
+  params?: T,
+) => void | (() => void);
 
 export class AudioManager {
   private context: AudioContext | null = null;
-  private registry = new Map<string, SoundSetup>();
+  // biome-ignore lint/suspicious/noExplicitAny: setup can contain any type of params depending on the sound
+  private registry = new Map<string, SoundSetup<any>>();
   private loops = new Map<string, () => void>();
 
   getContext(): AudioContext | null {
@@ -34,20 +39,33 @@ export class AudioManager {
     }
   }
 
-  register(key: string, setup: SoundSetup): void {
+  register<T extends SoundParams>(
+    key: string,
+    setup: SoundSetup<T>,
+  ): {
+    play: (params?: T) => void;
+    startLoop: (params?: T) => void;
+    stopLoop: () => void;
+  } {
     this.registry.set(key, setup);
+
+    const play = (params?: T) => this.play(key, params);
+    const startLoop = (params?: T) => this.startLoop(key, params);
+    const stopLoop = () => this.stopLoop(key);
+
+    return { play, startLoop, stopLoop };
   }
 
-  play(key: string): void {
+  play<T extends SoundParams>(key: string, params?: T): void {
     const ctx = this.getContext();
     const setup = this.registry.get(key);
 
     if (ctx && setup) {
-      setup(ctx);
+      setup(ctx, params);
     }
   }
 
-  startLoop(key: string): void {
+  startLoop<T extends SoundParams>(key: string, params?: T): void {
     if (this.loops.has(key)) {
       return;
     }
@@ -58,7 +76,7 @@ export class AudioManager {
       return;
     }
 
-    const cleanup = setup(ctx) as (() => void) | undefined;
+    const cleanup = setup(ctx, params);
     if (cleanup) {
       this.loops.set(key, cleanup);
     }

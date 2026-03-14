@@ -10,11 +10,12 @@ import { SmokeModifier } from "./SmokeModifier";
 // So initialVelocity = desiredRotations * 2π / 25 ≈ desiredRotations * 0.2513.
 const DEFAULT_SPIN_DECAY = 0.96;
 const DEFAULT_STUN_FRAMES = 60;
-const MIN_STUN_IMPACT_SPEED = 0.5;
+const DEFAULT_MIN_STUN_MOMENTUM = 500;
 
 interface StunModifierConfig {
   spinDecay?: number;
   stunFrames?: number;
+  minStunMomentum?: number;
 }
 
 export class StunModifier extends Modifier {
@@ -22,6 +23,7 @@ export class StunModifier extends Modifier {
   private spinAngle: number; // Tracked independently of player.update() so left/right input can't bleed into the spin.
   private spinDecay: number;
   private stunFrames: number;
+  private minStunMomentum: number;
   private currentStunFrames = 0;
 
   constructor(parent: Part, cfg: StunModifierConfig = {}) {
@@ -29,6 +31,7 @@ export class StunModifier extends Modifier {
     this.spinAngle = Math.atan2(parent.upX, -parent.upY);
     this.spinDecay = cfg.spinDecay ?? DEFAULT_SPIN_DECAY;
     this.stunFrames = cfg.stunFrames ?? DEFAULT_STUN_FRAMES;
+    this.minStunMomentum = cfg.minStunMomentum ?? DEFAULT_MIN_STUN_MOMENTUM;
   }
 
   override onCollide(other: EnginePart, nx: number, ny: number, impactSpeed: number): void {
@@ -40,7 +43,8 @@ export class StunModifier extends Modifier {
       return;
     }
 
-    if (impactSpeed < MIN_STUN_IMPACT_SPEED) {
+    const momentum = other.mass * impactSpeed;
+    if (momentum < this.minStunMomentum) {
       return;
     }
 
