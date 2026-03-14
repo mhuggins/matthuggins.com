@@ -1,7 +1,9 @@
 import { Part as EnginePart } from "@matthuggins/platforming-engine";
+import { playAsteroidCrashSound } from "../sounds";
 import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
-import { Planet } from "./Planet";
+
+const MIN_SPLIT_RADIUS = 5;
 
 interface AsteroidConfig {
   radius: number;
@@ -32,16 +34,59 @@ export class Asteroid extends Part {
     });
   }
 
-  override onCollide = (
-    other: EnginePart,
-    _nx: number,
-    _ny: number,
-    _impactSpeed: number,
-  ): void => {
-    if (other instanceof Planet) {
-      this.world.remove(this);
+  override onCollide = (other: EnginePart, nx: number, ny: number, _impactSpeed: number): void => {
+    this.world.remove(this);
+    playAsteroidCrashSound({ mass: this.mass });
+
+    if (this.radius > MIN_SPLIT_RADIUS) {
+      this.spawnFragments(other, nx, ny);
     }
   };
+
+  private spawnFragments(other: EnginePart, nx: number, ny: number): void {
+    const childRadius = this.radius / 2;
+    const numVertices = 7 + Math.floor(Math.random() * 3);
+
+    // Reflect velocity off the collision normal if the other part is anchored
+    // (e.g. a planet), otherwise deflect based on relative mass.
+    let baseVx: number;
+    let baseVy: number;
+
+    if (other.anchored) {
+      // Reflect: v' = v - 2(v·n)n
+      const dot = this.vx * nx + this.vy * ny;
+      baseVx = this.vx - 2 * dot * nx;
+      baseVy = this.vy - 2 * dot * ny;
+    } else {
+      // Deflect away from the other object's center
+      const dx = this.x - other.x;
+      const dy = this.y - other.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const speed = Math.hypot(this.vx, this.vy);
+      baseVx = (dx / dist) * speed;
+      baseVy = (dy / dist) * speed;
+    }
+
+    // Spread the two fragments apart by ±30° from the base direction.
+    const spreadAngle = Math.PI / 6;
+    const baseAngle = Math.atan2(baseVy, baseVx);
+    const speed = Math.hypot(baseVx, baseVy) * 0.8;
+
+    for (const sign of [-1, 1]) {
+      const angle = baseAngle + sign * spreadAngle;
+      const vertexOffsets = Array.from({ length: numVertices }, () => 0.75 + Math.random() * 0.5);
+
+      const fragment = new Asteroid(this.world, {
+        radius: childRadius,
+        vertexOffsets,
+      });
+      fragment.x = this.x + Math.cos(angle) * childRadius;
+      fragment.y = this.y + Math.sin(angle) * childRadius;
+      fragment.vx = Math.cos(angle) * speed;
+      fragment.vy = Math.sin(angle) * speed;
+      this.world.add(fragment);
+    }
+  }
 
   doUpdate(): void {
     this.x += this.vx;
