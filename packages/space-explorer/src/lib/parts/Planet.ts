@@ -1,3 +1,4 @@
+import { HeightFieldPart } from "@matthuggins/platforming-engine";
 import { clamp } from "../../helpers/clamp";
 import {
   GRAVITY_RADIUS_BASE,
@@ -6,7 +7,7 @@ import {
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { Color, PlanetDecoration, TerrainFeature } from "../../types";
 import type { World } from "../World";
-import { Part, RenderLayer } from "./Part";
+import { RenderLayer } from "./Part";
 
 // Assumed gravity range across all planets — used to normalize visual intensity.
 const GRAVITY_MIN = 0.15;
@@ -28,9 +29,10 @@ export interface PlanetConfig {
   terrain: TerrainFeature[];
 }
 
-export class Planet extends Part {
+export class Planet extends HeightFieldPart {
   readonly layer = RenderLayer.WORLD;
   override anchored = true;
+  declare world: World;
 
   name: string;
   color: Color;
@@ -52,10 +54,9 @@ export class Planet extends Part {
     this.mass = 4 * Math.PI * cfg.radius ** 2;
   }
 
-  override surfaceRadiusToward = (x: number, y: number): number => {
-    const angle = Math.atan2(y - this.y, x - this.x);
+  surfaceRadiusAt(angle: number): number {
     return surfaceRadiusAt(this, angle);
-  };
+  }
 
   doUpdate(): void {
     // Planets are static — no movement.
