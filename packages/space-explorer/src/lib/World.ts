@@ -1,5 +1,4 @@
-import { Part as EnginePart, World as EngineWorld } from "@matthuggins/platforming-engine";
-import { clamp } from "../helpers/clamp";
+import { World as EngineWorld } from "@matthuggins/platforming-engine";
 import { gravityVectorForPlanet } from "../helpers/gravityVectorForPlanet";
 import { roundRect } from "../helpers/roundRect";
 import { surfaceRadiusAt } from "../helpers/surfaceRadiusAt";
@@ -15,6 +14,16 @@ import { Player } from "./parts/Player";
 const MAX_NEAREST_PLANETS = 10;
 const MIN_CONTRIBUTION = 0.02;
 const MAX_ASTEROIDS = 3;
+
+interface Influence {
+  planet: Planet;
+  distance: number;
+  dirX: number;
+  dirY: number;
+  gx: number;
+  gy: number;
+  strength: number;
+}
 
 export class World extends EngineWorld<Input, Camera> {
   // Narrow inherited types to concrete space-explorer classes.
@@ -67,7 +76,7 @@ export class World extends EngineWorld<Input, Camera> {
 
   getBlendedGravity = (px: number, py: number) => {
     const influences = this.planets
-      .map((planet) => {
+      .map((planet): Influence => {
         const dx = planet.x - px;
         const dy = planet.y - py;
         const distance = Math.hypot(dx, dy);
@@ -93,8 +102,8 @@ export class World extends EngineWorld<Input, Camera> {
       gx,
       gy,
       strongest: influences.reduce(
-        (best, g) => (!best || g.strength > best.strength ? g : best),
-        null as (typeof influences)[0] | null,
+        (best: Influence | null, g) => (!best || g.strength > best.strength ? g : best),
+        null,
       ),
       influences,
     };
@@ -118,17 +127,7 @@ export class World extends EngineWorld<Input, Camera> {
     return best;
   };
 
-  protected override gravityForce(source: EnginePart, _target: EnginePart, dist: number): number {
-    const planet = source as Planet;
-    const altitude = Math.max(0, dist - planet.radius);
-    const influence = planet.radius * 2.0 + 240;
-    const t = clamp(altitude / influence, 0, 1);
-    const falloff = 1 - t * t * (3 - 2 * t);
-    return planet.gravity * (0.015 + 0.985 * falloff);
-  }
-
   protected override afterPhysics(): void {
-    super.afterPhysics();
     this.tickAsteroidSpawner();
   }
 
@@ -146,6 +145,7 @@ export class World extends EngineWorld<Input, Camera> {
     ctx.rotate(-this.camera.angle);
     ctx.translate(-player.x, -player.y);
 
+    // TODO: Remove this type casting; Platform not extending the local Part class makes this challenge
     const worldParts = (this.parts as Part[])
       .filter((p) => p.layer === RenderLayer.WORLD)
       .sort((a, b) => a.zIndex - b.zIndex);
