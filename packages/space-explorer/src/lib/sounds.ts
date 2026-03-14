@@ -2,6 +2,11 @@ import { AudioManager } from "@matthuggins/platforming-engine";
 
 const audioManager = new AudioManager();
 
+export function updateAudioListener(x: number, y: number): void {
+  audioManager.setListenerPosition(x, y);
+  audioManager.update();
+}
+
 export const { play: playLandSound } = audioManager.register("land", (ctx) => {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -102,7 +107,7 @@ export const { play: playAsteroidCrashSound } = audioManager.register(
     const t = Math.min(1, Math.max(0, (mass - 25) / 2000));
     const now = ctx.currentTime;
 
-    const volume = 0.08 + t * 0.35;
+    const volume = 0.2 + t * 0.6;
     const duration = 0.15 + t * 0.35;
 
     // Noise burst — the core of the explosion sound.
