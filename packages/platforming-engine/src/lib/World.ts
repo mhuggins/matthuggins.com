@@ -139,14 +139,36 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 
   private updatePlayerGrounding(): void {
     for (const part of this.parts) {
-      if (!(part instanceof Player)) {
+      if (!part.isPlayer) {
         continue;
+      }
+      const player = part as unknown as Player;
+
+      // Use dominant gravity direction as "up" reference so the grounding
+      // threshold stays accurate even when the player has free-rotated via jetpack.
+      let gravUpX = player.upX;
+      let gravUpY = player.upY;
+      let maxForce = 0;
+      for (const source of this.parts) {
+        if (source.gravity <= 0 || source === part) {
+          continue;
+        }
+        const dx = source.x - player.x;
+        const dy = source.y - player.y;
+        const dist = Math.hypot(dx, dy) || 0.001;
+        const force = this.gravityForce(source, player, dist) * player.gravityScale;
+        if (force > maxForce) {
+          maxForce = force;
+          // "up" is opposite of the pull direction (away from source)
+          gravUpX = -(dx / dist);
+          gravUpY = -(dy / dist);
+        }
       }
 
       let bestPart: Part | null = null;
       let bestNx = 0,
         bestNy = 0;
-      let bestDot = Math.cos(part.gradability); // threshold
+      let bestDot = Math.cos(player.gradability); // threshold
 
       for (const entry of this.contactPairs.values()) {
         let other: Part, nx: number, ny: number;
@@ -162,8 +184,8 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           continue;
         }
 
-        const upDot = nx * part.upX + ny * part.upY;
-        if (upDot > bestDot && part.canGroundOn(other)) {
+        const upDot = nx * gravUpX + ny * gravUpY;
+        if (upDot > bestDot && player.canGroundOn(other)) {
           bestDot = upDot;
           bestPart = other;
           bestNx = nx;
@@ -171,20 +193,20 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         }
       }
 
-      const wasGrounded = part.groundedOn !== null;
-      part.groundedOn = bestPart;
+      const wasGrounded = player.groundedOn !== null;
+      player.groundedOn = bestPart;
 
       if (bestPart !== null) {
-        part.groundedNormal = { x: bestNx, y: bestNy };
-        part.surfaceTangent = { x: -bestNy, y: bestNx };
-        part.upX = bestNx;
-        part.upY = bestNy;
+        player.groundedNormal = { x: bestNx, y: bestNy };
+        player.surfaceTangent = { x: -bestNy, y: bestNx };
+        player.upX = bestNx;
+        player.upY = bestNy;
       }
 
       if (!wasGrounded && bestPart !== null) {
-        part.onLand(bestPart);
+        player.onLand(bestPart);
       } else if (wasGrounded && bestPart === null) {
-        part.onLeaveGround();
+        player.onLeaveGround();
       }
     }
   }
@@ -233,8 +255,9 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           }
 
           // Skip contact when the rect surface is permeable in this direction.
-          // contact.nx/ny points from rect toward circle.
-          if (rect.isPermeable(contact.nx, contact.ny)) {
+          // contact.nx/ny points from rect toward circle; also pass circle
+          // position so implementations can use the player's side of the surface.
+          if (rect.isPermeable(contact.nx, contact.ny, circle.x, circle.y)) {
             continue;
           }
 

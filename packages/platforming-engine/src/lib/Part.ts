@@ -8,6 +8,7 @@ export abstract class Part {
 
   readonly id = Part.nextId++;
   readonly shape: "circle" | "rect" | null = null;
+  readonly isPlayer: boolean = false;
 
   x = 0;
   y = 0;
@@ -45,7 +46,7 @@ export abstract class Part {
    * `nx`/`ny` is the contact normal pointing from this part toward the
    * colliding circle. Override in one-way surfaces (e.g. platforms).
    */
-  isPermeable(_nx: number, _ny: number): boolean {
+  isPermeable(_nx: number, _ny: number, _cx?: number, _cy?: number): boolean {
     return false;
   }
 
