@@ -139,24 +139,23 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 
   private updatePlayerGrounding(): void {
     for (const part of this.parts) {
-      if (!part.isPlayer) {
+      if (!(part instanceof Player)) {
         continue;
       }
-      const player = part as unknown as Player;
 
       // Use dominant gravity direction as "up" reference so the grounding
       // threshold stays accurate even when the player has free-rotated via jetpack.
-      let gravUpX = player.upX;
-      let gravUpY = player.upY;
+      let gravUpX = part.upX;
+      let gravUpY = part.upY;
       let maxForce = 0;
       for (const source of this.parts) {
         if (source.gravity <= 0 || source === part) {
           continue;
         }
-        const dx = source.x - player.x;
-        const dy = source.y - player.y;
+        const dx = source.x - part.x;
+        const dy = source.y - part.y;
         const dist = Math.hypot(dx, dy) || 0.001;
-        const force = this.gravityForce(source, player, dist) * player.gravityScale;
+        const force = this.gravityForce(source, part, dist) * part.gravityScale;
         if (force > maxForce) {
           maxForce = force;
           // "up" is opposite of the pull direction (away from source)
@@ -168,7 +167,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
       let bestPart: Part | null = null;
       let bestNx = 0,
         bestNy = 0;
-      let bestDot = Math.cos(player.gradability); // threshold
+      let bestDot = Math.cos(part.gradability); // threshold
 
       for (const entry of this.contactPairs.values()) {
         let other: Part, nx: number, ny: number;
@@ -185,7 +184,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         }
 
         const upDot = nx * gravUpX + ny * gravUpY;
-        if (upDot > bestDot && player.canGroundOn(other)) {
+        if (upDot > bestDot && part.canGroundOn(other)) {
           bestDot = upDot;
           bestPart = other;
           bestNx = nx;
@@ -193,20 +192,20 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         }
       }
 
-      const wasGrounded = player.groundedOn !== null;
-      player.groundedOn = bestPart;
+      const wasGrounded = part.groundedOn !== null;
+      part.groundedOn = bestPart;
 
       if (bestPart !== null) {
-        player.groundedNormal = { x: bestNx, y: bestNy };
-        player.surfaceTangent = { x: -bestNy, y: bestNx };
-        player.upX = bestNx;
-        player.upY = bestNy;
+        part.groundedNormal = { x: bestNx, y: bestNy };
+        part.surfaceTangent = { x: -bestNy, y: bestNx };
+        part.upX = bestNx;
+        part.upY = bestNy;
       }
 
       if (!wasGrounded && bestPart !== null) {
-        player.onLand(bestPart);
+        part.onLand(bestPart);
       } else if (wasGrounded && bestPart === null) {
-        player.onLeaveGround();
+        part.onLeaveGround();
       }
     }
   }
