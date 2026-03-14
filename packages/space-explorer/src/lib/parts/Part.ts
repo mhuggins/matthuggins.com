@@ -12,7 +12,6 @@ export abstract class Part extends EnginePart {
   declare world: World;
 
   abstract readonly layer: RenderLayer;
-  zIndex = 0;
   upX = 0;
   upY = -1;
 }

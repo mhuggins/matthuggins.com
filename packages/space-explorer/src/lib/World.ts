@@ -1,4 +1,4 @@
-import { type Part as EnginePart, World as EngineWorld } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, World as EngineWorld } from "@matthuggins/platforming-engine";
 import { gravityStrengthForPlanet } from "../helpers/gravityStrengthForPlanets";
 import { gravityVectorForPlanet } from "../helpers/gravityVectorForPlanet";
 import { roundRect } from "../helpers/roundRect";
@@ -158,9 +158,11 @@ export class World extends EngineWorld<Input, Camera> {
     ctx.rotate(-this.camera.angle);
     ctx.translate(-player.x, -player.y);
 
-    // TODO: Remove this type casting; Platform not extending the local Part class makes this challenge
-    const worldParts = (this.parts as Part[])
-      .filter((p) => p.layer === RenderLayer.WORLD)
+    const worldParts = this.parts
+      .filter(
+        (p): p is Part | Planet =>
+          (p instanceof Part || p instanceof Planet) && p.layer === RenderLayer.WORLD,
+      )
       .sort((a, b) => a.zIndex - b.zIndex);
 
     for (const part of worldParts) {
