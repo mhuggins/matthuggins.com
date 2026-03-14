@@ -40,24 +40,14 @@ export class Satellite extends Part {
     this.color = cfg.color;
 
     this.polygon = rectPolygon(cfg.width, cfg.height);
-    this.rotation = cfg.angle + Math.PI / 2; // broadside tangent to orbit
 
-    const angularVelocity = (Math.PI * 2) / cfg.orbitalPeriod;
-    this.x = cfg.planet.x + Math.cos(cfg.angle) * cfg.orbitalRadius;
-    this.y = cfg.planet.y + Math.sin(cfg.angle) * cfg.orbitalRadius;
-    this.vx = -Math.sin(cfg.angle) * cfg.orbitalRadius * angularVelocity;
-    this.vy = Math.cos(cfg.angle) * cfg.orbitalRadius * angularVelocity;
+    this.syncToOrbit();
   }
 
   protected override doUpdate(): void {
     if (this.mode === "kinematic") {
-      const angularVelocity = (Math.PI * 2) / this.orbitalPeriod;
-      this.angle += angularVelocity;
-      this.x = this.parentPlanet.x + Math.cos(this.angle) * this.orbitalRadius;
-      this.y = this.parentPlanet.y + Math.sin(this.angle) * this.orbitalRadius;
-      this.vx = -Math.sin(this.angle) * this.orbitalRadius * angularVelocity;
-      this.vy = Math.cos(this.angle) * this.orbitalRadius * angularVelocity;
-      this.rotation = this.angle + Math.PI / 2; // stay broadside to orbit
+      this.angle += (Math.PI * 2) / this.orbitalPeriod;
+      this.syncToOrbit();
     } else {
       // Physics mode — gravity applied by engine applyGravity; just integrate position
       this.x += this.vx;
@@ -66,18 +56,23 @@ export class Satellite extends Part {
       // Crash into parent planet — respawn kinematically
       const dToPlanet = Math.hypot(this.x - this.parentPlanet.x, this.y - this.parentPlanet.y);
       const surfAngle = Math.atan2(this.y - this.parentPlanet.y, this.x - this.parentPlanet.x);
-      const collisionRadius = this.width / 4; // approximate bounding radius
+      const collisionRadius = this.width / 4;
       if (dToPlanet < surfaceRadiusAt(this.parentPlanet, surfAngle) + collisionRadius) {
         this.mode = "kinematic";
         this.angle = Math.random() * Math.PI * 2;
-        this.x = this.parentPlanet.x + Math.cos(this.angle) * this.orbitalRadius;
-        this.y = this.parentPlanet.y + Math.sin(this.angle) * this.orbitalRadius;
-        const av = (Math.PI * 2) / this.orbitalPeriod;
-        this.vx = -Math.sin(this.angle) * this.orbitalRadius * av;
-        this.vy = Math.cos(this.angle) * this.orbitalRadius * av;
-        this.rotation = this.angle + Math.PI / 2;
+        this.syncToOrbit();
       }
     }
+  }
+
+  /** Snap position, velocity, and rotation to match the current orbital angle. */
+  private syncToOrbit(): void {
+    const av = (Math.PI * 2) / this.orbitalPeriod;
+    this.x = this.parentPlanet.x + Math.cos(this.angle) * this.orbitalRadius;
+    this.y = this.parentPlanet.y + Math.sin(this.angle) * this.orbitalRadius;
+    this.vx = -Math.sin(this.angle) * this.orbitalRadius * av;
+    this.vy = Math.cos(this.angle) * this.orbitalRadius * av;
+    this.rotation = this.angle + Math.PI / 2;
   }
 
   protected override doRender(ctx: CanvasRenderingContext2D): void {
