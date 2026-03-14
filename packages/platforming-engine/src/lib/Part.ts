@@ -16,6 +16,7 @@ export abstract class Part {
   mass = 0;
   gravity: number = 0;
   gravityScale: number = 1.0;
+  zIndex = 0;
   anchored = false;
   inputsEnabled = true;
   modifiers: Modifier[] = [];

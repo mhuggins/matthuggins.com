@@ -37,7 +37,6 @@ abstract class PlayerPart extends EnginePlayer {
   declare world: World;
 
   abstract readonly layer: RenderLayer;
-  zIndex = 0;
   override upX = 0;
   override upY = -1;
 }
@@ -151,7 +150,7 @@ export class Player extends PlayerPart {
   }
 
   protected override applyInputs(input: Input): void {
-    const move =
+    let move =
       (input.isDown("KeyD") || input.isDown("ArrowRight") ? 1 : 0) -
       (input.isDown("KeyA") || input.isDown("ArrowLeft") ? 1 : 0);
 
@@ -199,6 +198,12 @@ export class Player extends PlayerPart {
           this.y = planet.y + radialY * targetRadial + tangentY * tangComp;
 
           const walkSpeed = 2.4;
+          if (
+            move !== 0 &&
+            this.isWalkBlockedByPlatformSide(tangentX * move, tangentY * move, walkSpeed)
+          ) {
+            move = 0;
+          }
           this.vx = tangentX * walkSpeed * move;
           this.vy = tangentY * walkSpeed * move;
 
@@ -242,6 +247,12 @@ export class Player extends PlayerPart {
         this.y = planet.y + radialY * targetDist;
 
         const walkSpeed = 2.4;
+        if (
+          move !== 0 &&
+          this.isWalkBlockedByPlatformSide(tangentX * move, tangentY * move, walkSpeed)
+        ) {
+          move = 0;
+        }
         this.vx = tangentX * walkSpeed * move;
         this.vy = tangentY * walkSpeed * move;
 
@@ -347,6 +358,53 @@ export class Player extends PlayerPart {
     this.x += this.vx;
     this.y += this.vy;
 
+    // Side-wall push-out — if the player ends up overlapping a platform's
+    // side after velocity is applied, push them back out and kill the
+    // velocity component directed into the wall.
+    if (this.onGround) {
+      for (const platform of this.world.platforms) {
+        if (platform === this.activePlatform) continue;
+
+        const pdx = this.x - platform.x;
+        const pdy = this.y - platform.y;
+
+        // Only handle top-side approach (underside is handled below).
+        if (dot(pdx, pdy, platform.topNormal.x, platform.topNormal.y) < 0) continue;
+
+        const cosR = Math.cos(-platform.rotation);
+        const sinR = Math.sin(-platform.rotation);
+        const localX = pdx * cosR - pdy * sinR;
+        const localY = pdx * sinR + pdy * cosR;
+
+        const hw = platform.width / 2 + PLAYER_WIDTH / 2;
+        const hh = platform.height / 2 + PLAYER_HEIGHT / 2;
+
+        const overlapX = hw - Math.abs(localX);
+        const overlapY = hh - Math.abs(localY);
+
+        if (overlapX <= 0 || overlapY <= 0) continue;
+        // Only side contacts (tangential overlap smaller than radial).
+        if (overlapX >= overlapY) continue;
+
+        // Push out along platform's local-X axis (tangent direction).
+        const pushSign = localX > 0 ? 1 : -1;
+        const worldTangX = Math.cos(platform.rotation);
+        const worldTangY = Math.sin(platform.rotation);
+
+        this.x += pushSign * overlapX * worldTangX;
+        this.y += pushSign * overlapX * worldTangY;
+
+        // Kill velocity component directed into the wall.
+        const wallNx = -pushSign * worldTangX;
+        const wallNy = -pushSign * worldTangY;
+        const approachSpeed = dot(this.vx, this.vy, wallNx, wallNy);
+        if (approachSpeed > 0) {
+          this.vx -= approachSpeed * wallNx;
+          this.vy -= approachSpeed * wallNy;
+        }
+      }
+    }
+
     if (!this.onGround) {
       const capped = clampVelocity(this.vx, this.vy, 9);
       this.vx = capped.vx;
@@ -403,6 +461,39 @@ export class Player extends PlayerPart {
       m.onCollide(other, nx, ny, impactSpeed);
     }
   };
+
+  /**
+   * Returns true if walking one frame in the given direction would overlap a
+   * platform's side (not top). Uses an AABB overlap test in platform-local space.
+   */
+  private isWalkBlockedByPlatformSide(dirX: number, dirY: number, walkSpeed: number): boolean {
+    const aheadX = this.x + dirX * walkSpeed;
+    const aheadY = this.y + dirY * walkSpeed;
+
+    for (const platform of this.world.platforms) {
+      if (platform === this.activePlatform) continue;
+
+      const cosR = Math.cos(-platform.rotation);
+      const sinR = Math.sin(-platform.rotation);
+      const dx = aheadX - platform.x;
+      const dy = aheadY - platform.y;
+      const localX = dx * cosR - dy * sinR;
+      const localY = dx * sinR + dy * cosR;
+
+      const hw = platform.width / 2 + PLAYER_WIDTH / 2;
+      const hh = platform.height / 2 + PLAYER_HEIGHT / 2;
+
+      const overlapX = hw - Math.abs(localX);
+      const overlapY = hh - Math.abs(localY);
+
+      // Side contact: both axes overlap, and the tangential (X) overlap is
+      // the smaller of the two — meaning the player is entering from the side.
+      if (overlapX > 0 && overlapY > 0 && overlapX < overlapY) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /** Set angular velocity for the air-steering code based on current tangential speed. */
   private initAirAngularVelocity(tangentX: number, tangentY: number, radius: number): void {
