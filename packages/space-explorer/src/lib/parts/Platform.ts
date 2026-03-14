@@ -1,7 +1,7 @@
-import { RectangularPart } from "@matthuggins/platforming-engine";
+import { type Point, rectPolygon } from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { World } from "../World";
-import { RenderLayer } from "./Part";
+import { Part, RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
 
 export interface PlatformConfig {
@@ -13,7 +13,7 @@ export interface PlatformConfig {
   color: string;
 }
 
-export class Platform extends RectangularPart {
+export class Platform extends Part {
   readonly layer = RenderLayer.WORLD;
   override anchored = true;
   declare world: World;
@@ -21,8 +21,10 @@ export class Platform extends RectangularPart {
   planet: Planet;
   angle: number;
   altitude: number;
+  width: number;
+  height: number;
   color: string;
-  topNormal: { x: number; y: number };
+  topNormal: Point;
 
   constructor(world: World, cfg: PlatformConfig) {
     super(world);
@@ -34,11 +36,10 @@ export class Platform extends RectangularPart {
     this.color = cfg.color;
     this.mass = 1e9;
 
-    this.tiltAngle = cfg.angle + Math.PI / 2;
+    this.polygon = rectPolygon(cfg.width, cfg.height);
+    this.rotation = cfg.angle + Math.PI / 2;
     // topNormal: outward radial direction (the "up" side of the platform).
-    // faceNormal is used as a fallback when the circle center is inside the rect.
     this.topNormal = { x: Math.cos(cfg.angle), y: Math.sin(cfg.angle) };
-    this.faceNormal = this.topNormal;
 
     const surfR = surfaceRadiusAt(cfg.planet, cfg.angle);
     const centerRadius = surfR + cfg.altitude + cfg.height / 2;

@@ -6,6 +6,5 @@
     "baseUrl": "./",
     "composite": true
   },
-  "include": ["src/**/*"],
-  "references": [{ "path": "../platforming-engine" }]
+  "include": ["src/**/*"]
 }
