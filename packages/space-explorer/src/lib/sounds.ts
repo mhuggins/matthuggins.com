@@ -100,37 +100,53 @@ export const { play: playAsteroidCrashSound } = audioManager.register(
     // Intensity scales with asteroid mass (range ~25 for tiny fragments to ~2025 for large asteroids).
     // Normalize to 0..1 where 0 is the smallest fragment and 1 is the largest asteroid.
     const t = Math.min(1, Math.max(0, (mass - 25) / 2000));
+    const now = ctx.currentTime;
 
-    const volume = 0.05 + t * 0.3;
-    const duration = 0.08 + t * 0.2;
-    const startFreq = 200 + t * 500;
-    const endFreq = 60 + t * 100;
+    const volume = 0.08 + t * 0.35;
+    const duration = 0.15 + t * 0.35;
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + duration);
-    gain.gain.setValueAtTime(volume, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + duration);
+    // Noise burst — the core of the explosion sound.
+    const bufferSize = Math.ceil(ctx.sampleRate * duration);
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
 
-    // Low rumble layer — only audible for larger asteroids.
-    if (t > 0.2) {
-      const rumble = ctx.createOscillator();
-      const rumbleGain = ctx.createGain();
-      rumble.type = "square";
-      rumble.frequency.setValueAtTime(40 + t * 60, ctx.currentTime);
-      rumble.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + duration);
-      rumbleGain.gain.setValueAtTime(volume * 0.6, ctx.currentTime);
-      rumbleGain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
-      rumble.connect(rumbleGain);
-      rumbleGain.connect(ctx.destination);
-      rumble.start(ctx.currentTime);
-      rumble.stop(ctx.currentTime + duration);
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+
+    // Bandpass shapes the noise — lower center freq for bigger asteroids gives a
+    // deeper, more thunderous blast; higher freq for small fragments gives a sharp pop.
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.setValueAtTime(800 - t * 500, now);
+    bp.frequency.exponentialRampToValueAtTime(100, now + duration);
+    bp.Q.value = 0.8;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(volume, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+    noise.connect(bp);
+    bp.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + duration);
+
+    // Low-freq concussive thump — scales up with size.
+    if (t > 0.15) {
+      const thump = ctx.createOscillator();
+      const thumpGain = ctx.createGain();
+      thump.type = "sine";
+      thump.frequency.setValueAtTime(60 + t * 40, now);
+      thump.frequency.exponentialRampToValueAtTime(20, now + duration * 0.8);
+      thumpGain.gain.setValueAtTime(volume * 0.7, now);
+      thumpGain.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.8);
+      thump.connect(thumpGain);
+      thumpGain.connect(ctx.destination);
+      thump.start(now);
+      thump.stop(now + duration * 0.8);
     }
   },
 );
