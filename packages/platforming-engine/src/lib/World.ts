@@ -273,12 +273,10 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
             nx = -contact.nx;
             ny = -contact.ny;
           }
-        } else {
+        } else if (a instanceof CircularPart && b instanceof CircularPart) {
           // Circle-circle: use terrain-aware surface radius.
-          const ca = a as unknown as CircularPart;
-          const cb = b as unknown as CircularPart;
-          const ra = ca.surfaceRadiusToward(b.x, b.y);
-          const rb = cb.surfaceRadiusToward(a.x, a.y);
+          const ra = a.surfaceRadiusToward(b.x, b.y);
+          const rb = b.surfaceRadiusToward(a.x, a.y);
           const dist = Math.hypot(a.x - b.x, a.y - b.y);
 
           nx = (b.x - a.x) / (dist || 0.001);
@@ -286,6 +284,9 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           overlapping = dist <= ra + rb + this.collisionBuffer;
           touching = dist <= ra + rb + this.separationBuffer;
           overlap = ra + rb - dist;
+        } else {
+          // TODO: Change `World.addPart()` to only accept `RectangularPart | CircularPart` typed parts
+          throw new Error("Parts must extend RectangularPart or CircularPart");
         }
 
         // Contact persists until the parts are clearly separated (hysteresis).
