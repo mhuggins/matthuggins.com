@@ -74,6 +74,9 @@ export class Player extends PlayerPart {
 
   /** Engine callback: veto grounding on specific surfaces (e.g. jump cooldown). */
   override canGroundOn(surface: EnginePart): boolean {
+    if (!this.inputsEnabled) {
+      return false; // don't ground while stunned
+    }
     if (surface instanceof Platform && this.platformLandingCooldown > 0) {
       return false;
     }
@@ -100,8 +103,26 @@ export class Player extends PlayerPart {
 
   /** Engine callback: fires when the player leaves the ground. */
   override onLeaveGround(): void {
+    const wasPlatform = this.activePlatform !== undefined;
     this.activePlatform = undefined;
     this.mode = "air";
+
+    const planet = this.currentPlanet;
+    const dx = this.x - planet.x;
+    const dy = this.y - planet.y;
+    const r = Math.hypot(dx, dy) || 0.001;
+    const radX = dx / r;
+    const radY = dy / r;
+
+    if (wasPlatform) {
+      // Strip tangential velocity so collision nudges at platform edges
+      // don't cause backward drift. The player falls purely radially.
+      const radialV = this.vx * radX + this.vy * radY;
+      this.vx = radX * radialV;
+      this.vy = radY * radialV;
+    }
+
+    this.initAirAngularVelocity(-radY, radX, r);
   }
 
   reset(): void {
@@ -164,10 +185,13 @@ export class Player extends PlayerPart {
 
         if (Math.abs(tangComp) > halfEdge) {
           // Walked off the edge — transition to air.
+          // Initialize angular velocity from walk speed so the air code
+          // preserves tangential momentum and allows steering.
+          this.initAirAngularVelocity(tangentX, tangentY, platform.topRadius + PLAYER_HEIGHT / 2);
           this.groundedOn = null;
           this.activePlatform = undefined;
           this.mode = "air";
-          this.platformLandingCooldown = 5;
+          this.platformLandingCooldown = 20;
         } else {
           // Snap to platform top surface, preserving tangential offset
           const targetRadial = platform.topRadius + PLAYER_HEIGHT / 2;
@@ -184,13 +208,7 @@ export class Player extends PlayerPart {
 
           if (input.justPressed("Space")) {
             playJumpSound();
-            const vt = dot(this.vx, this.vy, tangentX, tangentY);
-            const jumpDist = targetRadial;
-            this.jumpAngularVelocity = vt / jumpDist;
-            this.jumpAngularVelocityMax = Math.max(
-              Math.abs(this.jumpAngularVelocity),
-              walkSpeed / jumpDist,
-            );
+            this.initAirAngularVelocity(tangentX, tangentY, targetRadial);
             this.vx += up.x * JUMP_STRENGTH;
             this.vy += up.y * JUMP_STRENGTH;
             this.groundedOn = null;
@@ -198,7 +216,7 @@ export class Player extends PlayerPart {
             this.mode = "air";
             this.jetpackArmed = false;
             this.hasUsedJetpackThisAirborne = false;
-            this.platformLandingCooldown = 5;
+            this.platformLandingCooldown = 20;
           }
         }
       } else {
@@ -235,12 +253,7 @@ export class Player extends PlayerPart {
 
         if (input.justPressed("Space")) {
           playJumpSound();
-          const vt = dot(this.vx, this.vy, tangentX, tangentY);
-          this.jumpAngularVelocity = vt / targetDist;
-          this.jumpAngularVelocityMax = Math.max(
-            Math.abs(this.jumpAngularVelocity),
-            walkSpeed / targetDist,
-          );
+          this.initAirAngularVelocity(tangentX, tangentY, targetDist);
 
           this.vx += up.x * JUMP_STRENGTH;
           this.vy += up.y * JUMP_STRENGTH;
@@ -390,6 +403,14 @@ export class Player extends PlayerPart {
       m.onCollide(other, nx, ny, impactSpeed);
     }
   };
+
+  /** Set angular velocity for the air-steering code based on current tangential speed. */
+  private initAirAngularVelocity(tangentX: number, tangentY: number, radius: number): void {
+    const walkSpeed = 2.4;
+    const vt = dot(this.vx, this.vy, tangentX, tangentY);
+    this.jumpAngularVelocity = vt / radius;
+    this.jumpAngularVelocityMax = Math.max(Math.abs(this.jumpAngularVelocity), walkSpeed / radius);
+  }
 
   protected override isOffScreen(): boolean {
     return false; // player renders at screen center, always visible
