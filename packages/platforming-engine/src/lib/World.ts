@@ -334,21 +334,13 @@ function findContact(a: Part, b: Part, cb: number, sb: number): ContactResult | 
   return polyPolyContact(a, b, cb, sb);
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
-
-/** Bounding radius of a smooth part, derived from its polygon vertices. */
-function partRadius(p: Part): number {
-  if (p.polygon.length === 0) return 0;
-  return Math.max(...p.polygon.map((v) => Math.hypot(v.x, v.y)));
-}
-
 // ─── Circle–circle ─────────────────────────────────────────────────────────
 
 function circleCircleContact(a: Part, b: Part, cb: number, sb: number): ContactResult | null {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const dist = Math.hypot(dx, dy) || 0.001;
-  const overlap = partRadius(a) + partRadius(b) - dist;
+  const overlap = a.boundingRadius + b.boundingRadius - dist;
   if (overlap < -sb) return null;
   return {
     nx: dx / dist,
@@ -373,7 +365,7 @@ function circlePolyContact(circle: Part, poly: Part, cb: number, sb: number): Co
 
   function testAxis(ax: number, ay: number): boolean {
     const cp = circle.x * ax + circle.y * ay;
-    const r = partRadius(circle);
+    const r = circle.boundingRadius;
     const cMin = cp - r;
     const cMax = cp + r;
 
@@ -525,7 +517,7 @@ function heightFieldContact(
     const dist = Math.hypot(dx, dy) || 0.001;
     const angle = Math.atan2(dy, dx);
     const surfaceR = planet.surfaceRadiusAt(angle);
-    bestPenetration = surfaceR - (dist - partRadius(other));
+    bestPenetration = surfaceR - (dist - other.boundingRadius);
     bestAngle = angle;
   } else {
     // Polygon: find the deepest-penetrating vertex.

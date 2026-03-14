@@ -7,6 +7,7 @@ import { angleToUpVector } from "../../helpers/angleToUpVector";
 import { clamp } from "../../helpers/clamp";
 import { clampVelocity } from "../../helpers/clampVelocity";
 import { dot } from "../../helpers/dot";
+import { normalize } from "../../helpers/normalize";
 import { roundRect } from "../../helpers/roundRect";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import type { Input } from "../Input";
@@ -111,18 +112,17 @@ export class Player extends PlayerPart {
     const dx = this.x - planet.x;
     const dy = this.y - planet.y;
     const r = Math.hypot(dx, dy) || 0.001;
-    const radX = dx / r;
-    const radY = dy / r;
+    const rad = normalize(dx, dy);
 
     if (wasPlatform) {
       // Strip tangential velocity so collision nudges at platform edges
       // don't cause backward drift. The player falls purely radially.
-      const radialV = this.vx * radX + this.vy * radY;
-      this.vx = radX * radialV;
-      this.vy = radY * radialV;
+      const radialV = dot(this.vx, this.vy, rad.x, rad.y);
+      this.vx = rad.x * radialV;
+      this.vy = rad.y * radialV;
     }
 
-    this.initAirAngularVelocity(-radY, radX, r);
+    this.initAirAngularVelocity(-rad.y, rad.x, r);
   }
 
   reset(): void {
@@ -279,7 +279,7 @@ export class Player extends PlayerPart {
         const fromPlanetX = this.x - this.currentPlanet.x;
         const fromPlanetY = this.y - this.currentPlanet.y;
         const r = Math.hypot(fromPlanetX, fromPlanetY);
-        const fromPlanet = { x: fromPlanetX / r, y: fromPlanetY / r };
+        const fromPlanet = normalize(fromPlanetX, fromPlanetY);
         this.freeAngle = Math.atan2(fromPlanet.x, -fromPlanet.y);
 
         const jumpInfluence = blendedG.influences.find((g) => g.planet === this.currentPlanet);
@@ -359,7 +359,7 @@ export class Player extends PlayerPart {
         const pdx = this.x - platform.x;
         const pdy = this.y - platform.y;
         // Player must be on the inward (bottom) side of the platform.
-        if (pdx * sn.x + pdy * sn.y >= 0) continue;
+        if (dot(pdx, pdy, sn.x, sn.y) >= 0) continue;
 
         const cosA = Math.cos(-platform.rotation);
         const sinA = Math.sin(-platform.rotation);
@@ -373,7 +373,7 @@ export class Player extends PlayerPart {
         if (distLen >= PLAYER_HEIGHT / 2) continue;
 
         // Kill velocity component directed toward the platform top.
-        const approachSpeed = this.vx * sn.x + this.vy * sn.y;
+        const approachSpeed = dot(this.vx, this.vy, sn.x, sn.y);
         if (approachSpeed > 0) {
           this.vx -= approachSpeed * sn.x;
           this.vy -= approachSpeed * sn.y;
