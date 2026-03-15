@@ -20,8 +20,15 @@ export class WeldModifier extends Modifier {
     this.offsetY = cfg.offsetY;
   }
 
+  override shouldCollide(other: Part): boolean {
+    return other !== this.child;
+  }
+
   update(_input: Input): void {
-    this.parent.x = this.child.x + this.offsetX;
-    this.parent.y = this.child.y + this.offsetY;
+    const cos = Math.cos(this.child.rotation);
+    const sin = Math.sin(this.child.rotation);
+    this.parent.x = this.child.x + this.offsetX * cos - this.offsetY * sin;
+    this.parent.y = this.child.y + this.offsetX * sin + this.offsetY * cos;
+    this.parent.rotation = this.child.rotation;
   }
 }

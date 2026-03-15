@@ -13,6 +13,10 @@ export abstract class Modifier {
     return true;
   }
 
+  shouldCollide(_other: Part): boolean {
+    return true;
+  }
+
   onCollide(_other: Part, _nx: number, _ny: number, _impactSpeed: number): void {}
 
   onSeparate(_other: Part): void {}

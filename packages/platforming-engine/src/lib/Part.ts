@@ -196,6 +196,10 @@ export abstract class Part {
     return best;
   }
 
+  shouldCollideWith(other: Part): boolean {
+    return this.modifiers.every((m) => m.shouldCollide(other));
+  }
+
   onSpawn(): void {}
 
   onDestroy(): void {}

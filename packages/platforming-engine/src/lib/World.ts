@@ -555,6 +555,11 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           continue;
         }
 
+        // Skip pairs where a modifier on either part vetoes the collision.
+        if (!a.shouldCollideWith(b) || !b.shouldCollideWith(a)) {
+          continue;
+        }
+
         // Broad-phase: skip pairs that are clearly too far apart.
         const dx = b.x - a.x;
         const dy = b.y - a.y;
