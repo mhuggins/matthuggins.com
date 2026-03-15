@@ -4,6 +4,7 @@ import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 
 const MIN_SPLIT_RADIUS = 5;
+const MAX_ASTEROIDS = 8;
 
 interface AsteroidConfig {
   radius: number;
@@ -38,7 +39,7 @@ export class Asteroid extends Part {
     this.world.remove(this);
     playAsteroidCrashSound({ mass: this.mass }, { source: this });
 
-    if (this.radius > MIN_SPLIT_RADIUS) {
+    if (this.radius > MIN_SPLIT_RADIUS && this.world.asteroids.length < MAX_ASTEROIDS) {
       this.spawnFragments(other, nx, ny);
     }
   };
@@ -92,11 +93,10 @@ export class Asteroid extends Part {
     this.x += this.vx;
     this.y += this.vy;
 
-    // Despawn if too far from all planets
-    const nearestPlanetDist = Math.min(
-      ...this.world.planets.map((p) => Math.hypot(this.x - p.x, this.y - p.y)),
-    );
-    if (nearestPlanetDist > 3000) {
+    // Despawn if too far from the player (beyond minimap range).
+    const dx = this.x - this.world.player.x;
+    const dy = this.y - this.world.player.y;
+    if (dx * dx + dy * dy > 9000 * 9000) {
       this.world.remove(this);
     }
   }

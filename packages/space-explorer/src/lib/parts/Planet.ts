@@ -39,6 +39,7 @@ export class Planet extends HeightFieldPart {
   ringColor: Color;
   deco: PlanetDecoration[];
   terrain: TerrainFeature[];
+  private surfaceRadiusLUT: Float64Array;
 
   constructor(world: World, cfg: PlanetConfig) {
     super(world);
@@ -52,10 +53,24 @@ export class Planet extends HeightFieldPart {
     this.deco = cfg.deco;
     this.terrain = cfg.terrain;
     this.mass = 4 * Math.PI * cfg.radius ** 2;
+
+    const LUT_SIZE = 512;
+    this.surfaceRadiusLUT = new Float64Array(LUT_SIZE);
+    for (let i = 0; i < LUT_SIZE; i++) {
+      const a = (i / LUT_SIZE) * Math.PI * 2;
+      this.surfaceRadiusLUT[i] = surfaceRadiusAt(this, a);
+    }
   }
 
   surfaceRadiusAt(angle: number): number {
-    return surfaceRadiusAt(this, angle);
+    const TWO_PI = Math.PI * 2;
+    const n = this.surfaceRadiusLUT.length;
+    const a = ((angle % TWO_PI) + TWO_PI) % TWO_PI;
+    const idx = (a / TWO_PI) * n;
+    const i0 = Math.floor(idx) % n;
+    const i1 = (i0 + 1) % n;
+    const frac = idx - Math.floor(idx);
+    return this.surfaceRadiusLUT[i0] * (1 - frac) + this.surfaceRadiusLUT[i1] * frac;
   }
 
   doUpdate(): void {
