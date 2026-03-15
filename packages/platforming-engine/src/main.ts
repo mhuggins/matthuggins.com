@@ -1,4 +1,5 @@
 export * from "./helpers/applyCollisionImpulse";
+export * from "./helpers/CachedValue";
 export * from "./helpers/circlePolygon";
 export * from "./helpers/rectPolygon";
 

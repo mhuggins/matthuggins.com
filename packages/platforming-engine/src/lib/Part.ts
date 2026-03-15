@@ -1,4 +1,5 @@
 import autoBind from "auto-bind";
+import { CachedValue } from "../helpers/CachedValue";
 import type { Point } from "../types";
 import { Input } from "./Input";
 import type { Modifier } from "./Modifier";
@@ -22,12 +23,24 @@ export abstract class Part {
   modifiers: Modifier[] = [];
   world: World;
 
-  polygon: Point[] = [];
+  private _polygon: Point[] = [];
+  private _boundingRadius = 0;
+  private _worldVertsCache = new CachedValue<Point[]>();
+
   smooth = false;
   rotation = 0;
   canCollide = true;
   restitution = 1;
   obeysGravity = true;
+
+  get polygon(): Point[] {
+    return this._polygon;
+  }
+  set polygon(value: Point[]) {
+    this._polygon = value;
+    this._boundingRadius =
+      value.length === 0 ? 0 : Math.max(...value.map((v) => Math.hypot(v.x, v.y)));
+  }
 
   constructor(world: World) {
     autoBind(this);
@@ -36,12 +49,14 @@ export abstract class Part {
 
   /** Returns polygon vertices transformed to world space. */
   worldVertices(): Point[] {
-    const cos = Math.cos(this.rotation);
-    const sin = Math.sin(this.rotation);
-    return this.polygon.map((v) => ({
-      x: this.x + v.x * cos - v.y * sin,
-      y: this.y + v.x * sin + v.y * cos,
-    }));
+    return this._worldVertsCache.get(() => {
+      const cos = Math.cos(this.rotation);
+      const sin = Math.sin(this.rotation);
+      return this.polygon.map((v) => ({
+        x: this.x + v.x * cos - v.y * sin,
+        y: this.y + v.x * sin + v.y * cos,
+      }));
+    }, [this.x, this.y, this.rotation, this.polygon]);
   }
 
   update(input: Input): void {
@@ -53,8 +68,7 @@ export abstract class Part {
   }
 
   get boundingRadius(): number {
-    if (this.polygon.length === 0) return 0;
-    return Math.max(...this.polygon.map((v) => Math.hypot(v.x, v.y)));
+    return this._boundingRadius;
   }
 
   render(ctx: CanvasRenderingContext2D): void {
