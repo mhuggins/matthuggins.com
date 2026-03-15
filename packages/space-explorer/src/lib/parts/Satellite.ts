@@ -1,9 +1,12 @@
-import { Part as EnginePart, rectPolygon } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, rectPolygon, WeldModifier } from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { Color } from "../../types";
 import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 import type { Planet } from "./Planet";
+import { SatellitePanel } from "./SatellitePanel";
+
+const MIN_BREAK_IMPACT_SPEED = 2;
 
 interface SatelliteConfig {
   planet: Planet;
@@ -28,6 +31,11 @@ export class Satellite extends Part {
   color: Color;
   parentPlanet: Planet;
 
+  private intact = true;
+  private angularVelocity = 0;
+  private panels: SatellitePanel[] = [];
+  private panelWelds: WeldModifier[] = [];
+
   constructor(world: World, cfg: SatelliteConfig) {
     super(world);
     this.parentPlanet = cfg.planet;
@@ -39,9 +47,25 @@ export class Satellite extends Part {
     this.mass = cfg.mass;
     this.color = cfg.color;
 
-    this.polygon = rectPolygon(cfg.width, cfg.height);
+    // While intact the body collision covers the full satellite span.
+    const s = cfg.width / 4;
+    this.polygon = rectPolygon(s * 6.4, s * 1.1);
 
     this.syncToOrbit();
+  }
+
+  override onSpawn(): void {
+    this.assemblePanels();
+  }
+
+  override onDestroy(): void {
+    // Clean up panels that are still welded.
+    for (const panel of this.panels) {
+      if (!panel.broken) {
+        this.world.remove(panel);
+      }
+    }
+    this.panels = [];
   }
 
   protected override doUpdate(): void {
@@ -49,20 +73,55 @@ export class Satellite extends Part {
       this.angle += (Math.PI * 2) / this.orbitalPeriod;
       this.syncToOrbit();
     } else {
-      // Physics mode — gravity applied by engine applyGravity; just integrate position
       this.x += this.vx;
       this.y += this.vy;
 
-      // Crash into parent planet — respawn kinematically
+      if (!this.intact) {
+        this.rotation += this.angularVelocity;
+      }
+
+      // Crash into parent planet — respawn kinematically.
       const dToPlanet = Math.hypot(this.x - this.parentPlanet.x, this.y - this.parentPlanet.y);
       const surfAngle = Math.atan2(this.y - this.parentPlanet.y, this.x - this.parentPlanet.x);
-      const collisionRadius = this.width / 4;
-      if (dToPlanet < surfaceRadiusAt(this.parentPlanet, surfAngle) + collisionRadius) {
-        this.mode = "kinematic";
-        this.angle = Math.random() * Math.PI * 2;
-        this.syncToOrbit();
+      const s = this.width / 4;
+      if (dToPlanet < surfaceRadiusAt(this.parentPlanet, surfAngle) + s * 0.5) {
+        this.respawn();
       }
     }
+  }
+
+  override onCollide = (other: EnginePart, _nx: number, _ny: number, impactSpeed: number): void => {
+    if (this.mode === "kinematic") {
+      this.mode = "physics";
+    }
+
+    if (this.intact && impactSpeed >= MIN_BREAK_IMPACT_SPEED) {
+      this.breakApart(other);
+    }
+  };
+
+  protected override doRender(ctx: CanvasRenderingContext2D): void {
+    // Draw faint orbital ring in kinematic mode.
+    if (this.mode === "kinematic") {
+      ctx.beginPath();
+      ctx.arc(this.parentPlanet.x, this.parentPlanet.y, this.orbitalRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0.12)`;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 8]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    const s = this.width / 4;
+
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
+
+    this.drawBody(ctx, s);
+    this.drawAntenna(ctx, s);
+
+    ctx.restore();
   }
 
   /** Snap position, velocity, and rotation to match the current orbital angle. */
@@ -75,102 +134,119 @@ export class Satellite extends Part {
     this.rotation = this.angle + Math.PI / 2;
   }
 
-  protected override doRender(ctx: CanvasRenderingContext2D): void {
-    // Draw faint orbital ring in kinematic mode
-    if (this.mode === "kinematic") {
-      ctx.beginPath();
-      ctx.arc(this.parentPlanet.x, this.parentPlanet.y, this.orbitalRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0.12)`;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([6, 8]);
-      ctx.stroke();
-      ctx.setLineDash([]);
+  private assemblePanels(): void {
+    const s = this.width / 4;
+    const panelMass = this.mass * 0.2;
+
+    for (const side of [-1, 1] as const) {
+      const panel = new SatellitePanel(this.world, {
+        side,
+        scale: s,
+        color: this.color,
+        mass: panelMass,
+      });
+      this.world.add(panel);
+
+      const weld = new WeldModifier(panel, {
+        child: this,
+        offsetX: side * s * 1.8,
+        offsetY: 0,
+      });
+      panel.modifiers.push(weld);
+
+      // Position the panel immediately so it doesn't flash at (0,0).
+      const cos = Math.cos(this.rotation);
+      const sin = Math.sin(this.rotation);
+      const ox = side * s * 1.8;
+      panel.x = this.x + ox * cos;
+      panel.y = this.y + ox * sin;
+      panel.rotation = this.rotation;
+
+      this.panels.push(panel);
+      this.panelWelds.push(weld);
     }
-
-    const orientAngle =
-      this.mode === "kinematic"
-        ? this.angle + Math.PI / 2
-        : Math.atan2(this.vy, this.vx) + Math.PI / 2;
-
-    const s = this.width / 4; // render scale (equivalent to old radius)
-
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(orientAngle);
-
-    this.drawSolarPanels(ctx, s);
-    this.drawBody(ctx, s);
-    this.drawAntenna(ctx, s);
-
-    ctx.restore();
   }
 
-  override onCollide = (
-    _other: EnginePart,
-    _nx: number,
-    _ny: number,
-    _impactSpeed: number,
-  ): void => {
-    if (this.mode === "kinematic") {
-      this.mode = "physics";
+  private breakApart(other: EnginePart): void {
+    this.intact = false;
+
+    // Shrink body polygon to just the body + antenna.
+    const s = this.width / 4;
+    this.polygon = rectPolygon(s * 0.76, s * 1.6);
+    this.gravityScale = 0.5;
+    this.angularVelocity = (Math.random() - 0.5) * 0.08;
+
+    // Compute fragment launch direction.
+    let baseVx: number;
+    let baseVy: number;
+
+    if (other.anchored) {
+      // Reflect velocity off collision surface.
+      const dx = this.x - other.x;
+      const dy = this.y - other.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const nx = dx / dist;
+      const ny = dy / dist;
+      const dot = this.vx * nx + this.vy * ny;
+      baseVx = this.vx - 2 * dot * nx;
+      baseVy = this.vy - 2 * dot * ny;
+    } else {
+      const dx = this.x - other.x;
+      const dy = this.y - other.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const speed = Math.hypot(this.vx, this.vy);
+      baseVx = (dx / dist) * speed;
+      baseVy = (dy / dist) * speed;
     }
-  };
 
-  private drawSolarPanels(ctx: CanvasRenderingContext2D, s: number): void {
-    const boomLen = s * 1.7;
-    const boomW = s * 0.08;
-    const panelW = s * 1.3;
-    const panelH = s * 0.55;
-    const panelGap = s * 0.12;
+    const baseAngle = Math.atan2(baseVy, baseVx);
+    const speed = Math.hypot(baseVx, baseVy) * 0.7;
 
-    for (const side of [-1, 1]) {
-      const boomStartX = side * s * 0.38;
-      const boomEndX = side * (s * 0.38 + boomLen);
+    // Release each panel.
+    for (let i = 0; i < this.panels.length; i++) {
+      const panel = this.panels[i];
+      const weld = this.panelWelds[i];
 
-      ctx.fillStyle = "rgba(160,165,180,0.9)";
-      ctx.fillRect(
-        Math.min(boomStartX, boomEndX),
-        -boomW / 2,
-        Math.abs(boomEndX - boomStartX),
-        boomW,
-      );
+      // Remove the weld modifier.
+      const idx = panel.modifiers.indexOf(weld);
+      if (idx !== -1) panel.modifiers.splice(idx, 1);
 
-      for (let pi = 0; pi < 2; pi++) {
-        const pStartX =
-          side > 0
-            ? boomStartX + panelGap + pi * (panelW + panelGap)
-            : boomStartX - panelGap - (pi + 1) * panelW - pi * panelGap;
+      panel.enablePhysics();
 
-        ctx.fillStyle = "rgba(22, 44, 120, 0.95)";
-        ctx.fillRect(pStartX, -panelH / 2, panelW * side, panelH);
+      // Launch at a spread angle away from impact.
+      const spreadAngle = (Math.PI / 5) * (i === 0 ? -1 : 1);
+      const launchAngle = baseAngle + spreadAngle;
+      panel.vx = Math.cos(launchAngle) * speed;
+      panel.vy = Math.sin(launchAngle) * speed;
+      panel.angularVelocity = (Math.random() - 0.5) * 0.12;
+    }
 
-        ctx.strokeStyle = "rgba(80, 120, 220, 0.6)";
-        ctx.lineWidth = 0.5;
-        const cols = 4;
-        const rows = 2;
-        for (let ci = 1; ci < cols; ci++) {
-          const lx = pStartX + (panelW * side * ci) / cols;
-          ctx.beginPath();
-          ctx.moveTo(lx, -panelH / 2);
-          ctx.lineTo(lx, panelH / 2);
-          ctx.stroke();
-        }
-        for (let ri = 1; ri < rows; ri++) {
-          const ly = -panelH / 2 + (panelH * ri) / rows;
-          ctx.beginPath();
-          ctx.moveTo(pStartX, ly);
-          ctx.lineTo(pStartX + panelW * side, ly);
-          ctx.stroke();
-        }
+    this.panels = [];
+    this.panelWelds = [];
+  }
 
-        ctx.fillStyle = "rgba(100,160,255,0.10)";
-        ctx.fillRect(pStartX, -panelH / 2, panelW * side, panelH * 0.4);
-
-        ctx.strokeStyle = "rgba(140,170,255,0.5)";
-        ctx.lineWidth = 0.8;
-        ctx.strokeRect(pStartX, -panelH / 2, panelW * side, panelH);
+  private respawn(): void {
+    // Remove any lingering broken panels.
+    for (const panel of this.panels) {
+      if (!panel.broken) {
+        this.world.remove(panel);
       }
     }
+    this.panels = [];
+    this.panelWelds = [];
+
+    this.mode = "kinematic";
+    this.intact = true;
+    this.angularVelocity = 0;
+    this.gravityScale = 1;
+    this.angle = Math.random() * Math.PI * 2;
+
+    // Restore full-size collision polygon.
+    const s = this.width / 4;
+    this.polygon = rectPolygon(s * 6.4, s * 1.1);
+
+    this.syncToOrbit();
+    this.assemblePanels();
   }
 
   private drawBody(ctx: CanvasRenderingContext2D, s: number): void {
