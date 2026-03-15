@@ -35,6 +35,7 @@ export class Platform extends Part {
     this.color = cfg.color;
     this.mass = 1e9;
     this.restitution = 0;
+    this.landingCooldown = 20;
 
     this.polygon = rectPolygon(cfg.width, cfg.height);
     this.rotation = cfg.angle + Math.PI / 2;
@@ -43,11 +44,6 @@ export class Platform extends Part {
     const centerRadius = surfR + cfg.altitude + cfg.height / 2;
     this.x = cfg.planet.x + Math.cos(cfg.angle) * centerRadius;
     this.y = cfg.planet.y + Math.sin(cfg.angle) * centerRadius;
-  }
-
-  /** Distance from planet center to the walkable top surface of this platform. */
-  get topRadius(): number {
-    return surfaceRadiusAt(this.planet, this.angle) + this.altitude + this.height;
   }
 
   protected override doUpdate(): void {}

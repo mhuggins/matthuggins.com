@@ -5,6 +5,19 @@ import { Input } from "./Input";
 import type { Modifier } from "./Modifier";
 import type { World } from "./World";
 
+/**
+ * Returned by `getGrounding()` — provides snap position and walk tangent
+ * for grounded player movement.
+ */
+export interface GroundingResult {
+  /** Snap position for the player center. */
+  x: number;
+  y: number;
+  /** Walk tangent direction (unit vector along the walkable edge). */
+  tx: number;
+  ty: number;
+}
+
 export abstract class Part {
   private static nextId = 0;
 
@@ -88,6 +101,99 @@ export abstract class Part {
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
     return sx + screenR < 0 || sx - screenR > w || sy + screenR < 0 || sy - screenR > h;
+  }
+
+  /** Ticks to delay re-grounding after leaving this part's surface. */
+  landingCooldown: number = 0;
+
+  /**
+   * Returns grounding info for a player at (px, py) with the given half-dimensions.
+   * Returns null if the player is off-edge (should transition to air) or if this
+   * part has no walkable surface.
+   *
+   * The default implementation works for any anchored convex polygon: it finds the
+   * edge whose outward normal aligns with the given up direction within the
+   * gradability threshold, then projects the player onto that edge.
+   *
+   * Override for non-polygon parts (e.g. height-field planets).
+   */
+  getGrounding(
+    px: number,
+    py: number,
+    halfWidth: number,
+    halfHeight: number,
+    upX: number,
+    upY: number,
+    gradability: number,
+  ): GroundingResult | null {
+    if (!this.anchored) return null;
+
+    const verts = this.worldVertices();
+    const n = verts.length;
+    if (n < 3) return null;
+
+    const cosGrad = Math.cos(gradability);
+
+    // Centroid — used to orient outward normals for convex polygons.
+    let cx = 0;
+    let cy = 0;
+    for (let i = 0; i < n; i++) {
+      cx += verts[i].x;
+      cy += verts[i].y;
+    }
+    cx /= n;
+    cy /= n;
+
+    let best: GroundingResult | null = null;
+    let bestDist = Infinity;
+
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      const ax = verts[i].x;
+      const ay = verts[i].y;
+      const bx = verts[j].x;
+      const by = verts[j].y;
+
+      const edx = bx - ax;
+      const edy = by - ay;
+      const len = Math.hypot(edx, edy);
+      if (len < 1e-6) continue;
+
+      // Edge tangent (a → b) and candidate outward normal.
+      const tx = edx / len;
+      const ty = edy / len;
+      let nx = -ty;
+      let ny = tx;
+
+      // Ensure normal points away from centroid (outward for convex polygon).
+      const mx = (ax + bx) / 2;
+      const my = (ay + by) / 2;
+      if (nx * (cx - mx) + ny * (cy - my) > 0) {
+        nx = -nx;
+        ny = -ny;
+      }
+
+      // Only consider edges walkable within the gradability threshold.
+      if (nx * upX + ny * upY < cosGrad) continue;
+
+      // Signed distance from player to edge line (positive = normal side).
+      const dist = (px - ax) * nx + (py - ay) * ny;
+      if (dist >= bestDist) continue;
+
+      // Project player onto edge direction.
+      const t = (px - ax) * tx + (py - ay) * ty;
+      if (t < -halfWidth || t > len + halfWidth) continue;
+
+      bestDist = dist;
+      best = {
+        x: ax + tx * t + nx * halfHeight,
+        y: ay + ty * t + ny * halfHeight,
+        tx,
+        ty,
+      };
+    }
+
+    return best;
   }
 
   onSpawn(): void {}
