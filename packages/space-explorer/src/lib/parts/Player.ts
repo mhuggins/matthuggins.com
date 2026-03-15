@@ -23,7 +23,7 @@ const PLAYER_WIDTH = 16;
 const PLAYER_HEIGHT = 24;
 const JUMP_STRENGTH = 7.8;
 const JETPACK_FORCE = 0.35;
-const JETPACK_DRAIN = 0; // 0.0125;
+const JETPACK_DRAIN = 0.00125;
 const AIR_ROTATE_SPEED = 0.01;
 
 abstract class PlayerPart extends EnginePlayer {
@@ -155,7 +155,6 @@ export class Player extends PlayerPart {
       this.jetpackArmed = false;
       this.jetpackActive = false;
       this.hasUsedJetpackThisAirborne = false;
-      this.fuel = this.maxFuel;
       this.mode = "grounded";
 
       const groundPart = this.activePart ?? this.groundedOn;

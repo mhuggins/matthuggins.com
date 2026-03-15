@@ -156,6 +156,38 @@ export const { play: playAsteroidCrashSound } = audioManager.register(
   },
 );
 
+export const { play: playCrystalPickupSound } = audioManager.register("crystalPickup", (ctx) => {
+  const now = ctx.currentTime;
+
+  // Bright ascending chime.
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(880, now);
+  osc.frequency.exponentialRampToValueAtTime(1760, now + 0.08);
+  osc.frequency.exponentialRampToValueAtTime(2200, now + 0.15);
+  gain.gain.setValueAtTime(0.18, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 0.25);
+
+  // Sparkle shimmer overtone.
+  const osc2 = ctx.createOscillator();
+  const gain2 = ctx.createGain();
+  osc2.type = "triangle";
+  osc2.frequency.setValueAtTime(1320, now + 0.03);
+  osc2.frequency.exponentialRampToValueAtTime(2640, now + 0.12);
+  gain2.gain.setValueAtTime(0, now);
+  gain2.gain.linearRampToValueAtTime(0.1, now + 0.04);
+  gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+  osc2.connect(gain2);
+  gain2.connect(ctx.destination);
+  osc2.start(now);
+  osc2.stop(now + 0.2);
+});
+
 export const { startLoop: startAmbientSound, stopLoop: stopAmbientSound } = audioManager.register(
   "ambient",
   (ctx) => {
