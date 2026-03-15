@@ -11,17 +11,8 @@ interface PlayerConfig {
 }
 
 export abstract class Player extends Part {
-  halfWidth: number;
-  halfHeight: number;
-
-  constructor(world: ConstructorParameters<typeof Part>[0], cfg: PlayerConfig = {}) {
-    super(world);
-    const w = cfg.width ?? DEFAULT_PLAYER_WIDTH;
-    const h = cfg.height ?? DEFAULT_PLAYER_HEIGHT;
-    this.halfWidth = w / 2;
-    this.halfHeight = h / 2;
-    this.polygon = rectPolygon(w, h);
-  }
+  private _halfWidth: number;
+  private _halfHeight: number;
 
   jumpStrength: number = 7;
   gradability: number = Math.PI / 3; // 60° — max slope before player slides
@@ -36,6 +27,23 @@ export abstract class Player extends Part {
   surfaceTangent: Point = { x: 1, y: 0 };
   upX: number = 0;
   upY: number = -1;
+
+  constructor(world: ConstructorParameters<typeof Part>[0], cfg: PlayerConfig = {}) {
+    super(world);
+    const w = cfg.width ?? DEFAULT_PLAYER_WIDTH;
+    const h = cfg.height ?? DEFAULT_PLAYER_HEIGHT;
+    this._halfWidth = w / 2;
+    this._halfHeight = h / 2;
+    this.polygon = rectPolygon(w, h);
+  }
+
+  get halfWidth() {
+    return this._halfWidth;
+  }
+
+  get halfHeight() {
+    return this._halfHeight;
+  }
 
   // Override to veto grounding on a specific surface (e.g. cooldown)
   canGroundOn(_surface: Part): boolean {
