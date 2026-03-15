@@ -19,7 +19,8 @@ import { updateAudioListener } from "./sounds";
 
 const MAX_NEAREST_PLANETS = 10;
 const MIN_CONTRIBUTION = 0.02;
-const MAX_ASTEROIDS = 3;
+const MAX_ASTEROIDS = 8;
+const ASTEROID_SPAWN_RADIUS = 8500;
 
 interface Influence {
   planet: Planet;
@@ -36,10 +37,13 @@ export class World extends EngineWorld<Input, Camera> {
   protected declare input: Input;
   public declare readonly camera: Camera;
 
+  private _player: Player | null = null;
   private status: HTMLElement;
   private fuel: HTMLElement;
   private asteroidSpawnTimer = 0;
   private starfield: Star[];
+  private _worldSortDirty = true;
+  private _sortedWorldParts: (Part | Planet)[] = [];
 
   constructor({
     canvas,
@@ -63,16 +67,38 @@ export class World extends EngineWorld<Input, Camera> {
     this.starfield = generateStarfield();
   }
 
-  get planets(): Planet[] {
-    return this.parts.filter((p): p is Planet => p instanceof Planet);
+  protected override classifyPart(part: EnginePart): void {
+    super.classifyPart(part);
+    if (part instanceof Player) this._player = part;
+    else if (part instanceof Planet) this.pushToMap("planets", part);
+    else if (part instanceof Platform) this.pushToMap("platforms", part);
+    else if (part instanceof Asteroid) this.pushToMap("asteroids", part);
+    this._worldSortDirty = true;
   }
 
-  get platforms(): Platform[] {
-    return this.parts.filter((p): p is Platform => p instanceof Platform);
+  protected override unclassifyPart(part: EnginePart): void {
+    super.unclassifyPart(part);
+    if (part instanceof Player) this._player = null;
+    else if (part instanceof Planet) this.spliceFromMap("planets", part);
+    else if (part instanceof Platform) this.spliceFromMap("platforms", part);
+    else if (part instanceof Asteroid) this.spliceFromMap("asteroids", part);
+    this._worldSortDirty = true;
   }
 
   get player(): Player {
-    return this.parts.find((p): p is Player => p instanceof Player)!;
+    return this._player!;
+  }
+
+  get planets(): Planet[] {
+    return (this._partsMap.get("planets") ?? []) as Planet[];
+  }
+
+  get platforms(): Platform[] {
+    return (this._partsMap.get("platforms") ?? []) as Platform[];
+  }
+
+  get asteroids(): Asteroid[] {
+    return (this._partsMap.get("asteroids") ?? []) as Asteroid[];
   }
 
   override reset = (): void => {
@@ -138,6 +164,8 @@ export class World extends EngineWorld<Input, Camera> {
     this.tickAsteroidSpawner();
 
     const player = this.player;
+    this.viewX = player.x;
+    this.viewY = player.y;
     updateAudioListener(player.x, player.y);
   }
 
@@ -162,14 +190,17 @@ export class World extends EngineWorld<Input, Camera> {
     ctx.rotate(-this.camera.angle);
     ctx.translate(-player.x, -player.y);
 
-    const worldParts = this.parts
-      .filter(
-        (p): p is Part | Planet =>
-          (p instanceof Part || p instanceof Planet) && p.layer === RenderLayer.WORLD,
-      )
-      .sort((a, b) => a.zIndex - b.zIndex);
+    if (this._worldSortDirty) {
+      this._sortedWorldParts = this.parts
+        .filter(
+          (p): p is Part | Planet =>
+            (p instanceof Part || p instanceof Planet) && p.layer === RenderLayer.WORLD,
+        )
+        .sort((a, b) => a.zIndex - b.zIndex);
+      this._worldSortDirty = false;
+    }
 
-    for (const part of worldParts) {
+    for (const part of this._sortedWorldParts) {
       part.render(ctx);
     }
 
@@ -227,27 +258,24 @@ export class World extends EngineWorld<Input, Camera> {
   };
 
   private tickAsteroidSpawner = (): void => {
-    const asteroidCount = this.parts.filter((p) => p instanceof Asteroid).length;
+    const asteroidCount = this.asteroids.length;
     this.asteroidSpawnTimer--;
     if (this.asteroidSpawnTimer <= 0 && asteroidCount < MAX_ASTEROIDS) {
       this.spawnAsteroid();
-      this.asteroidSpawnTimer = 300 + Math.floor(Math.random() * 600);
+      this.asteroidSpawnTimer = 120 + Math.floor(Math.random() * 240);
     }
   };
 
   private spawnAsteroid = (): void => {
     const player = this.player;
     const angle = Math.random() * Math.PI * 2;
-    const spawnDist = Math.hypot(this.canvas.clientWidth, this.canvas.clientHeight) / 2 + 500;
-    const spawnX = player.x + Math.cos(angle) * spawnDist;
-    const spawnY = player.y + Math.sin(angle) * spawnDist;
+    const spawnX = player.x + Math.cos(angle) * ASTEROID_SPAWN_RADIUS;
+    const spawnY = player.y + Math.sin(angle) * ASTEROID_SPAWN_RADIUS;
 
-    const planets = this.planets;
-    const centerX = planets.reduce((s, p) => s + p.x, 0) / planets.length;
-    const centerY = planets.reduce((s, p) => s + p.y, 0) / planets.length;
-    const toCenter = Math.atan2(centerY - spawnY, centerX - spawnX);
-    const aimAngle = toCenter + (Math.random() - 0.5) * (Math.PI / 3);
-    const speed = 6 + Math.random() * 6;
+    // Aim inward with some spread so asteroids cross the play area.
+    const toPlayer = Math.atan2(player.y - spawnY, player.x - spawnX);
+    const aimAngle = toPlayer + (Math.random() - 0.5) * (Math.PI / 3);
+    const speed = 2 + Math.random() * 4;
     const radius = 15 + Math.random() * 30;
     const numVertices = 7 + Math.floor(Math.random() * 3);
     const vertexOffsets = Array.from({ length: numVertices }, () => 0.75 + Math.random() * 0.5);
@@ -397,6 +425,12 @@ export class World extends EngineWorld<Input, Camera> {
       ctx.beginPath();
       ctx.arc(mp.x, mp.y, r, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    for (const p of this.asteroids) {
+      const mp = worldToMinimap(p.x, p.y);
+      ctx.fillRect(mp.x, mp.y, 1, 1);
     }
 
     ctx.fillStyle = "#f7f8ff";

@@ -28,6 +28,11 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   protected input: TInput;
   protected parts: Part[] = [];
   protected contactPairs: Map<string, ContactEntry> = new Map();
+  protected viewX = 0;
+  protected viewY = 0;
+  protected _partsMap: Map<string, Part[]> = new Map();
+  private _sortedParts: Part[] = [];
+  private _renderSortDirty = true;
 
   private container: HTMLElement;
   private collisionBuffer: number;
@@ -65,6 +70,8 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   add(part: Part): void {
     part.world = this;
     this.parts.push(part);
+    this.classifyPart(part);
+    this._renderSortDirty = true;
     part.onSpawn();
   }
 
@@ -74,6 +81,34 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
     if (idx !== -1) {
       this.parts.splice(idx, 1);
     }
+    this.unclassifyPart(part);
+    this._renderSortDirty = true;
+  }
+
+  protected classifyPart(part: Part): void {
+    if (part.gravity > 0) this.pushToMap("gravitySources", part);
+    if (part.canCollide) this.pushToMap("collidable", part);
+  }
+
+  protected unclassifyPart(part: Part): void {
+    if (part.gravity > 0) this.spliceFromMap("gravitySources", part);
+    if (part.canCollide) this.spliceFromMap("collidable", part);
+  }
+
+  protected pushToMap(key: string, part: Part): void {
+    let list = this._partsMap.get(key);
+    if (!list) {
+      list = [];
+      this._partsMap.set(key, list);
+    }
+    list.push(part);
+  }
+
+  protected spliceFromMap(key: string, part: Part): void {
+    const list = this._partsMap.get(key);
+    if (!list) return;
+    const idx = list.indexOf(part);
+    if (idx !== -1) list.splice(idx, 1);
   }
 
   handleResize(): void {
@@ -118,7 +153,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   }
 
   protected applyGravity(): void {
-    const sources = this.parts.filter((p) => p.gravity > 0);
+    const sources = this._partsMap.get("gravitySources") ?? [];
     for (const target of this.parts) {
       if (target.anchored || target.mass === 0 || !target.obeysGravity) {
         continue;
@@ -221,8 +256,13 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
     const cb = this.collisionBuffer;
     const sb = this.separationBuffer;
 
-    const collidable = this.parts.filter((p) => p.canCollide);
+    const collidable = this._partsMap.get("collidable") ?? [];
     const newContacts: Map<string, ContactEntry> = new Map();
+
+    // Skip expensive narrow-phase (SAT) for pairs where both objects are
+    // far off-screen.  1.5× the screen diagonal gives a generous margin.
+    const screenDiag = Math.hypot(this.canvas.clientWidth, this.canvas.clientHeight);
+    const cullDist2 = (screenDiag * 1.5) ** 2;
 
     for (let i = 0; i < collidable.length; i++) {
       for (let j = i + 1; j < collidable.length; j++) {
@@ -237,6 +277,15 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         const dy = b.y - a.y;
         const maxDist = a.boundingRadius + b.boundingRadius + sb;
         if (dx * dx + dy * dy > maxDist * maxDist) continue;
+
+        // Skip narrow-phase for pairs where both objects are far off-screen.
+        const dax = a.x - this.viewX;
+        const day = a.y - this.viewY;
+        const dbx = b.x - this.viewX;
+        const dby = b.y - this.viewY;
+        if (dax * dax + day * day > cullDist2 && dbx * dbx + dby * dby > cullDist2) {
+          continue;
+        }
 
         const key = `${Math.min(a.id, b.id)}-${Math.max(a.id, b.id)}`;
         const wasContact = this.contactPairs.has(key);
@@ -302,10 +351,14 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 
   render(): void {
     const ctx = this.ctx;
-    const sortedParts = this.parts.sort((a, b) => a.zIndex - b.zIndex);
+
+    if (this._renderSortDirty) {
+      this._sortedParts = [...this.parts].sort((a, b) => a.zIndex - b.zIndex);
+      this._renderSortDirty = false;
+    }
 
     ctx.save();
-    for (const part of sortedParts) {
+    for (const part of this._sortedParts) {
       part.render(ctx);
     }
     ctx.restore();
