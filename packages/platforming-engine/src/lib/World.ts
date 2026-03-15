@@ -208,6 +208,28 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           part.gradability,
         );
         if (grounding) {
+          // Keep current ground but still update normal/tangent from the
+          // contact data so they stay accurate as the player moves (e.g.
+          // walking around a curved planet surface).
+          for (const entry of this.contactPairs.values()) {
+            let other: Part, nx: number, ny: number;
+            if (entry.a === part) {
+              other = entry.b;
+              nx = -entry.nx;
+              ny = -entry.ny;
+            } else if (entry.b === part) {
+              other = entry.a;
+              nx = entry.nx;
+              ny = entry.ny;
+            } else {
+              continue;
+            }
+            if (other === part.groundedOn) {
+              part.groundedNormal = { x: nx, y: ny };
+              part.surfaceTangent = { x: -ny, y: nx };
+              break;
+            }
+          }
           continue;
         }
       }
