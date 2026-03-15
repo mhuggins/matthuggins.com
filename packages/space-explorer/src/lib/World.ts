@@ -7,7 +7,6 @@ import { gravityStrengthForPlanet } from "../helpers/gravityStrengthForPlanets";
 import { gravityVectorForPlanet } from "../helpers/gravityVectorForPlanet";
 import { roundRect } from "../helpers/roundRect";
 import { surfaceRadiusAt } from "../helpers/surfaceRadiusAt";
-import { Star } from "../types";
 import { Camera } from "./Camera";
 import { Input } from "./Input";
 import { Asteroid } from "./parts/Asteroid";
@@ -15,6 +14,7 @@ import { Part, RenderLayer } from "./parts/Part";
 import { Planet } from "./parts/Planet";
 import { Platform } from "./parts/Platform";
 import { Player } from "./parts/Player";
+import { Starfield } from "./Starfield";
 import { updateAudioListener } from "./sounds";
 
 const MAX_NEAREST_PLANETS = 10;
@@ -41,7 +41,7 @@ export class World extends EngineWorld<Input, Camera> {
   private status: HTMLElement;
   private fuel: HTMLElement;
   private asteroidSpawnTimer = 0;
-  private starfield: Star[];
+  private starfield: Starfield;
   private _worldSortDirty = true;
   private _sortedWorldParts: (Part | Planet)[] = [];
 
@@ -64,7 +64,7 @@ export class World extends EngineWorld<Input, Camera> {
 
     this.status = status;
     this.fuel = fuel;
-    this.starfield = generateStarfield();
+    this.starfield = new Starfield(0, 0);
   }
 
   protected override classifyPart(part: EnginePart): void {
@@ -166,6 +166,7 @@ export class World extends EngineWorld<Input, Camera> {
     const player = this.player;
     this.viewX = player.x;
     this.viewY = player.y;
+    this.starfield.update(player.x, player.y);
     updateAudioListener(player.x, player.y);
   }
 
@@ -295,7 +296,7 @@ export class World extends EngineWorld<Input, Camera> {
     ctx.fillStyle = "#0a1020";
     ctx.fillRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
 
-    for (const star of this.starfield) {
+    for (const star of this.starfield.stars) {
       const p = this.camera.worldToScreen(star.x, star.y, player, this.canvas);
 
       if (
@@ -462,16 +463,4 @@ export class World extends EngineWorld<Input, Camera> {
       this.fuel.textContent = `Fuel: ${Math.round((player.fuel / player.maxFuel) * 100)}%`;
     }
   };
-}
-
-function generateStarfield(count = 240): Star[] {
-  return Array.from({ length: count }, (_, i) => {
-    const spread = 4200;
-    return {
-      x: ((i * 347) % spread) - spread / 2,
-      y: ((i * 191) % spread) - spread / 2,
-      r: (i % 3) + 0.8,
-      a: 0.18 + (i % 5) * 0.08,
-    };
-  });
 }
