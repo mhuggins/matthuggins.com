@@ -426,7 +426,12 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
    * Returns the player and their pre-collision upward velocity if so.
    * Must be called before separation changes positions.
    */
-  private detectWallSideJump(a: Part, b: Part): { player: Player; preVUp: number } | null {
+  private detectWallSideJump(
+    a: Part,
+    b: Part,
+    nx: number,
+    ny: number,
+  ): { player: Player; preVUp: number } | null {
     let player: Player | null = null;
     let obstacle: Part | null = null;
 
@@ -439,6 +444,15 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
     }
 
     if (!player || !obstacle) {
+      return null;
+    }
+
+    // Only relevant when the SAT normal is near-walkable (the corner
+    // artifact where the normal rotates from wall to floor). For pure
+    // wall hits the impulse only strips lateral velocity, not upward.
+    const sign = player === a ? -1 : 1;
+    const normalUpDot = sign * nx * player.upX + sign * ny * player.upY;
+    if (normalUpDot < Math.cos(player.gradability)) {
       return null;
     }
 
@@ -591,7 +605,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         // (below its walkable surface). Near corners the SAT normal can
         // rotate from horizontal to near-vertical, causing both the
         // separation and impulse to steal jump velocity.
-        const jumpRestore = this.detectWallSideJump(a, b);
+        const jumpRestore = this.detectWallSideJump(a, b, nx, ny);
 
         // Separate the pair, only moving non-anchored parts.
         const shareA = a.anchored ? 0 : b.anchored ? 1 : 0.5;
