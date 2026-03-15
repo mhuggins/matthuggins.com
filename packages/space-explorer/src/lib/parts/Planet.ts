@@ -82,6 +82,8 @@ export class Planet extends HeightFieldPart {
     const playerAngle = Math.atan2(py - this.y, px - this.x);
     const radialX = Math.cos(playerAngle);
     const radialY = Math.sin(playerAngle);
+    const tangentX = -radialY;
+    const tangentY = radialX;
 
     const surfR = this.surfaceRadiusAt(playerAngle);
     const targetDist = surfR + halfHeight;
@@ -89,8 +91,8 @@ export class Planet extends HeightFieldPart {
     return {
       x: this.x + radialX * targetDist,
       y: this.y + radialY * targetDist,
-      tx: -radialY,
-      ty: radialX,
+      tx: tangentX,
+      ty: tangentY,
     };
   }
 
