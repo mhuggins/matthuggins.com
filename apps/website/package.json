@@ -10,7 +10,7 @@
     "dev": "tsx src/server.ts",
     "build": "pnpm build:data && pnpm build:client && pnpm build:ssr && pnpm build:node",
     "build:node": "tsc --project tsconfig.server.json",
-    "build:data": "tsx scripts/generate-blog-metadata.ts && tsx scripts/generate-sitemap.ts",
+    "build:data": "tsx scripts/generate-blog-metadata.ts && tsx scripts/generate-lab-metadata.ts && tsx scripts/generate-sitemap.ts",
     "build:client": "vite build --outDir ../dist/client",
     "build:ssr": "vite build --outDir ../dist/server --ssr entry-server.tsx",
     "start": "NODE_ENV=production node dist/server.js",

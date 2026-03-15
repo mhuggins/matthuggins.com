@@ -16,6 +16,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://matthuggins.com/lab/space-explorer</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://matthuggins.com/blog</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
