@@ -139,6 +139,12 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
       part.inputsEnabled = true;
       part.update(this.input);
     }
+    for (const part of this.parts) {
+      if (part instanceof Player) {
+        part.preColVx = part.vx;
+        part.preColVy = part.vy;
+      }
+    }
     this.resolveCollisions();
     this.afterPhysics();
     this.camera.update();
@@ -252,6 +258,18 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
           bestPart = other;
           bestNx = nx;
           bestNy = ny;
+        }
+      }
+
+      // Don't ground an airborne player who was moving away from the surface
+      // before collisions. This prevents false grounding when ascending past
+      // a platform corner — SAT normals near corners can rotate from "wall"
+      // to "walkable" while the player is still going up, and the collision
+      // impulse may have already zeroed their current velocity.
+      if (bestPart !== null && part.groundedOn === null) {
+        const preVAway = part.preColVx * bestNx + part.preColVy * bestNy;
+        if (preVAway > 0.5) {
+          bestPart = null;
         }
       }
 
@@ -381,14 +399,71 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   }
 
   /**
+   * Before separation, check whether an airborne ascending player is
+   * hitting the side of an anchored obstacle (below its walkable surface).
+   * Returns the player and their pre-collision upward velocity if so.
+   * Must be called before separation changes positions.
+   */
+  private detectWallSideJump(a: Part, b: Part): { player: Player; preVUp: number } | null {
+    let player: Player | null = null;
+    let obstacle: Part | null = null;
+
+    if (a instanceof Player && a.groundedOn === null && b.anchored) {
+      player = a;
+      obstacle = b;
+    } else if (b instanceof Player && b.groundedOn === null && a.anchored) {
+      player = b;
+      obstacle = a;
+    }
+
+    if (!player || !obstacle) {
+      return null;
+    }
+
+    // Was the player ascending before this tick's collisions?
+    const preVUp = player.preColVx * player.upX + player.preColVy * player.upY;
+    if (preVUp <= 0) {
+      return null;
+    }
+
+    // Is the player below the obstacle's walkable surface?
+    // (checked at the current position, BEFORE separation moves them)
+    const grounding = obstacle.getGrounding(
+      player.x,
+      player.y,
+      player.halfWidth,
+      player.halfHeight,
+      player.upX,
+      player.upY,
+      player.gradability,
+    );
+    if (!grounding) {
+      return null;
+    }
+
+    const vertOffset =
+      (grounding.x - player.x) * player.upX + (grounding.y - player.y) * player.upY;
+
+    if (vertOffset <= player.halfHeight * 0.5) {
+      return null;
+    }
+
+    return { player, preVUp };
+  }
+
+  /**
    * For airborne players touching steep surfaces (angle from "up" exceeds
    * maxSlopeAngle), strip the velocity component into the wall so gravity
    * naturally slides them along the surface.
    */
   private applySteepSliding(): void {
     for (const part of this.parts) {
-      if (!(part instanceof Player)) continue;
-      if (part.groundedOn !== null) continue;
+      if (!(part instanceof Player)) {
+        continue;
+      }
+      if (part.groundedOn !== null) {
+        continue;
+      }
 
       const cosMax = Math.cos(part.gradability);
 
@@ -407,7 +482,9 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 
         // How much does this contact normal align with "up"?
         const upDot = nx * part.upX + ny * part.upY;
-        if (upDot >= cosMax) continue; // walkable slope — no slide
+        if (upDot >= cosMax) {
+          continue; // walkable slope — no slide
+        }
 
         // Too steep — remove velocity component into the wall.
         const vInto = -(part.vx * nx + part.vy * ny);
@@ -443,7 +520,9 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const maxDist = a.boundingRadius + b.boundingRadius + sb;
-        if (dx * dx + dy * dy > maxDist * maxDist) continue;
+        if (dx * dx + dy * dy > maxDist * maxDist) {
+          continue;
+        }
 
         // Skip narrow-phase for pairs where both objects are far off-screen.
         const dax = a.x - this.viewX;
@@ -485,6 +564,13 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         // Capture impact speed before velocities change.
         const impactSpeed = Math.abs((a.vx - b.vx) * nx + (a.vy - b.vy) * ny);
 
+        // Before separation changes positions, detect whether an airborne
+        // ascending player is hitting the SIDE of an anchored obstacle
+        // (below its walkable surface). Near corners the SAT normal can
+        // rotate from horizontal to near-vertical, causing both the
+        // separation and impulse to steal jump velocity.
+        const jumpRestore = this.detectWallSideJump(a, b);
+
         // Separate the pair, only moving non-anchored parts.
         const shareA = a.anchored ? 0 : b.anchored ? 1 : 0.5;
         const shareB = b.anchored ? 0 : a.anchored ? 1 : 0.5;
@@ -496,6 +582,30 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
 
         const e = Math.min(a.restitution, b.restitution);
         applyCollisionImpulse(a, b, nx, ny, e);
+
+        // Restore jump velocity that separation + impulse stripped.
+        if (jumpRestore) {
+          const postVUp =
+            jumpRestore.player.vx * jumpRestore.player.upX +
+            jumpRestore.player.vy * jumpRestore.player.upY;
+          if (postVUp < jumpRestore.preVUp) {
+            const restore = jumpRestore.preVUp - postVUp;
+            jumpRestore.player.vx += jumpRestore.player.upX * restore;
+            jumpRestore.player.vy += jumpRestore.player.upY * restore;
+          }
+          // Also undo the upward component of separation so the player
+          // stays at the side, not pushed to the surface level.
+          const sepX = nx * separationOverlap;
+          const sepY = ny * separationOverlap;
+          const sepUp = sepX * jumpRestore.player.upX + sepY * jumpRestore.player.upY;
+          if (Math.abs(sepUp) > 0.01) {
+            const share = jumpRestore.player === a ? shareA : shareB;
+            const sign = jumpRestore.player === a ? -1 : 1;
+            // Undo the upward component of the separation
+            jumpRestore.player.x -= sign * sepUp * share * jumpRestore.player.upX;
+            jumpRestore.player.y -= sign * sepUp * share * jumpRestore.player.upY;
+          }
+        }
 
         // Only notify on first contact this pair has made.
         if (!wasContact) {

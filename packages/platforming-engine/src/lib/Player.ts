@@ -27,6 +27,10 @@ export abstract class Player extends Part {
   gradability: number = Math.PI / 3; // 60° — max slope before player slides
   stepHeight: number = 0; // max vertical offset for stepping onto adjacent surfaces
   movementIntent: number = 0; // -1/0/1 — set by game from input each frame
+  /** @internal Pre-collision x-velocity, saved so grounding can detect ascending players. */
+  preColVx = 0;
+  /** @internal Pre-collision y-velocity, saved so grounding can detect ascending players. */
+  preColVy = 0;
   groundedOn: Part | null = null;
   groundedNormal: Point = { x: 0, y: -1 };
   surfaceTangent: Point = { x: 1, y: 0 };
