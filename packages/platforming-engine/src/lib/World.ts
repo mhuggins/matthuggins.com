@@ -9,6 +9,9 @@ import { Player } from "./Player";
 const DEFAULT_COLLISION_BUFFER = 0.2; // contact slop: catches floating-point near-misses on exact surface snaps
 const DEFAULT_SEPARATION_BUFFER = 4; // hysteresis: contact persists until clearly separated
 
+const GRAVITY_SOURCES_KEY = "engine:gravitySources";
+const COLLIDABLE_KEY = "engine:collidable";
+
 type ContactEntry = { a: Part; b: Part; nx: number; ny: number };
 // nx/ny point from a toward b
 
@@ -86,13 +89,13 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   }
 
   protected classifyPart(part: Part): void {
-    if (part.gravity > 0) this.pushToMap("gravitySources", part);
-    if (part.canCollide) this.pushToMap("collidable", part);
+    if (part.gravity > 0) this.pushToMap(GRAVITY_SOURCES_KEY, part);
+    if (part.canCollide) this.pushToMap(COLLIDABLE_KEY, part);
   }
 
   protected unclassifyPart(part: Part): void {
-    if (part.gravity > 0) this.spliceFromMap("gravitySources", part);
-    if (part.canCollide) this.spliceFromMap("collidable", part);
+    if (part.gravity > 0) this.spliceFromMap(GRAVITY_SOURCES_KEY, part);
+    if (part.canCollide) this.spliceFromMap(COLLIDABLE_KEY, part);
   }
 
   protected pushToMap(key: string, part: Part): void {
@@ -161,7 +164,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   }
 
   protected applyGravity(): void {
-    const sources = this._partsMap.get("gravitySources") ?? [];
+    const sources = this._partsMap.get(GRAVITY_SOURCES_KEY) ?? [];
     for (const target of this.parts) {
       if (target.anchored || target.mass === 0 || !target.obeysGravity) {
         continue;
@@ -536,7 +539,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
     const cb = this.collisionBuffer;
     const sb = this.separationBuffer;
 
-    const collidable = this._partsMap.get("collidable") ?? [];
+    const collidable = this._partsMap.get(COLLIDABLE_KEY) ?? [];
     const newContacts: Map<string, ContactEntry> = new Map();
 
     // Skip expensive narrow-phase (SAT) for pairs where both objects are
