@@ -278,7 +278,8 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         b.x += nx * separationOverlap * shareB;
         b.y += ny * separationOverlap * shareB;
 
-        applyCollisionImpulse(a, b, nx, ny);
+        const e = Math.min(a.restitution, b.restitution);
+        applyCollisionImpulse(a, b, nx, ny, e);
 
         // Only notify on first contact this pair has made.
         if (!wasContact) {

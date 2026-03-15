@@ -358,53 +358,6 @@ export class Player extends PlayerPart {
     this.x += this.vx;
     this.y += this.vy;
 
-    // Side-wall push-out — if the player ends up overlapping a platform's
-    // side after velocity is applied, push them back out and kill the
-    // velocity component directed into the wall.
-    if (this.onGround) {
-      for (const platform of this.world.platforms) {
-        if (platform === this.activePlatform) continue;
-
-        const pdx = this.x - platform.x;
-        const pdy = this.y - platform.y;
-
-        // Only handle top-side approach (underside is handled below).
-        if (dot(pdx, pdy, platform.topNormal.x, platform.topNormal.y) < 0) continue;
-
-        const cosR = Math.cos(-platform.rotation);
-        const sinR = Math.sin(-platform.rotation);
-        const localX = pdx * cosR - pdy * sinR;
-        const localY = pdx * sinR + pdy * cosR;
-
-        const hw = platform.width / 2 + PLAYER_WIDTH / 2;
-        const hh = platform.height / 2 + PLAYER_HEIGHT / 2;
-
-        const overlapX = hw - Math.abs(localX);
-        const overlapY = hh - Math.abs(localY);
-
-        if (overlapX <= 0 || overlapY <= 0) continue;
-        // Only side contacts (tangential overlap smaller than radial).
-        if (overlapX >= overlapY) continue;
-
-        // Push out along platform's local-X axis (tangent direction).
-        const pushSign = localX > 0 ? 1 : -1;
-        const worldTangX = Math.cos(platform.rotation);
-        const worldTangY = Math.sin(platform.rotation);
-
-        this.x += pushSign * overlapX * worldTangX;
-        this.y += pushSign * overlapX * worldTangY;
-
-        // Kill velocity component directed into the wall.
-        const wallNx = -pushSign * worldTangX;
-        const wallNy = -pushSign * worldTangY;
-        const approachSpeed = dot(this.vx, this.vy, wallNx, wallNy);
-        if (approachSpeed > 0) {
-          this.vx -= approachSpeed * wallNx;
-          this.vy -= approachSpeed * wallNy;
-        }
-      }
-    }
-
     if (!this.onGround) {
       const capped = clampVelocity(this.vx, this.vy, 9);
       this.vx = capped.vx;

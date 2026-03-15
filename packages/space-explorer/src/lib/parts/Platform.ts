@@ -35,6 +35,7 @@ export class Platform extends Part {
     this.height = cfg.height;
     this.color = cfg.color;
     this.mass = 1e9;
+    this.restitution = 0;
 
     this.polygon = rectPolygon(cfg.width, cfg.height);
     this.rotation = cfg.angle + Math.PI / 2;

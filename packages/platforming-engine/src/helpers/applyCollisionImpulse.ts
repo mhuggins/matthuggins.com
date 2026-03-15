@@ -3,6 +3,7 @@ export function applyCollisionImpulse(
   b: { vx: number; vy: number; mass: number; anchored?: boolean },
   nx: number,
   ny: number,
+  restitution: number = 1,
 ): void {
   const relVx = a.vx - b.vx;
   const relVy = a.vy - b.vy;
@@ -17,7 +18,7 @@ export function applyCollisionImpulse(
     return;
   }
 
-  const j = (2 * relDotN) / (invMassA + invMassB);
+  const j = ((1 + restitution) * relDotN) / (invMassA + invMassB);
   if (!a.anchored) {
     a.vx -= j * invMassA * nx;
     a.vy -= j * invMassA * ny;
