@@ -1,9 +1,4 @@
-import {
-  Part as EnginePart,
-  Player as EnginePlayer,
-  Part,
-  type Point,
-} from "@matthuggins/platforming-engine";
+import { Part as EnginePart, Player as EnginePlayer, Part } from "@matthuggins/platforming-engine";
 import { angleToUpVector } from "../../helpers/angleToUpVector";
 import { clamp } from "../../helpers/clamp";
 import { clampVelocity } from "../../helpers/clampVelocity";
@@ -43,13 +38,8 @@ abstract class PlayerPart extends EnginePlayer {
 export class Player extends PlayerPart {
   readonly layer = RenderLayer.PLAYER;
 
-  // Engine-player interface fields — used by engine World's updatePlayerGrounding
   override jumpStrength: number = JUMP_STRENGTH;
-  override gradability: number = Math.PI / 3; // 60° max slope
   override stepHeight: number = 10;
-  override groundedOn: EnginePart | null = null;
-  override groundedNormal: Point = { x: 0, y: -1 };
-  override surfaceTangent: Point = { x: 1, y: 0 };
   activePart: Part | undefined = undefined;
   mode: "grounded" | "air" = "grounded";
   freeAngle = 0;
