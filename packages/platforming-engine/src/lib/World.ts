@@ -150,6 +150,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   // Hook for subclasses to run logic after physics but before camera/render each tick.
   protected afterPhysics(): void {
     this.updatePlayerGrounding();
+    this.applySteepSliding();
   }
 
   protected applyGravity(): void {
@@ -240,14 +241,51 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
       if (bestPart !== null) {
         part.groundedNormal = { x: bestNx, y: bestNy };
         part.surfaceTangent = { x: -bestNy, y: bestNx };
-        part.upX = bestNx;
-        part.upY = bestNy;
       }
 
       if (!wasGrounded && bestPart !== null) {
         part.onLand(bestPart);
       } else if (wasGrounded && bestPart === null) {
         part.onLeaveGround();
+      }
+    }
+  }
+
+  /**
+   * For airborne players touching steep surfaces (angle from "up" exceeds
+   * maxSlopeAngle), strip the velocity component into the wall so gravity
+   * naturally slides them along the surface.
+   */
+  private applySteepSliding(): void {
+    for (const part of this.parts) {
+      if (!(part instanceof Player)) continue;
+      if (part.groundedOn !== null) continue;
+
+      const cosMax = Math.cos(part.gradability);
+
+      for (const entry of this.contactPairs.values()) {
+        let nx: number, ny: number;
+        if (entry.a === part) {
+          // entry.nx points from a toward b; we want toward player
+          nx = -entry.nx;
+          ny = -entry.ny;
+        } else if (entry.b === part) {
+          nx = entry.nx;
+          ny = entry.ny;
+        } else {
+          continue;
+        }
+
+        // How much does this contact normal align with "up"?
+        const upDot = nx * part.upX + ny * part.upY;
+        if (upDot >= cosMax) continue; // walkable slope — no slide
+
+        // Too steep — remove velocity component into the wall.
+        const vInto = -(part.vx * nx + part.vy * ny);
+        if (vInto > 0) {
+          part.vx += nx * vInto;
+          part.vy += ny * vInto;
+        }
       }
     }
   }

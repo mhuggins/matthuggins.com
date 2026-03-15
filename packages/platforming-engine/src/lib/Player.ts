@@ -20,7 +20,7 @@ export abstract class Player extends Part {
   }
 
   jumpStrength: number = 7;
-  gradability: number = Math.PI / 3; // 60° — max traversable slope
+  gradability: number = Math.PI / 3; // 60° — max slope before player slides
   groundedOn: Part | null = null;
   groundedNormal: Point = { x: 0, y: -1 };
   surfaceTangent: Point = { x: 1, y: 0 };

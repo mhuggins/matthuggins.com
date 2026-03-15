@@ -450,7 +450,7 @@ export class World extends EngineWorld<Input, Camera> {
     const player = this.player;
     let label = player.mode;
     if (player.mode === "grounded") {
-      label += player.activePlanet ? ` • ${player.activePlanet.name}` : "";
+      label += ` • ${player.currentPlanet.name}`;
     } else if (player.mode === "air") {
       label += " • blended";
     }

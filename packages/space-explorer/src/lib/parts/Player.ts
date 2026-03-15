@@ -51,8 +51,7 @@ export class Player extends PlayerPart {
   override groundedNormal: Point = { x: 0, y: -1 };
   override surfaceTangent: Point = { x: 1, y: 0 };
   currentPlanet!: Planet;
-  activePlanet: Planet | undefined = undefined;
-  activePlatform: Platform | undefined = undefined;
+  activePart: Platform | Ramp | undefined = undefined;
   mode: "grounded" | "air" = "grounded";
   freeAngle = 0;
   jetpackArmed = false;
@@ -77,7 +76,10 @@ export class Player extends PlayerPart {
     if (!this.inputsEnabled) {
       return false; // don't ground while stunned
     }
-    if (surface instanceof Platform && this.platformLandingCooldown > 0) {
+    if (
+      (surface instanceof Platform || surface instanceof Ramp) &&
+      this.platformLandingCooldown > 0
+    ) {
       return false;
     }
     return true;
@@ -86,11 +88,11 @@ export class Player extends PlayerPart {
   /** Engine callback: fires when the player first lands on a surface. */
   override onLand(surface: EnginePart): void {
     playLandSound();
-    if (surface instanceof Platform) {
-      this.activePlatform = surface;
+    if (surface instanceof Platform || surface instanceof Ramp) {
+      this.activePart = surface;
       this.currentPlanet = surface.planet;
     } else {
-      this.activePlatform = undefined;
+      this.activePart = undefined;
       if (surface instanceof Planet) {
         this.currentPlanet = surface;
       }
@@ -103,8 +105,8 @@ export class Player extends PlayerPart {
 
   /** Engine callback: fires when the player leaves the ground. */
   override onLeaveGround(): void {
-    const wasPlatform = this.activePlatform !== undefined;
-    this.activePlatform = undefined;
+    const wasOnPart = this.activePart !== undefined;
+    this.activePart = undefined;
     this.mode = "air";
 
     const planet = this.currentPlanet;
@@ -113,8 +115,8 @@ export class Player extends PlayerPart {
     const r = Math.hypot(dx, dy) || 0.001;
     const rad = normalize(dx, dy);
 
-    if (wasPlatform) {
-      // Strip tangential velocity so collision nudges at platform edges
+    if (wasOnPart) {
+      // Strip tangential velocity so collision nudges at platform/ramp edges
       // don't cause backward drift. The player falls purely radially.
       const radialV = dot(this.vx, this.vy, rad.x, rad.y);
       this.vx = rad.x * radialV;
@@ -132,8 +134,7 @@ export class Player extends PlayerPart {
     this.vy = 0;
     this.groundedOn = null;
     this.currentPlanet = p;
-    this.activePlanet = p;
-    this.activePlatform = undefined;
+    this.activePart = undefined;
     this.mode = "grounded";
     this.mass = 80;
     this.upX = 0;
@@ -165,16 +166,14 @@ export class Player extends PlayerPart {
       this.fuel = this.maxFuel;
       this.mode = "grounded";
 
-      const platform = this.activePlatform;
-
-      if (platform) {
+      if (this.activePart instanceof Platform) {
         // ── Platform grounding ──────────────────────────────────────────────
+        const platform = this.activePart;
         const planet = platform.planet;
         const radialX = this.groundedNormal.x;
         const radialY = this.groundedNormal.y;
         const tangentX = this.surfaceTangent.x;
         const tangentY = this.surfaceTangent.y;
-        const up = this.groundedNormal;
 
         // How far along the platform (in the tangent direction) is the player?
         const dx = this.x - planet.x;
@@ -188,7 +187,7 @@ export class Player extends PlayerPart {
           // preserves tangential momentum and allows steering.
           this.initAirAngularVelocity(tangentX, tangentY, platform.topRadius + PLAYER_HEIGHT / 2);
           this.groundedOn = null;
-          this.activePlatform = undefined;
+          this.activePart = undefined;
           this.mode = "air";
           this.platformLandingCooldown = 20;
         } else {
@@ -198,36 +197,100 @@ export class Player extends PlayerPart {
           this.y = planet.y + radialY * targetRadial + tangentY * tangComp;
 
           const walkSpeed = 2.4;
-          if (
-            move !== 0 &&
-            this.isWalkBlockedByPlatformSide(tangentX * move, tangentY * move, walkSpeed)
-          ) {
-            move = 0;
-          }
           this.vx = tangentX * walkSpeed * move;
           this.vy = tangentY * walkSpeed * move;
 
-          this.upX = up.x;
-          this.upY = up.y;
-          this.freeAngle = Math.atan2(this.upX, -this.upY);
+          // Orient upright relative to gravity source (planet center),
+          // not the platform surface normal.
+          const platRad = normalize(this.x - planet.x, this.y - planet.y);
+          this.upX = platRad.x;
+          this.upY = platRad.y;
+          this.freeAngle = Math.atan2(platRad.x, -platRad.y);
 
           if (input.justPressed("Space")) {
             playJumpSound();
             this.initAirAngularVelocity(tangentX, tangentY, targetRadial);
-            this.vx += up.x * JUMP_STRENGTH;
-            this.vy += up.y * JUMP_STRENGTH;
+            this.vx += platRad.x * JUMP_STRENGTH;
+            this.vy += platRad.y * JUMP_STRENGTH;
             this.groundedOn = null;
-            this.activePlatform = undefined;
+            this.activePart = undefined;
             this.mode = "air";
             this.jetpackArmed = false;
             this.hasUsedJetpackThisAirborne = false;
             this.platformLandingCooldown = 20;
           }
         }
+      } else if (this.activePart instanceof Ramp) {
+        // ── Ramp grounding ──────────────────────────────────────────────────
+        const ramp = this.activePart;
+        const planet = ramp.planet;
+        const sn = ramp.slopeNormal;
+        const st = ramp.slopeTangent;
+
+        // Project player onto the slope line.
+        const dx = this.x - ramp.slopeStart.x;
+        const dy = this.y - ramp.slopeStart.y;
+        const t = dx * st.x + dy * st.y;
+
+        const halfEdge = PLAYER_WIDTH / 2;
+
+        if (t < halfEdge) {
+          // Walked off the low end (base at planet surface) → air, will
+          // re-ground on planet next tick.
+          this.groundedOn = null;
+          this.activePart = undefined;
+          this.mode = "air";
+          const r = Math.hypot(this.x - planet.x, this.y - planet.y);
+          const rad = normalize(this.x - planet.x, this.y - planet.y);
+          this.initAirAngularVelocity(-rad.y, rad.x, r);
+        } else if (t > ramp.slopeLength - halfEdge) {
+          // Reached the high end (wall corner) → air
+          this.groundedOn = null;
+          this.activePart = undefined;
+          this.mode = "air";
+          const r = Math.hypot(this.x - planet.x, this.y - planet.y);
+          const rad = normalize(this.x - planet.x, this.y - planet.y);
+          this.initAirAngularVelocity(-rad.y, rad.x, r);
+        } else {
+          // Snap to slope surface.
+          const clampedT = Math.max(0, Math.min(ramp.slopeLength, t));
+          const surfX = ramp.slopeStart.x + st.x * clampedT;
+          const surfY = ramp.slopeStart.y + st.y * clampedT;
+          this.x = surfX + (sn.x * PLAYER_HEIGHT) / 2;
+          this.y = surfY + (sn.y * PLAYER_HEIGHT) / 2;
+
+          // Walk along the slope. Determine which direction "right" maps to
+          // by comparing the slope tangent to the engine's surface tangent.
+          const tangentDot = st.x * this.surfaceTangent.x + st.y * this.surfaceTangent.y;
+          const walkDir = tangentDot >= 0 ? 1 : -1;
+
+          const walkSpeed = 2.4;
+          this.vx = st.x * walkSpeed * move * walkDir;
+          this.vy = st.y * walkSpeed * move * walkDir;
+
+          // Orient upright relative to gravity source (planet center),
+          // not the slope normal.
+          const rampRad = normalize(this.x - planet.x, this.y - planet.y);
+          this.upX = rampRad.x;
+          this.upY = rampRad.y;
+          this.freeAngle = Math.atan2(rampRad.x, -rampRad.y);
+
+          if (input.justPressed("Space")) {
+            playJumpSound();
+            const r = Math.hypot(this.x - planet.x, this.y - planet.y);
+            this.initAirAngularVelocity(-rampRad.y, rampRad.x, r);
+            this.vx += rampRad.x * JUMP_STRENGTH;
+            this.vy += rampRad.y * JUMP_STRENGTH;
+            this.groundedOn = null;
+            this.activePart = undefined;
+            this.mode = "air";
+            this.jetpackArmed = false;
+            this.hasUsedJetpackThisAirborne = false;
+          }
+        }
       } else {
         // ── Planet grounding ────────────────────────────────────────────────
         const planet = this.currentPlanet;
-        this.activePlanet = planet;
 
         // Derive snap direction and walk tangent from the player's actual
         // angle relative to the planet center.  Using the groundedNormal
@@ -247,27 +310,20 @@ export class Player extends PlayerPart {
         this.y = planet.y + radialY * targetDist;
 
         const walkSpeed = 2.4;
-        if (
-          move !== 0 &&
-          this.isWalkBlockedByPlatformSide(tangentX * move, tangentY * move, walkSpeed)
-        ) {
-          move = 0;
-        }
         this.vx = tangentX * walkSpeed * move;
         this.vy = tangentY * walkSpeed * move;
 
-        // Keep terrain-aware grounded normal for visual orientation.
-        const up = this.groundedNormal;
-        this.upX = up.x;
-        this.upY = up.y;
-        this.freeAngle = Math.atan2(this.upX, -this.upY);
+        // Orient upright relative to gravity source (planet center).
+        this.upX = radialX;
+        this.upY = radialY;
+        this.freeAngle = Math.atan2(radialX, -radialY);
 
         if (input.justPressed("Space")) {
           playJumpSound();
           this.initAirAngularVelocity(tangentX, tangentY, targetDist);
 
-          this.vx += up.x * JUMP_STRENGTH;
-          this.vy += up.y * JUMP_STRENGTH;
+          this.vx += radialX * JUMP_STRENGTH;
+          this.vy += radialY * JUMP_STRENGTH;
           this.groundedOn = null;
           this.mode = "air";
           this.jetpackArmed = false;
@@ -362,47 +418,6 @@ export class Player extends PlayerPart {
       const capped = clampVelocity(this.vx, this.vy, 9);
       this.vx = capped.vx;
       this.vy = capped.vy;
-
-      // Underside bounce — game-specific: engine skips underside contacts
-      // (isPermeable returns true for bottom approach), so we handle it manually.
-      for (const platform of this.world.platforms) {
-        const sn = platform.topNormal;
-        const pdx = this.x - platform.x;
-        const pdy = this.y - platform.y;
-        // Player must be on the inward (bottom) side of the platform.
-        if (dot(pdx, pdy, sn.x, sn.y) >= 0) continue;
-
-        const cosA = Math.cos(-platform.rotation);
-        const sinA = Math.sin(-platform.rotation);
-        const localX = pdx * cosA - pdy * sinA;
-        const localY = pdx * sinA + pdy * cosA;
-        const hw = platform.width / 2;
-        const hh = platform.height / 2;
-
-        // Skip if the player center is past the platform edge — this is a
-        // base-corner contact due to planet curvature, not a genuine underside
-        // overlap. Without this check, the underside code kills jump velocity
-        // at tilted platform corners.
-        if (Math.abs(localX) > hw) continue;
-
-        const closestX = Math.max(-hw, Math.min(hw, localX));
-        const closestY = Math.max(-hh, Math.min(hh, localY));
-        const distLen = Math.hypot(localX - closestX, localY - closestY);
-        if (distLen >= PLAYER_HEIGHT / 2) continue;
-
-        // Kill velocity component directed toward the platform top.
-        const approachSpeed = dot(this.vx, this.vy, sn.x, sn.y);
-        if (approachSpeed > 0) {
-          this.vx -= approachSpeed * sn.x;
-          this.vy -= approachSpeed * sn.y;
-        }
-
-        // Push player out of overlap in the inward direction.
-        const overlap = PLAYER_HEIGHT / 2 - distLen;
-        this.x -= sn.x * overlap;
-        this.y -= sn.y * overlap;
-        break;
-      }
     }
   }
 
@@ -413,7 +428,7 @@ export class Player extends PlayerPart {
   override onCollide = (other: EnginePart, nx: number, ny: number, impactSpeed: number): void => {
     if (this.onGround && !other.anchored) {
       this.groundedOn = null;
-      this.activePlatform = undefined;
+      this.activePart = undefined;
       this.mode = "air";
     }
 
@@ -421,39 +436,6 @@ export class Player extends PlayerPart {
       m.onCollide(other, nx, ny, impactSpeed);
     }
   };
-
-  /**
-   * Returns true if walking one frame in the given direction would overlap a
-   * platform's side (not top). Uses an AABB overlap test in platform-local space.
-   */
-  private isWalkBlockedByPlatformSide(dirX: number, dirY: number, walkSpeed: number): boolean {
-    const aheadX = this.x + dirX * walkSpeed;
-    const aheadY = this.y + dirY * walkSpeed;
-
-    for (const platform of this.world.platforms) {
-      if (platform === this.activePlatform) continue;
-
-      const cosR = Math.cos(-platform.rotation);
-      const sinR = Math.sin(-platform.rotation);
-      const dx = aheadX - platform.x;
-      const dy = aheadY - platform.y;
-      const localX = dx * cosR - dy * sinR;
-      const localY = dx * sinR + dy * cosR;
-
-      const hw = platform.width / 2 + PLAYER_WIDTH / 2;
-      const hh = platform.height / 2 + PLAYER_HEIGHT / 2;
-
-      const overlapX = hw - Math.abs(localX);
-      const overlapY = hh - Math.abs(localY);
-
-      // Side contact: both axes overlap, and the tangential (X) overlap is
-      // the smaller of the two — meaning the player is entering from the side.
-      if (overlapX > 0 && overlapY > 0 && overlapX < overlapY) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   /** Set angular velocity for the air-steering code based on current tangential speed. */
   private initAirAngularVelocity(tangentX: number, tangentY: number, radius: number): void {
