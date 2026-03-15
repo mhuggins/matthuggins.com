@@ -11,16 +11,22 @@ interface PlayerConfig {
 }
 
 export abstract class Player extends Part {
+  halfWidth: number;
+  halfHeight: number;
+
   constructor(world: ConstructorParameters<typeof Part>[0], cfg: PlayerConfig = {}) {
     super(world);
-    this.polygon = rectPolygon(
-      cfg.width ?? DEFAULT_PLAYER_WIDTH,
-      cfg.height ?? DEFAULT_PLAYER_HEIGHT,
-    );
+    const w = cfg.width ?? DEFAULT_PLAYER_WIDTH;
+    const h = cfg.height ?? DEFAULT_PLAYER_HEIGHT;
+    this.halfWidth = w / 2;
+    this.halfHeight = h / 2;
+    this.polygon = rectPolygon(w, h);
   }
 
   jumpStrength: number = 7;
   gradability: number = Math.PI / 3; // 60° — max slope before player slides
+  stepHeight: number = 0; // max vertical offset for stepping onto adjacent surfaces
+  movementIntent: number = 0; // -1/0/1 — set by game from input each frame
   groundedOn: Part | null = null;
   groundedNormal: Point = { x: 0, y: -1 };
   surfaceTangent: Point = { x: 1, y: 0 };
@@ -35,4 +41,5 @@ export abstract class Player extends Part {
   // Callbacks — override in game Player
   onLand(_surface: Part): void {}
   onLeaveGround(): void {}
+  onStepUp(_surface: Part): void {}
 }

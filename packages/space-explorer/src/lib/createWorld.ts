@@ -2,6 +2,7 @@ import { Color } from "../types";
 import { Planet, PlanetConfig } from "./parts/Planet";
 import { Platform } from "./parts/Platform";
 import { Player } from "./parts/Player";
+import { Ramp } from "./parts/Ramp";
 import { Satellite } from "./parts/Satellite";
 import { World } from "./World";
 
@@ -58,6 +59,17 @@ export function createWorld(...args: WorldArgs): World {
         width: 80,
         height: 18,
         color: "#4a7ac4",
+      }),
+    );
+    // Ramp near player spawn (slightly to the right)
+    world.add(
+      new Ramp(world, {
+        planet: azure,
+        angle: -Math.PI / 2 + 0.3,
+        altitude: 0,
+        width: 80,
+        height: 40,
+        color: "#6090d0",
       }),
     );
   }
