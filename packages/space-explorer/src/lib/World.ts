@@ -10,12 +10,13 @@ import { surfaceRadiusAt } from "../helpers/surfaceRadiusAt";
 import { Camera } from "./Camera";
 import { Input } from "./Input";
 import { Asteroid } from "./parts/Asteroid";
+import { Crystal } from "./parts/Crystal";
 import { Part, RenderLayer } from "./parts/Part";
 import { Planet } from "./parts/Planet";
 import { Platform } from "./parts/Platform";
 import { Player } from "./parts/Player";
 import { Starfield } from "./Starfield";
-import { updateAudioListener } from "./sounds";
+import { playCrystalPickupSound, updateAudioListener } from "./sounds";
 
 const MAX_NEAREST_PLANETS = 10;
 const MIN_CONTRIBUTION = 0.02;
@@ -69,36 +70,45 @@ export class World extends EngineWorld<Input, Camera> {
 
   protected override classifyPart(part: EnginePart): void {
     super.classifyPart(part);
-    if (part instanceof Player) this._player = part;
-    else if (part instanceof Planet) this.pushToMap("planets", part);
-    else if (part instanceof Platform) this.pushToMap("platforms", part);
-    else if (part instanceof Asteroid) this.pushToMap("asteroids", part);
+    if (part instanceof Player) {
+      this._player = part;
+    } else {
+      this.pushToMap(part.constructor.name, part);
+    }
     this._worldSortDirty = true;
   }
 
   protected override unclassifyPart(part: EnginePart): void {
     super.unclassifyPart(part);
-    if (part instanceof Player) this._player = null;
-    else if (part instanceof Planet) this.spliceFromMap("planets", part);
-    else if (part instanceof Platform) this.spliceFromMap("platforms", part);
-    else if (part instanceof Asteroid) this.spliceFromMap("asteroids", part);
+    if (part instanceof Player) {
+      this._player = null;
+    } else {
+      this.spliceFromMap(part.constructor.name, part);
+    }
     this._worldSortDirty = true;
   }
 
   get player(): Player {
-    return this._player!;
+    if (!this._player) {
+      throw new Error("player is undefined");
+    }
+    return this._player;
   }
 
   get planets(): Planet[] {
-    return (this._partsMap.get("planets") ?? []) as Planet[];
+    return (this._partsMap.get(Planet.name) ?? []) as Planet[];
   }
 
   get platforms(): Platform[] {
-    return (this._partsMap.get("platforms") ?? []) as Platform[];
+    return (this._partsMap.get(Platform.name) ?? []) as Platform[];
   }
 
   get asteroids(): Asteroid[] {
-    return (this._partsMap.get("asteroids") ?? []) as Asteroid[];
+    return (this._partsMap.get(Asteroid.name) ?? []) as Asteroid[];
+  }
+
+  get crystals(): Crystal[] {
+    return (this._partsMap.get(Crystal.name) ?? []) as Crystal[];
   }
 
   override reset = (): void => {
@@ -162,6 +172,7 @@ export class World extends EngineWorld<Input, Camera> {
   protected override afterPhysics(): void {
     super.afterPhysics();
     this.tickAsteroidSpawner();
+    this.tickCrystalPickup();
 
     const player = this.player;
     this.viewX = player.x;
@@ -254,6 +265,17 @@ export class World extends EngineWorld<Input, Camera> {
         }
         ctx.closePath();
         ctx.stroke();
+      }
+    }
+  };
+
+  private tickCrystalPickup = (): void => {
+    const player = this.player;
+    for (const crystal of this.crystals) {
+      if (crystal.isNearPlayer()) {
+        player.fuel = Math.min(player.maxFuel, player.fuel + crystal.fuelAmount);
+        playCrystalPickupSound(undefined, { source: crystal });
+        this.remove(crystal);
       }
     }
   };
@@ -430,9 +452,15 @@ export class World extends EngineWorld<Input, Camera> {
     }
 
     ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-    for (const p of this.asteroids) {
-      const mp = worldToMinimap(p.x, p.y);
+    for (const a of this.asteroids) {
+      const mp = worldToMinimap(a.x, a.y);
       ctx.fillRect(mp.x, mp.y, 1, 1);
+    }
+
+    ctx.fillStyle = "rgba(255, 80, 180, 0.8)";
+    for (const c of this.crystals) {
+      const mp = worldToMinimap(c.x, c.y);
+      ctx.fillRect(mp.x - 0.5, mp.y - 0.5, 2, 2);
     }
 
     ctx.fillStyle = "#f7f8ff";

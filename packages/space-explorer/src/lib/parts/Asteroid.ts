@@ -1,6 +1,7 @@
 import { Part as EnginePart } from "@matthuggins/platforming-engine";
 import { playAsteroidCrashSound } from "../sounds";
 import type { World } from "../World";
+import { Crystal } from "./Crystal";
 import { Part, RenderLayer } from "./Part";
 
 const MIN_SPLIT_RADIUS = 5;
@@ -38,11 +39,31 @@ export class Asteroid extends Part {
   override onCollide = (other: EnginePart, nx: number, ny: number, _impactSpeed: number): void => {
     this.world.remove(this);
     playAsteroidCrashSound({ mass: this.mass }, { source: this });
+    this.spawnCrystals();
 
     if (this.radius > MIN_SPLIT_RADIUS && this.world.asteroids.length < MAX_ASTEROIDS) {
       this.spawnFragments(other, nx, ny);
     }
   };
+
+  private spawnCrystals(): void {
+    // Larger asteroids drop more crystals. Tiny fragments drop 1, big asteroids drop up to 3.
+    const count = Math.min(3, Math.max(1, Math.floor(this.radius / 12)));
+    const speed = Math.hypot(this.vx, this.vy) * 0.3;
+
+    for (let i = 0; i < count; i++) {
+      const crystal = new Crystal(this.world);
+      crystal.x = this.x + (Math.random() - 0.5) * this.radius;
+      crystal.y = this.y + (Math.random() - 0.5) * this.radius;
+
+      // Scatter in random directions.
+      const angle = Math.random() * Math.PI * 2;
+      crystal.vx = Math.cos(angle) * (speed + Math.random() * 1.5);
+      crystal.vy = Math.sin(angle) * (speed + Math.random() * 1.5);
+
+      this.world.add(crystal);
+    }
+  }
 
   private spawnFragments(other: EnginePart, nx: number, ny: number): void {
     const childRadius = this.radius / 2;
