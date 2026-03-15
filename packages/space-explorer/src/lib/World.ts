@@ -324,7 +324,8 @@ export class World extends EngineWorld<Input, Camera> {
     }
 
     const ctx = this.ctx;
-    const planet = player.currentPlanet;
+    const planet = this.nearestSurfacePlanet(player.x, player.y);
+    if (!planet) return;
     const cx = this.canvas.clientWidth / 2;
     const cy = this.canvas.clientHeight / 2;
 
@@ -450,7 +451,8 @@ export class World extends EngineWorld<Input, Camera> {
     const player = this.player;
     let label = player.mode;
     if (player.mode === "grounded") {
-      label += ` • ${player.currentPlanet.name}`;
+      const nearest = this.nearestSurfacePlanet(player.x, player.y);
+      if (nearest) label += ` • ${nearest.name}`;
     } else if (player.mode === "air") {
       label += " • blended";
     }

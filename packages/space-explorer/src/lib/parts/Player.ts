@@ -50,8 +50,7 @@ export class Player extends PlayerPart {
   override groundedOn: EnginePart | null = null;
   override groundedNormal: Point = { x: 0, y: -1 };
   override surfaceTangent: Point = { x: 1, y: 0 };
-  currentPlanet!: Planet;
-  activePart: Platform | Ramp | undefined = undefined;
+  activePart: Platform | undefined = undefined;
   mode: "grounded" | "air" = "grounded";
   freeAngle = 0;
   jetpackArmed = false;
@@ -90,12 +89,8 @@ export class Player extends PlayerPart {
     playLandSound();
     if (surface instanceof Platform || surface instanceof Ramp) {
       this.activePart = surface;
-      this.currentPlanet = surface.planet;
     } else {
       this.activePart = undefined;
-      if (surface instanceof Planet) {
-        this.currentPlanet = surface;
-      }
     }
     this.jetpackArmed = false;
     this.jetpackActive = false;
@@ -109,21 +104,23 @@ export class Player extends PlayerPart {
     this.activePart = undefined;
     this.mode = "air";
 
-    const planet = this.currentPlanet;
-    const dx = this.x - planet.x;
-    const dy = this.y - planet.y;
-    const r = Math.hypot(dx, dy) || 0.001;
-    const rad = normalize(dx, dy);
+    const planet = this.world.nearestSurfacePlanet(this.x, this.y);
+    if (planet) {
+      const dx = this.x - planet.x;
+      const dy = this.y - planet.y;
+      const r = Math.hypot(dx, dy) || 0.001;
+      const rad = normalize(dx, dy);
 
-    if (wasOnPart) {
-      // Strip tangential velocity so collision nudges at platform/ramp edges
-      // don't cause backward drift. The player falls purely radially.
-      const radialV = dot(this.vx, this.vy, rad.x, rad.y);
-      this.vx = rad.x * radialV;
-      this.vy = rad.y * radialV;
+      if (wasOnPart) {
+        // Strip tangential velocity so collision nudges at platform/ramp edges
+        // don't cause backward drift. The player falls purely radially.
+        const radialV = dot(this.vx, this.vy, rad.x, rad.y);
+        this.vx = rad.x * radialV;
+        this.vy = rad.y * radialV;
+      }
+
+      this.initAirAngularVelocity(-rad.y, rad.x, r);
     }
-
-    this.initAirAngularVelocity(-rad.y, rad.x, r);
   }
 
   reset(): void {
@@ -133,7 +130,6 @@ export class Player extends PlayerPart {
     this.vx = 0;
     this.vy = 0;
     this.groundedOn = null;
-    this.currentPlanet = p;
     this.activePart = undefined;
     this.mode = "grounded";
     this.mass = 80;
@@ -288,9 +284,9 @@ export class Player extends PlayerPart {
             this.hasUsedJetpackThisAirborne = false;
           }
         }
-      } else {
+      } else if (this.groundedOn instanceof Planet) {
         // ── Planet grounding ────────────────────────────────────────────────
-        const planet = this.currentPlanet;
+        const planet = this.groundedOn;
 
         // Derive snap direction and walk tangent from the player's actual
         // angle relative to the planet center.  Using the groundedNormal
@@ -342,17 +338,16 @@ export class Player extends PlayerPart {
 
       if (this.hasUsedJetpackThisAirborne) {
         this.freeAngle += move * AIR_ROTATE_SPEED;
-      } else {
-        const fromPlanetX = this.x - this.currentPlanet.x;
-        const fromPlanetY = this.y - this.currentPlanet.y;
+      } else if (blendedG.strongest) {
+        const strongest = blendedG.strongest;
+        const fromPlanetX = this.x - strongest.planet.x;
+        const fromPlanetY = this.y - strongest.planet.y;
         const r = Math.hypot(fromPlanetX, fromPlanetY);
         const fromPlanet = normalize(fromPlanetX, fromPlanetY);
         this.freeAngle = Math.atan2(fromPlanet.x, -fromPlanet.y);
 
-        const jumpInfluence = blendedG.influences.find((g) => g.planet === this.currentPlanet);
-        const jumpStrength = jumpInfluence?.strength ?? 0;
         const totalStrength = blendedG.influences.reduce((sum, g) => sum + g.strength, 0);
-        const dominance = totalStrength > 0 ? jumpStrength / totalStrength : 0;
+        const dominance = totalStrength > 0 ? strongest.strength / totalStrength : 0;
 
         const airSteerAccel = 0.0003;
         this.jumpAngularVelocity = clamp(
