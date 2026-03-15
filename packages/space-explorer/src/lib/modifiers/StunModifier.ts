@@ -1,7 +1,6 @@
-import { Part as EnginePart } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, Player as EnginePlayer } from "@matthuggins/platforming-engine";
 import { angleToUpVector } from "../../helpers/angleToUpVector";
 import type { Input } from "../Input";
-import type { Part } from "../parts/Part";
 import { playCrashSound } from "../sounds";
 import { Modifier } from "./Modifier";
 import { SmokeModifier } from "./SmokeModifier";
@@ -26,7 +25,7 @@ export class StunModifier extends Modifier {
   private minStunMomentum: number;
   private currentStunFrames = 0;
 
-  constructor(parent: Part, cfg: StunModifierConfig = {}) {
+  constructor(parent: EnginePlayer, cfg: StunModifierConfig = {}) {
     super(parent);
     this.spinAngle = Math.atan2(parent.upX, -parent.upY);
     this.spinDecay = cfg.spinDecay ?? DEFAULT_SPIN_DECAY;

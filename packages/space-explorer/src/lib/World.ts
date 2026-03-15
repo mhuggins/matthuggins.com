@@ -449,19 +449,17 @@ export class World extends EngineWorld<Input, Camera> {
 
   private drawStatus = (): void => {
     const player = this.player;
-    let label = player.mode;
+    let label = player.mode === "grounded" ? "Grounded" : "Airborne";
     if (player.mode === "grounded") {
       const nearest = this.nearestSurfacePlanet(player.x, player.y);
       if (nearest) label += ` • ${nearest.name}`;
-    } else if (player.mode === "air") {
-      label += " • blended";
     }
 
     if (this.status) {
       this.status.textContent = label;
     }
     if (this.fuel) {
-      this.fuel.textContent = `jetpack fuel: ${Math.round((player.fuel / player.maxFuel) * 100)}%`;
+      this.fuel.textContent = `Fuel: ${Math.round((player.fuel / player.maxFuel) * 100)}%`;
     }
   };
 }
