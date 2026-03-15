@@ -54,17 +54,43 @@ export class Platform extends Part {
   }
 
   /**
-   * Permeable when the player center is on the underside of the platform AND
-   * the contact normal points away from topNormal. Requiring both conditions
-   * prevents corner contacts on tilted platforms from incorrectly passing through
-   * when the player approaches from the side.
+   * Only top-surface contacts are solid (for landing). Everything else —
+   * underside, sides, corners — is permeable.
+   *
+   * A "top-surface" contact requires the other object to be above the
+   * platform surface (normalOffset > height/2) and within the platform
+   * width (tangentOffset ≤ width/2). This prevents the SAT corner response
+   * on tilted platforms from absorbing jump velocity.
+   *
+   * Walking into platform sides is prevented by the Player's
+   * isWalkBlockedByPlatformSide check, not by collision response.
    */
   override isPermeable(nx: number, ny: number, cx?: number, cy?: number): boolean {
+    if (cx === undefined || cy === undefined) {
+      // Without position info, fall back to normal-direction check.
+      return nx * this.topNormal.x + ny * this.topNormal.y < 0;
+    }
+
+    const dx = cx - this.x;
+    const dy = cy - this.y;
+    const normalOffset = dx * this.topNormal.x + dy * this.topNormal.y;
+
+    // Underside: contact normal points away from topNormal and the other
+    // object is below the platform.
     const normalAway = nx * this.topNormal.x + ny * this.topNormal.y < 0;
-    if (!normalAway) return false;
-    if (cx === undefined || cy === undefined) return true;
-    const playerSide = (cx - this.x) * this.topNormal.x + (cy - this.y) * this.topNormal.y;
-    return playerSide < 0;
+    if (normalAway && normalOffset < 0) return true;
+
+    // Side/corner/base: if the other object is not above the top surface,
+    // or its center is past the platform edge, this is not a landing.
+    const tangentX = -this.topNormal.y;
+    const tangentY = this.topNormal.x;
+    const tangentOffset = Math.abs(dx * tangentX + dy * tangentY);
+
+    if (normalOffset < this.height / 2 || tangentOffset > this.width / 2) {
+      return true;
+    }
+
+    return false;
   }
 
   protected override doUpdate(): void {}

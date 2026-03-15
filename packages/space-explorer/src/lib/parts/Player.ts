@@ -378,6 +378,13 @@ export class Player extends PlayerPart {
         const localY = pdx * sinA + pdy * cosA;
         const hw = platform.width / 2;
         const hh = platform.height / 2;
+
+        // Skip if the player center is past the platform edge — this is a
+        // base-corner contact due to planet curvature, not a genuine underside
+        // overlap. Without this check, the underside code kills jump velocity
+        // at tilted platform corners.
+        if (Math.abs(localX) > hw) continue;
+
         const closestX = Math.max(-hw, Math.min(hw, localX));
         const closestY = Math.max(-hh, Math.min(hh, localY));
         const distLen = Math.hypot(localX - closestX, localY - closestY);
