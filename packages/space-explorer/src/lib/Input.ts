@@ -4,6 +4,7 @@ type ResetCallback = () => void;
 
 export class Input extends EngineInput {
   private onReset: ResetCallback;
+  debugCollisions = false;
 
   constructor() {
     super();
@@ -16,6 +17,8 @@ export class Input extends EngineInput {
       e.preventDefault();
     } else if (e.code === "KeyR") {
       this.onReset();
+    } else if (e.code === "Backquote") {
+      this.debugCollisions = !this.debugCollisions;
     }
   };
 
