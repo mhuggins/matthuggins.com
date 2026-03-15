@@ -46,6 +46,7 @@ export class Player extends PlayerPart {
   // Engine-player interface fields — used by engine World's updatePlayerGrounding
   override jumpStrength: number = JUMP_STRENGTH;
   override gradability: number = Math.PI / 3; // 60° max slope
+  override stepHeight: number = 10;
   override groundedOn: EnginePart | null = null;
   override groundedNormal: Point = { x: 0, y: -1 };
   override surfaceTangent: Point = { x: 1, y: 0 };
@@ -92,6 +93,13 @@ export class Player extends PlayerPart {
     this.jetpackActive = false;
     this.hasUsedJetpackThisAirborne = false;
     this.mode = "grounded";
+  }
+
+  /** Engine callback: fires when the player steps up onto an adjacent surface. */
+  override onStepUp(surface: EnginePart): void {
+    if (surface.anchored) {
+      this.activePart = surface;
+    }
   }
 
   /** Engine callback: fires when the player leaves the ground. */
@@ -146,6 +154,8 @@ export class Player extends PlayerPart {
     let move =
       (input.isDown("KeyD") || input.isDown("ArrowRight") ? 1 : 0) -
       (input.isDown("KeyA") || input.isDown("ArrowLeft") ? 1 : 0);
+
+    this.movementIntent = move;
 
     if (input.justReleased("Space") && !this.onGround) {
       this.jetpackArmed = true;

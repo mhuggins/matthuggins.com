@@ -150,6 +150,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
   // Hook for subclasses to run logic after physics but before camera/render each tick.
   protected afterPhysics(): void {
     this.updatePlayerGrounding();
+    this.applyStepUp();
     this.applySteepSliding();
   }
 
@@ -184,6 +185,25 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
     for (const part of this.parts) {
       if (!(part instanceof Player)) {
         continue;
+      }
+
+      // If already grounded and the current surface still has a walkable
+      // edge near the player, keep it. This prevents oscillation at surface
+      // junctions (e.g. planet/ramp) where the contact-normal heuristic
+      // would flip between surfaces every frame.
+      if (part.groundedOn !== null) {
+        const grounding = part.groundedOn.getGrounding(
+          part.x,
+          part.y,
+          part.halfWidth,
+          part.halfHeight,
+          part.upX,
+          part.upY,
+          part.gradability,
+        );
+        if (grounding) {
+          continue;
+        }
       }
 
       // Use dominant gravity direction as "up" reference so the grounding
@@ -247,6 +267,115 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         part.onLand(bestPart);
       } else if (wasGrounded && bestPart === null) {
         part.onLeaveGround();
+      }
+    }
+  }
+
+  /**
+   * When a grounded player is in contact with a nearby anchored part (e.g.
+   * the base of a ramp), check whether that part has a walkable surface
+   * within the player's stepHeight. If so, snap the player onto it.
+   */
+  private applyStepUp(): void {
+    for (const part of this.parts) {
+      if (!(part instanceof Player)) continue;
+      if (part.groundedOn === null || part.stepHeight <= 0) continue;
+
+      let stepped = false;
+
+      for (const entry of this.contactPairs.values()) {
+        let other: Part;
+        let towardX: number;
+        let towardY: number;
+        if (entry.a === part) {
+          other = entry.b;
+          towardX = entry.nx;
+          towardY = entry.ny;
+        } else if (entry.b === part) {
+          other = entry.a;
+          towardX = -entry.nx;
+          towardY = -entry.ny;
+        } else {
+          continue;
+        }
+
+        // Only step onto anchored parts that aren't the current ground.
+        if (!other.anchored || other === part.groundedOn) continue;
+
+        // Only step up when the player is actively moving toward the obstacle.
+        // We use movementIntent rather than velocity because collision impulses
+        // zero the velocity component toward the obstacle before this runs.
+        if (part.movementIntent === 0) continue;
+        const moveX = part.surfaceTangent.x * part.movementIntent;
+        const moveY = part.surfaceTangent.y * part.movementIntent;
+        const intentToward = moveX * towardX + moveY * towardY;
+        if (intentToward <= 0) continue;
+
+        // Find walkable edges on the obstacle and check for step-up.
+        const verts = other.worldVertices();
+        const nv = verts.length;
+        if (nv < 3) continue;
+
+        const cosGrad = Math.cos(part.gradability);
+
+        let cx = 0;
+        let cy = 0;
+        for (let i = 0; i < nv; i++) {
+          cx += verts[i].x;
+          cy += verts[i].y;
+        }
+        cx /= nv;
+        cy /= nv;
+
+        for (let i = 0; i < nv; i++) {
+          const j = (i + 1) % nv;
+          const ax = verts[i].x;
+          const ay = verts[i].y;
+          const bx = verts[j].x;
+          const by = verts[j].y;
+
+          const edx = bx - ax;
+          const edy = by - ay;
+          const len = Math.hypot(edx, edy);
+          if (len < 1e-6) continue;
+
+          const tx = edx / len;
+          const ty = edy / len;
+          let nx = -ty;
+          let ny = tx;
+          const mx = (ax + bx) / 2;
+          const my = (ay + by) / 2;
+          if (nx * (cx - mx) + ny * (cy - my) > 0) {
+            nx = -nx;
+            ny = -ny;
+          }
+
+          // Only walkable edges.
+          if (nx * part.upX + ny * part.upY < cosGrad) continue;
+
+          // Nearest point on the edge segment to the player (clamped).
+          const t = Math.max(0, Math.min(len, (part.x - ax) * tx + (part.y - ay) * ty));
+          const snapX = ax + tx * t + nx * part.halfHeight;
+          const snapY = ay + ty * t + ny * part.halfHeight;
+
+          // How much higher is the target surface (along the player's up)?
+          const dxSnap = snapX - part.x;
+          const dySnap = snapY - part.y;
+          const verticalOffset = dxSnap * part.upX + dySnap * part.upY;
+
+          if (verticalOffset >= 0 && verticalOffset <= part.stepHeight) {
+            part.x = snapX;
+            part.y = snapY;
+            part.groundedOn = other;
+            part.groundedNormal = { x: nx, y: ny };
+            part.surfaceTangent = { x: -ny, y: nx };
+            part.onStepUp(other);
+            stepped = true;
+            break;
+          }
+        }
+
+        if (stepped) break;
       }
     }
   }
