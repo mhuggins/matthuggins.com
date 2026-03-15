@@ -2,6 +2,7 @@ import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { DOMAIN } from "../src/constants/site";
 import { blogMetadata } from "../src/data/blog-metadata.gen";
+import { labMetadata } from "../src/data/lab-metadata.gen";
 
 const SITEMAP_PATH = resolve(process.cwd(), "public/sitemap.xml");
 
@@ -20,7 +21,9 @@ function generateSitemap(): string {
 
   // Lab pages
   urls.push({ loc: `${DOMAIN}/lab`, changefreq: "monthly", priority: 0.8 });
-  urls.push({ loc: `${DOMAIN}/lab/cargo-dispatch`, changefreq: "yearly", priority: 0.6 });
+  for (const entry of labMetadata) {
+    urls.push({ loc: `${DOMAIN}/lab/${entry.slug}`, changefreq: "yearly", priority: 0.6 });
+  }
 
   // Blog index
   urls.push({ loc: `${DOMAIN}/blog`, changefreq: "weekly", priority: 0.8 });
