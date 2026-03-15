@@ -2,13 +2,21 @@ import { rectPolygon } from "../helpers/rectPolygon";
 import type { Point } from "../types";
 import { Part } from "./Part";
 
-const PLAYER_WIDTH = 16;
-const PLAYER_HEIGHT = 24;
+const DEFAULT_PLAYER_WIDTH = 16;
+const DEFAULT_PLAYER_HEIGHT = 24;
+
+interface PlayerConfig {
+  width?: number;
+  height?: number;
+}
 
 export abstract class Player extends Part {
-  constructor(world?: ConstructorParameters<typeof Part>[0]) {
+  constructor(world: ConstructorParameters<typeof Part>[0], cfg: PlayerConfig = {}) {
     super(world);
-    this.polygon = rectPolygon(PLAYER_WIDTH, PLAYER_HEIGHT);
+    this.polygon = rectPolygon(
+      cfg.width ?? DEFAULT_PLAYER_WIDTH,
+      cfg.height ?? DEFAULT_PLAYER_HEIGHT,
+    );
   }
 
   jumpStrength: number = 7;

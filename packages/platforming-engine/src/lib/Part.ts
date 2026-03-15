@@ -20,19 +20,18 @@ export abstract class Part {
   anchored = false;
   inputsEnabled = true;
   modifiers: Modifier[] = [];
-  world!: World;
+  world: World;
 
   polygon: Point[] = [];
   smooth = false;
   rotation = 0;
   canCollide = true;
+  restitution = 1;
   obeysGravity = true;
 
-  constructor(world?: World) {
+  constructor(world: World) {
     autoBind(this);
-    if (world !== undefined) {
-      this.world = world;
-    }
+    this.world = world;
   }
 
   /** Returns polygon vertices transformed to world space. */

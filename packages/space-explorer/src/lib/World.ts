@@ -1,4 +1,8 @@
-import { Part as EnginePart, World as EngineWorld } from "@matthuggins/platforming-engine";
+import {
+  Part as EnginePart,
+  World as EngineWorld,
+  HeightFieldPart,
+} from "@matthuggins/platforming-engine";
 import { gravityStrengthForPlanet } from "../helpers/gravityStrengthForPlanets";
 import { gravityVectorForPlanet } from "../helpers/gravityVectorForPlanet";
 import { roundRect } from "../helpers/roundRect";
@@ -169,6 +173,10 @@ export class World extends EngineWorld<Input, Camera> {
       part.render(ctx);
     }
 
+    if (this.input.debugCollisions) {
+      this.drawDebugCollisions(ctx);
+    }
+
     ctx.restore();
 
     // Player layer (screen space)
@@ -178,6 +186,44 @@ export class World extends EngineWorld<Input, Camera> {
     this.drawPlanetIndicator();
     this.drawMinimap();
     this.drawStatus();
+  };
+
+  private drawDebugCollisions = (ctx: CanvasRenderingContext2D): void => {
+    ctx.strokeStyle = "rgba(255, 0, 0, 0.8)";
+    ctx.lineWidth = 1;
+
+    for (const part of this.parts) {
+      if (part instanceof HeightFieldPart) {
+        const steps = 256;
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const angle = (i / steps) * Math.PI * 2;
+          const r = part.surfaceRadiusAt(angle);
+          const px = part.x + Math.cos(angle) * r;
+          const py = part.y + Math.sin(angle) * r;
+          if (i === 0) {
+            ctx.moveTo(px, py);
+          } else {
+            ctx.lineTo(px, py);
+          }
+        }
+        ctx.closePath();
+        ctx.stroke();
+      } else if (part.smooth) {
+        ctx.beginPath();
+        ctx.arc(part.x, part.y, part.boundingRadius, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (part.polygon.length > 0) {
+        const verts = part.worldVertices();
+        ctx.beginPath();
+        ctx.moveTo(verts[0].x, verts[0].y);
+        for (let i = 1; i < verts.length; i++) {
+          ctx.lineTo(verts[i].x, verts[i].y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
   };
 
   private tickAsteroidSpawner = (): void => {
