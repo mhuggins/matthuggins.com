@@ -1,4 +1,4 @@
-import { HeightFieldPart } from "@matthuggins/platforming-engine";
+import { type GroundingResult, HeightFieldPart } from "@matthuggins/platforming-engine";
 import { clamp } from "../../helpers/clamp";
 import {
   GRAVITY_RADIUS_BASE,
@@ -71,6 +71,27 @@ export class Planet extends HeightFieldPart {
     const i1 = (i0 + 1) % n;
     const frac = idx - Math.floor(idx);
     return this.surfaceRadiusLUT[i0] * (1 - frac) + this.surfaceRadiusLUT[i1] * frac;
+  }
+
+  override getGrounding(
+    px: number,
+    py: number,
+    _halfWidth: number,
+    halfHeight: number,
+  ): GroundingResult | null {
+    const playerAngle = Math.atan2(py - this.y, px - this.x);
+    const radialX = Math.cos(playerAngle);
+    const radialY = Math.sin(playerAngle);
+
+    const surfR = this.surfaceRadiusAt(playerAngle);
+    const targetDist = surfR + halfHeight;
+
+    return {
+      x: this.x + radialX * targetDist,
+      y: this.y + radialY * targetDist,
+      tx: -radialY,
+      ty: radialX,
+    };
   }
 
   doUpdate(): void {
