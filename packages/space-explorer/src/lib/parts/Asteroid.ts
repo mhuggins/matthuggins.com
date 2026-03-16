@@ -128,8 +128,8 @@ export class Asteroid extends Part {
     for (let i = 0; i <= numVerts; i++) {
       const vAngle = (i / numVerts) * Math.PI * 2;
       const r = this.radius * this.vertexOffsets[i % numVerts];
-      const vx = this.x + Math.cos(vAngle) * r;
-      const vy = this.y + Math.sin(vAngle) * r;
+      const vx = Math.cos(vAngle) * r;
+      const vy = Math.sin(vAngle) * r;
       if (i === 0) ctx.moveTo(vx, vy);
       else ctx.lineTo(vx, vy);
     }

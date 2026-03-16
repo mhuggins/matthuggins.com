@@ -106,27 +106,9 @@ export class Satellite extends Part {
   };
 
   protected override doRender(ctx: RenderingContext2D): void {
-    // Draw faint orbital ring in kinematic mode.
-    if (this.mode === "kinematic") {
-      ctx.beginPath();
-      ctx.arc(this.parentPlanet.x, this.parentPlanet.y, this.orbitalRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0.12)`;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([6, 8]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
     const s = this.width / 4;
-
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.rotation);
-
     this.drawBody(ctx, s);
     this.drawAntenna(ctx, s);
-
-    ctx.restore();
   }
 
   /** Snap position, velocity, and rotation to match the current orbital angle. */

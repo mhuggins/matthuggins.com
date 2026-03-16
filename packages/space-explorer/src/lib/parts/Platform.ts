@@ -44,17 +44,17 @@ export class Platform extends Part {
     const centerRadius = surfR + cfg.altitude + cfg.height / 2;
     this.x = cfg.planet.x + Math.cos(cfg.angle) * centerRadius;
     this.y = cfg.planet.y + Math.sin(cfg.angle) * centerRadius;
+
+    // Cache static rendering to an offscreen canvas.
+    const pad = 4;
+    const w = cfg.width + pad * 2;
+    const h = cfg.height + 6 + pad * 2; // +6 for drop shadow
+    this.buildRenderCache(w, h, -(cfg.width / 2 + pad), -(cfg.height / 2 + pad));
   }
 
   protected override doUpdate(): void {}
 
   protected override doRender(ctx: RenderingContext2D): void {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    // Rotate so the rectangle is tangent to the planet surface:
-    // tangent direction is angle + π/2, so width lies along the surface.
-    ctx.rotate(this.angle + Math.PI / 2);
-
     const w = this.width;
     const h = this.height;
 
@@ -78,7 +78,5 @@ export class Platform extends Part {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
     ctx.lineWidth = 1;
     ctx.strokeRect(-w / 2 + 0.5, -h / 2 + 0.5, w - 1, h - 1);
-
-    ctx.restore();
   }
 }
