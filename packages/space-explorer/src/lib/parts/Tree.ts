@@ -206,10 +206,6 @@ export class Tree extends Part {
     this.rotation = this.surfaceAngle + Math.PI / 2;
   }
 
-  doUpdate(): void {
-    // Static — no update logic needed.
-  }
-
   doRender(ctx: RenderingContext2D): void {
     // Draw branch segments
     ctx.strokeStyle = this.trunkColor;

@@ -54,7 +54,7 @@ export class Crystal extends Part {
     return dx * dx + dy * dy < CRYSTAL_PICKUP_RADIUS * CRYSTAL_PICKUP_RADIUS;
   }
 
-  doUpdate(): void {
+  protected override doUpdate(): void {
     if (!this.settled) {
       // Apply friction damping every frame once the crystal has hit a surface.
       if (this.touchedSurface) {
@@ -89,7 +89,7 @@ export class Crystal extends Part {
     }
   }
 
-  doRender(ctx: RenderingContext2D): void {
+  protected doRender(ctx: RenderingContext2D): void {
     const remaining = CRYSTAL_LIFETIME - this.age;
     const blinkAlpha = remaining < 120 ? Math.sin(this.age * 0.3) * 0.5 + 0.5 : 1;
 
