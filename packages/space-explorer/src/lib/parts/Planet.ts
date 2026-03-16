@@ -100,11 +100,7 @@ export class Planet extends HeightFieldPart {
     };
   }
 
-  doUpdate(): void {
-    // Planets are static — no movement.
-  }
-
-  doRender(ctx: RenderingContext2D): void {
+  protected doRender(ctx: RenderingContext2D): void {
     const player = this.world.player;
     const planets = this.world.planets;
 

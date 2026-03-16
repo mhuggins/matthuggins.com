@@ -284,7 +284,8 @@ export abstract class Part {
     }
   }
 
-  protected abstract doUpdate(): void;
+  protected doUpdate(): void {}
+
   protected abstract doRender(ctx: RenderingContext2D): void;
 
   protected applyInputs(_input: Input): void {}

@@ -299,7 +299,7 @@ export class Player extends PlayerPart {
     this.prevWalkActive = walkActive;
   }
 
-  doUpdate(): void {
+  protected override doUpdate(): void {
     this.rotation = this.freeAngle;
 
     if (!this.inputsEnabled) {
@@ -349,7 +349,7 @@ export class Player extends PlayerPart {
     this.renderModifiers(ctx);
   }
 
-  doRender(ctx: RenderingContext2D): void {
+  protected doRender(ctx: RenderingContext2D): void {
     const canvas = this.world.canvas;
     const cx = canvas.clientWidth / 2;
     const cy = canvas.clientHeight / 2;

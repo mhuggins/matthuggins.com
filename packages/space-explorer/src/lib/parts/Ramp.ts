@@ -130,8 +130,6 @@ export class Ramp extends Part {
     );
   }
 
-  protected override doUpdate(): void {}
-
   protected override doRender(ctx: RenderingContext2D): void {
     const verts = this.polygon;
 

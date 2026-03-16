@@ -52,8 +52,6 @@ export class Platform extends Part {
     this.buildRenderCache(w, h, -(cfg.width / 2 + pad), -(cfg.height / 2 + pad));
   }
 
-  protected override doUpdate(): void {}
-
   protected override doRender(ctx: RenderingContext2D): void {
     const w = this.width;
     const h = this.height;

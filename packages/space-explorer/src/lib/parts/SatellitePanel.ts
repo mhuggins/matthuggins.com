@@ -53,7 +53,9 @@ export class SatellitePanel extends Part {
   }
 
   protected override doUpdate(): void {
-    if (!this.broken) return;
+    if (!this.broken) {
+      return;
+    }
 
     this.x += this.vx;
     this.y += this.vy;

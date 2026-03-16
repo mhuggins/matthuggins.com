@@ -110,7 +110,7 @@ export class Asteroid extends Part {
     }
   }
 
-  doUpdate(): void {
+  protected override doUpdate(): void {
     this.x += this.vx;
     this.y += this.vy;
 
@@ -122,7 +122,7 @@ export class Asteroid extends Part {
     }
   }
 
-  doRender(ctx: RenderingContext2D): void {
+  protected doRender(ctx: RenderingContext2D): void {
     const numVerts = this.vertexOffsets.length;
     ctx.beginPath();
     for (let i = 0; i <= numVerts; i++) {
