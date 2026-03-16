@@ -2,7 +2,7 @@ import { Part as EnginePart, type RenderingContext2D } from "@matthuggins/platfo
 import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 
-const CRYSTAL_FUEL_AMOUNT = 0.08;
+const CRYSTAL_FUEL_AMOUNT = 0.05;
 const CRYSTAL_LIFETIME = 600; // frames (~10 seconds at 60fps)
 const CRYSTAL_PICKUP_RADIUS = 28;
 const CRYSTAL_DESPAWN_RADIUS = 9000;

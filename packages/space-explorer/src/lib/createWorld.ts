@@ -33,7 +33,7 @@ export function createWorld(...args: WorldArgs): World {
 
   // Add platforms
   const planets = world.planets;
-  const [azure, cinder, verdant, violet] = planets;
+  const [azure, cinder, verdant, violet, tessera] = planets;
 
   if (azure) {
     // Ground-level block (resting on the surface)
@@ -127,6 +127,31 @@ export function createWorld(...args: WorldArgs): World {
         width: 70,
         height: 18,
         color: "#2a9a62",
+      }),
+    );
+  }
+
+  if (tessera) {
+    // Ground-level block on a flat side
+    world.add(
+      new Platform(world, {
+        planet: tessera,
+        angle: 0,
+        altitude: 0,
+        width: 120,
+        height: 20,
+        color: "#c8a840",
+      }),
+    );
+    // Floating platform near a corner
+    world.add(
+      new Platform(world, {
+        planet: tessera,
+        angle: Math.PI / 4 + 0.3,
+        altitude: 90,
+        width: 85,
+        height: 18,
+        color: "#b09030",
       }),
     );
   }
@@ -225,6 +250,11 @@ const TREE_PALETTES: Record<
     { leafHue: 280, leafSat: 55, trunkHue: 270, trunkSat: 25 }, // purple
     { leafHue: 310, leafSat: 50, trunkHue: 290, trunkSat: 20 }, // magenta
     { leafHue: 250, leafSat: 45, trunkHue: 260, trunkSat: 22 }, // indigo
+  ],
+  Tessera: [
+    { leafHue: 45, leafSat: 50, trunkHue: 30, trunkSat: 45 }, // golden
+    { leafHue: 70, leafSat: 45, trunkHue: 40, trunkSat: 40 }, // olive
+    { leafHue: 20, leafSat: 55, trunkHue: 15, trunkSat: 50 }, // amber
   ],
 };
 
@@ -328,6 +358,32 @@ const PLANET_CONFIGS: PlanetConfig[] = [
       { angle: 3.5, amplitude: 52, width: 0.32 },
       { angle: 4.5, amplitude: -14, width: 0.55 },
       { angle: 5.3, amplitude: 40, width: 0.3 },
+    ],
+  },
+  {
+    name: "Tessera",
+    x: 3500,
+    y: 2400,
+    radius: 480,
+    gravity: 0.28,
+    color: { r: 230, g: 195, b: 80 },
+    ringColor: { r: 230, g: 195, b: 80 },
+    deco: [
+      { angle: 0.4, size: 12, color: "#f0e0a0" },
+      { angle: 2.8, size: 14, color: "#f0e0a0" },
+      { angle: 5.0, size: 11, color: "#f0e0a0" },
+    ],
+    terrain: [
+      // Flat sides (pull inward at cardinal directions)
+      { angle: 0, amplitude: -55, width: 0.5 },
+      { angle: Math.PI / 2, amplitude: -55, width: 0.5 },
+      { angle: Math.PI, amplitude: -55, width: 0.5 },
+      { angle: (3 * Math.PI) / 2, amplitude: -55, width: 0.5 },
+      // Rounded corners (push outward at diagonals)
+      { angle: Math.PI / 4, amplitude: 70, width: 0.5 },
+      { angle: (3 * Math.PI) / 4, amplitude: 70, width: 0.5 },
+      { angle: (5 * Math.PI) / 4, amplitude: 70, width: 0.5 },
+      { angle: (7 * Math.PI) / 4, amplitude: 70, width: 0.5 },
     ],
   },
 ];
