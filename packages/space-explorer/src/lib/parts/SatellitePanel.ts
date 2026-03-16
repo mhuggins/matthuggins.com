@@ -71,10 +71,6 @@ export class SatellitePanel extends Part {
     const s = this.scale;
     const side = this.side;
 
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.rotation);
-
     // All coordinates are relative to the panel center.
     // The panel assembly for one side spans from 0.38s to 3.22s from the body center,
     // giving a center offset of 1.8s. So local X goes from -1.42s to +1.42s.
@@ -136,7 +132,5 @@ export class SatellitePanel extends Part {
       ctx.lineWidth = 0.8;
       ctx.strokeRect(pStartX, -panelH / 2, panelW * side, panelH);
     }
-
-    ctx.restore();
   }
 }

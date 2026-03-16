@@ -93,8 +93,6 @@ export class Crystal extends Part {
     const remaining = CRYSTAL_LIFETIME - this.age;
     const blinkAlpha = remaining < 120 ? Math.sin(this.age * 0.3) * 0.5 + 0.5 : 1;
 
-    ctx.save();
-    ctx.translate(this.x, this.y);
     ctx.globalAlpha *= blinkAlpha;
 
     const size = 6;
@@ -140,7 +138,5 @@ export class Crystal extends Part {
     ctx.beginPath();
     ctx.arc(0, 0, size * 2, 0, Math.PI * 2);
     ctx.fill();
-
-    ctx.restore();
   }
 }

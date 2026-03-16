@@ -117,15 +117,22 @@ export class Ramp extends Part {
       x: this.x + highLX * cosR - highLY * sinR,
       y: this.y + highLX * sinR + highLY * cosR,
     };
+
+    // Cache static rendering to an offscreen canvas.
+    const pad = 4;
+    const shadowOffsetX = 3;
+    const shadowOffsetY = 4;
+    this.buildRenderCache(
+      cfg.width + shadowOffsetX + pad * 2,
+      cfg.height + shadowOffsetY + pad * 2,
+      -(hw + pad),
+      -(hh + pad),
+    );
   }
 
   protected override doUpdate(): void {}
 
   protected override doRender(ctx: RenderingContext2D): void {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle + Math.PI / 2);
-
     const verts = this.polygon;
 
     // Drop shadow
@@ -150,7 +157,5 @@ export class Ramp extends Part {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
     ctx.lineWidth = 1;
     ctx.stroke();
-
-    ctx.restore();
   }
 }

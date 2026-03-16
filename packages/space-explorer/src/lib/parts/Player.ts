@@ -343,8 +343,10 @@ export class Player extends PlayerPart {
     this.jumpAngularVelocityMax = Math.max(Math.abs(this.jumpAngularVelocity), walkSpeed / radius);
   }
 
-  protected override isOffScreen(): boolean {
-    return false; // player renders at screen center, always visible
+  /** Player renders in screen space (no camera transform), so bypass the base translate/rotate. */
+  override render(ctx: CanvasRenderingContext2D): void {
+    this.doRender(ctx);
+    this.renderModifiers(ctx);
   }
 
   doRender(ctx: RenderingContext2D): void {

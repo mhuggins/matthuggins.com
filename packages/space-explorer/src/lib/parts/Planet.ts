@@ -141,16 +141,16 @@ export class Planet extends HeightFieldPart {
     ctx.save();
     ctx.beginPath();
     ctx.rect(
-      this.x - influenceRadius - 10,
-      this.y - influenceRadius - 10,
+      -(influenceRadius + 10),
+      -(influenceRadius + 10),
       (influenceRadius + 10) * 2,
       (influenceRadius + 10) * 2,
     );
     for (let i = 0; i <= 256; i++) {
       const a = (i / 256) * Math.PI * 2;
       const r = surfaceRadiusAt(this, a);
-      const px = this.x + Math.cos(a) * r;
-      const py = this.y + Math.sin(a) * r;
+      const px = Math.cos(a) * r;
+      const py = Math.sin(a) * r;
       if (i === 0) ctx.moveTo(px, py);
       else ctx.lineTo(px, py);
     }
@@ -162,7 +162,7 @@ export class Planet extends HeightFieldPart {
       const bandRadius = influenceRadius * (1 - phase);
       ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${bandAlpha})`;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, bandRadius, 0, Math.PI * 2);
+      ctx.arc(0, 0, bandRadius, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.restore();
@@ -170,11 +170,11 @@ export class Planet extends HeightFieldPart {
 
   private drawBody(ctx: RenderingContext2D): void {
     const g = ctx.createRadialGradient(
-      this.x - this.radius * 0.35,
-      this.y - this.radius * 0.4,
+      -this.radius * 0.35,
+      -this.radius * 0.4,
       this.radius * 0.2,
-      this.x,
-      this.y,
+      0,
+      0,
       this.radius,
     );
     g.addColorStop(0, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0.7)`);
@@ -186,8 +186,8 @@ export class Planet extends HeightFieldPart {
     for (let i = 0; i <= N; i++) {
       const a = (i / N) * Math.PI * 2;
       const r = surfaceRadiusAt(this, a);
-      const px = this.x + Math.cos(a) * r;
-      const py = this.y + Math.sin(a) * r;
+      const px = Math.cos(a) * r;
+      const py = Math.sin(a) * r;
       if (i === 0) ctx.moveTo(px, py);
       else ctx.lineTo(px, py);
     }
@@ -203,7 +203,7 @@ export class Planet extends HeightFieldPart {
       const oy = Math.sin(d.angle) * (surfR - d.size * 0.8);
       ctx.fillStyle = d.color;
       ctx.beginPath();
-      ctx.arc(this.x + ox, this.y + oy, d.size, 0, Math.PI * 2);
+      ctx.arc(ox, oy, d.size, 0, Math.PI * 2);
       ctx.fill();
     }
   }

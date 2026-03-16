@@ -94,16 +94,17 @@ export abstract class Part {
       return;
     }
 
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
+
     if (this.renderCache) {
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.rotation);
       ctx.drawImage(this.renderCache, this.renderCacheOffsetX, this.renderCacheOffsetY);
-      ctx.restore();
     } else {
       this.doRender(ctx);
     }
 
+    ctx.restore();
     this.renderModifiers(ctx);
   }
 
