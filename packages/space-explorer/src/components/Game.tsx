@@ -7,8 +7,6 @@ import { startAmbientSound, stopAmbientSound } from "../lib/sounds";
 export const SpaceExplorer = ({ className }: { className?: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const statusRef = useRef<HTMLDivElement>(null);
-  const fuelRef = useRef<HTMLDivElement>(null);
 
   const [displayFullscreen, setDisplayFullscreen] = useState(false);
   const [playAmbientSounds, setPlayAmbientSounds] = useState(true);
@@ -16,14 +14,12 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
   useEffect(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
-    const status = statusRef.current;
-    const fuel = fuelRef.current;
 
-    if (!container || !canvas || !status || !fuel) {
+    if (!container || !canvas) {
       return undefined;
     }
 
-    const world = createWorld({ canvas, container, status, fuel });
+    const world = createWorld({ canvas, container });
     world.start();
     startAmbientSound();
     return () => {
@@ -45,11 +41,6 @@ export const SpaceExplorer = ({ className }: { className?: string }) => {
       className={cn("relative h-[600px] overflow-hidden bg-[#0a1020] font-sans", className)}
     >
       <canvas ref={canvasRef} className="block h-full w-full" />
-
-      <div className="absolute top-3 left-3 max-w-[360px] rounded-xl border border-white/[0.08] bg-black/[0.42] px-3 py-[10px] text-[#dce7ff] text-sm leading-[1.45] shadow-[0_10px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm">
-        <div ref={statusRef} className="mt-1.5 opacity-[0.82]" />
-        <div ref={fuelRef} className="opacity-[0.82]" />
-      </div>
 
       <div className="absolute right-3 bottom-3 flex items-center gap-2">
         <ConsoleButton onClick={toggleAmbientSound} aria-label="Toggle background sound">

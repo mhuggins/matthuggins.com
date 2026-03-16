@@ -39,8 +39,6 @@ export class World extends EngineWorld<Input, Camera> {
   public declare readonly camera: Camera;
 
   private _player: Player | null = null;
-  private status: HTMLElement;
-  private fuel: HTMLElement;
   private asteroidSpawnTimer = 0;
   private starfield: Starfield;
   private _worldSortDirty = true;
@@ -49,22 +47,17 @@ export class World extends EngineWorld<Input, Camera> {
   constructor({
     canvas,
     container,
-    status,
-    fuel,
   }: {
     canvas: HTMLCanvasElement;
     container: HTMLElement;
-    status: HTMLElement;
-    fuel: HTMLElement;
   }) {
     const input = new Input();
     const camera = new Camera();
     super({ canvas, container, input, camera });
+
     input.setResetCallback(this.reset);
     camera.setWorld(this);
 
-    this.status = status;
-    this.fuel = fuel;
     this.starfield = new Starfield(0, 0);
   }
 
@@ -228,7 +221,7 @@ export class World extends EngineWorld<Input, Camera> {
     // HUD layer
     this.drawPlanetIndicator();
     this.drawMinimap();
-    this.drawStatus();
+    this.drawFuelGauge();
   };
 
   private drawDebugCollisions = (ctx: CanvasRenderingContext2D): void => {
@@ -476,19 +469,80 @@ export class World extends EngineWorld<Input, Camera> {
     ctx.stroke();
   };
 
-  private drawStatus = (): void => {
+  private drawFuelGauge = (): void => {
+    const ctx = this.ctx;
     const player = this.player;
-    let label = player.mode === "grounded" ? "Grounded" : "Airborne";
-    if (player.mode === "grounded") {
-      const nearest = this.nearestSurfacePlanet(player.x, player.y);
-      if (nearest) label += ` • ${nearest.name}`;
+    const fuelPct = player.fuel / player.maxFuel;
+
+    // Position: top-right area of the canvas.
+    const gaugeX = this.canvas.clientWidth - 52;
+    const gaugeY = 52;
+    const outerRadius = 32;
+    const innerRadius = 24;
+    const lineWidth = outerRadius - innerRadius;
+
+    // Arc spans 270° (from 135° to 405°, i.e. bottom-left to bottom-right going clockwise).
+    const startAngle = Math.PI * 0.75;
+    const endAngle = Math.PI * 2.25;
+    const fuelAngle = startAngle + (endAngle - startAngle) * fuelPct;
+
+    ctx.save();
+
+    // Background track.
+    ctx.beginPath();
+    ctx.arc(gaugeX, gaugeY, outerRadius - lineWidth / 2, startAngle, endAngle);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = "round";
+    ctx.stroke();
+
+    // Fuel fill — color shifts from green to orange to red.
+    let r: number;
+    let g: number;
+    let b: number;
+    if (fuelPct > 0.5) {
+      // Green to orange.
+      const t = (fuelPct - 0.5) * 2;
+      r = Math.round(255 * (1 - t) + 80 * t);
+      g = Math.round(180 * (1 - t) + 220 * t);
+      b = Math.round(60 * (1 - t) + 120 * t);
+    } else {
+      // Orange to red.
+      const t = fuelPct * 2;
+      r = 255;
+      g = Math.round(180 * t + 50 * (1 - t));
+      b = Math.round(60 * t + 50 * (1 - t));
     }
 
-    if (this.status) {
-      this.status.textContent = label;
+    if (fuelPct > 0.005) {
+      ctx.beginPath();
+      ctx.arc(gaugeX, gaugeY, outerRadius - lineWidth / 2, startAngle, fuelAngle);
+      ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.9)`;
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = "round";
+      ctx.stroke();
+
+      // Glow on the fuel arc.
+      ctx.beginPath();
+      ctx.arc(gaugeX, gaugeY, outerRadius - lineWidth / 2, startAngle, fuelAngle);
+      ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.25)`;
+      ctx.lineWidth = lineWidth + 6;
+      ctx.stroke();
     }
-    if (this.fuel) {
-      this.fuel.textContent = `Fuel: ${Math.round((player.fuel / player.maxFuel) * 100)}%`;
-    }
+
+    // Percentage text in the center.
+    const pctText = `${Math.round(fuelPct * 100)}`;
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.95)`;
+    ctx.font = "bold 14px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(pctText, gaugeX, gaugeY - 2);
+
+    // "FUEL" label below the arc.
+    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.font = "8px monospace";
+    ctx.fillText("FUEL", gaugeX, gaugeY + 12);
+
+    ctx.restore();
   };
 }
