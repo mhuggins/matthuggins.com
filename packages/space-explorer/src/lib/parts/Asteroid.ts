@@ -1,4 +1,4 @@
-import { Part as EnginePart } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, type RenderingContext2D } from "@matthuggins/platforming-engine";
 import { playAsteroidCrashSound } from "../sounds";
 import type { World } from "../World";
 import { Crystal } from "./Crystal";
@@ -122,7 +122,7 @@ export class Asteroid extends Part {
     }
   }
 
-  doRender(ctx: CanvasRenderingContext2D): void {
+  doRender(ctx: RenderingContext2D): void {
     const numVerts = this.vertexOffsets.length;
     ctx.beginPath();
     for (let i = 0; i <= numVerts; i++) {

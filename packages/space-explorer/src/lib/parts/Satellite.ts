@@ -1,4 +1,9 @@
-import { Part as EnginePart, rectPolygon, WeldModifier } from "@matthuggins/platforming-engine";
+import {
+  Part as EnginePart,
+  type RenderingContext2D,
+  rectPolygon,
+  WeldModifier,
+} from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { Color } from "../../types";
 import type { World } from "../World";
@@ -100,7 +105,7 @@ export class Satellite extends Part {
     }
   };
 
-  protected override doRender(ctx: CanvasRenderingContext2D): void {
+  protected override doRender(ctx: RenderingContext2D): void {
     // Draw faint orbital ring in kinematic mode.
     if (this.mode === "kinematic") {
       ctx.beginPath();
@@ -249,7 +254,7 @@ export class Satellite extends Part {
     this.assemblePanels();
   }
 
-  private drawBody(ctx: CanvasRenderingContext2D, s: number): void {
+  private drawBody(ctx: RenderingContext2D, s: number): void {
     const bodyW = s * 0.76;
     const bodyH = s * 1.1;
     const br = s * 0.1;
@@ -288,7 +293,7 @@ export class Satellite extends Part {
     }
   }
 
-  private drawAntenna(ctx: CanvasRenderingContext2D, s: number): void {
+  private drawAntenna(ctx: RenderingContext2D, s: number): void {
     const bodyH = s * 1.1;
     const dishR = s * 0.28;
     const dishStemH = s * 0.22;

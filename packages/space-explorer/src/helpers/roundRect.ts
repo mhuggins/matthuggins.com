@@ -1,5 +1,7 @@
+import type { RenderingContext2D } from "@matthuggins/platforming-engine";
+
 export function roundRect(
-  ctx: CanvasRenderingContext2D,
+  ctx: RenderingContext2D,
   x: number,
   y: number,
   w: number,
