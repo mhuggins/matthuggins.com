@@ -4,6 +4,7 @@ import { Platform } from "./parts/Platform";
 import { Player } from "./parts/Player";
 import { Ramp } from "./parts/Ramp";
 import { Satellite } from "./parts/Satellite";
+import { Tree, TreeConfig } from "./parts/Tree";
 import { World } from "./World";
 
 type WorldArgs = ConstructorParameters<typeof World>;
@@ -14,6 +15,13 @@ export function createWorld(...args: WorldArgs): World {
   // Add planets
   for (const cfg of PLANET_CONFIGS) {
     world.add(new Planet(world, cfg));
+  }
+
+  // Add trees
+  for (const planet of world.planets) {
+    for (const tree of createTrees(planet)) {
+      world.add(tree);
+    }
   }
 
   // Add satellites
@@ -191,6 +199,47 @@ function createSatellites(planet: Planet): Satellite[] {
     );
   }
   return sats;
+}
+
+// Per-planet tree color palettes: [leafHue, leafSat, trunkHue, trunkSat]
+const TREE_PALETTES: Record<
+  string,
+  Pick<TreeConfig, "leafHue" | "leafSat" | "trunkHue" | "trunkSat">[]
+> = {
+  Azure: [
+    { leafHue: 160, leafSat: 55, trunkHue: 25, trunkSat: 40 }, // teal-green
+    { leafHue: 210, leafSat: 50, trunkHue: 220, trunkSat: 20 }, // cool blue
+    { leafHue: 130, leafSat: 50, trunkHue: 30, trunkSat: 45 }, // classic green
+  ],
+  Cinder: [
+    { leafHue: 25, leafSat: 70, trunkHue: 15, trunkSat: 50 }, // orange
+    { leafHue: 45, leafSat: 65, trunkHue: 20, trunkSat: 45 }, // golden
+    { leafHue: 0, leafSat: 55, trunkHue: 10, trunkSat: 40 }, // red-orange
+  ],
+  Verdant: [
+    { leafHue: 140, leafSat: 60, trunkHue: 30, trunkSat: 40 }, // forest green
+    { leafHue: 170, leafSat: 55, trunkHue: 160, trunkSat: 20 }, // teal
+    { leafHue: 100, leafSat: 50, trunkHue: 35, trunkSat: 45 }, // lime green
+  ],
+  Violet: [
+    { leafHue: 280, leafSat: 55, trunkHue: 270, trunkSat: 25 }, // purple
+    { leafHue: 310, leafSat: 50, trunkHue: 290, trunkSat: 20 }, // magenta
+    { leafHue: 250, leafSat: 45, trunkHue: 260, trunkSat: 22 }, // indigo
+  ],
+};
+
+function createTrees(planet: Planet): Tree[] {
+  const trees: Tree[] = [];
+  const count = 6 + Math.floor(Math.random() * 5); // 6-10 trees per planet
+  const palettes = TREE_PALETTES[planet.name] ?? TREE_PALETTES.Verdant;
+
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2 + Math.random() * 0.3;
+    const seed = Math.floor(planet.x * 7 + planet.y * 13 + i * 997);
+    const palette = palettes[i % palettes.length];
+    trees.push(new Tree(planet.world, { planet, angle, seed, ...palette }));
+  }
+  return trees;
 }
 
 const PLANET_CONFIGS: PlanetConfig[] = [

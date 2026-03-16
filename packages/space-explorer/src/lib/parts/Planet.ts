@@ -120,7 +120,6 @@ export class Planet extends HeightFieldPart {
     this.drawBands(ctx, bandVisibility);
     this.drawBody(ctx);
     this.drawDecorations(ctx);
-    this.drawTrees(ctx);
   }
 
   private drawBands(ctx: CanvasRenderingContext2D, bandVisibility: number): void {
@@ -201,32 +200,6 @@ export class Planet extends HeightFieldPart {
       ctx.fillStyle = d.color;
       ctx.beginPath();
       ctx.arc(this.x + ox, this.y + oy, d.size, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  private drawTrees(ctx: CanvasRenderingContext2D): void {
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2 + 0.3;
-      const nx = Math.cos(a);
-      const ny = Math.sin(a);
-      const surfR = surfaceRadiusAt(this, a);
-
-      const trunkBaseX = this.x + nx * surfR;
-      const trunkBaseY = this.y + ny * surfR;
-      const trunkTopX = this.x + nx * (surfR + 10);
-      const trunkTopY = this.y + ny * (surfR + 10);
-
-      ctx.strokeStyle = "rgba(60,35,20,0.9)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(trunkBaseX, trunkBaseY);
-      ctx.lineTo(trunkTopX, trunkTopY);
-      ctx.stroke();
-
-      ctx.fillStyle = "rgba(145,220,160,0.95)";
-      ctx.beginPath();
-      ctx.arc(this.x + nx * (surfR + 14), this.y + ny * (surfR + 14), 4, 0, Math.PI * 2);
       ctx.fill();
     }
   }
