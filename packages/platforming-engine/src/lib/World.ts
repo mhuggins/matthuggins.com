@@ -429,12 +429,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
    * Returns the player and their pre-collision upward velocity if so.
    * Must be called before separation changes positions.
    */
-  private detectWallSideJump(
-    a: Part,
-    b: Part,
-    nx: number,
-    ny: number,
-  ): { player: Player; preVUp: number } | null {
+  private detectWallSideJump(a: Part, b: Part): { player: Player; preVUp: number } | null {
     let player: Player | null = null;
     let obstacle: Part | null = null;
 
@@ -450,18 +445,18 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
       return null;
     }
 
-    // Only relevant when the SAT normal is near-walkable (the corner
-    // artifact where the normal rotates from wall to floor). For pure
-    // wall hits the impulse only strips lateral velocity, not upward.
-    const sign = player === a ? -1 : 1;
-    const normalUpDot = sign * nx * player.upX + sign * ny * player.upY;
-    if (normalUpDot < Math.cos(player.gradability)) {
-      return null;
-    }
-
     // Was the player ascending before this tick's collisions?
     const preVUp = player.preColVx * player.upX + player.preColVy * player.upY;
     if (preVUp <= 0) {
+      return null;
+    }
+
+    // Only restore when the player is moving primarily upward (ascending
+    // past the side). If they're flying mostly sideways with incidental
+    // upward velocity, skip — otherwise the separation undo can teleport
+    // the player through the obstacle at corners.
+    const preSpeed = Math.hypot(player.preColVx, player.preColVy);
+    if (preSpeed > 0.001 && preVUp / preSpeed < 0.4) {
       return null;
     }
 
@@ -613,7 +608,7 @@ export class World<TInput extends Input = Input, TCamera extends Camera = Camera
         // (below its walkable surface). Near corners the SAT normal can
         // rotate from horizontal to near-vertical, causing both the
         // separation and impulse to steal jump velocity.
-        const jumpRestore = this.detectWallSideJump(a, b, nx, ny);
+        const jumpRestore = this.detectWallSideJump(a, b);
 
         // Separate the pair, only moving non-anchored parts.
         const shareA = a.anchored ? 0 : b.anchored ? 1 : 0.5;
