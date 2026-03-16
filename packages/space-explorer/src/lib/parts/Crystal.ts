@@ -1,4 +1,4 @@
-import { Part as EnginePart } from "@matthuggins/platforming-engine";
+import { Part as EnginePart, type RenderingContext2D } from "@matthuggins/platforming-engine";
 import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
 
@@ -89,7 +89,7 @@ export class Crystal extends Part {
     }
   }
 
-  doRender(ctx: CanvasRenderingContext2D): void {
+  doRender(ctx: RenderingContext2D): void {
     const remaining = CRYSTAL_LIFETIME - this.age;
     const blinkAlpha = remaining < 120 ? Math.sin(this.age * 0.3) * 0.5 + 0.5 : 1;
 

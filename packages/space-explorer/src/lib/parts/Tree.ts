@@ -1,3 +1,4 @@
+import type { RenderingContext2D } from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
@@ -73,11 +74,6 @@ export class Tree extends Part {
   private segments: Segment[] = [];
   private leaves: Leaf[] = [];
 
-  /** Pre-rendered offscreen canvas and its origin offset in local space. */
-  private cache: OffscreenCanvas | null = null;
-  private cacheOffsetX = 0;
-  private cacheOffsetY = 0;
-
   constructor(world: World, cfg: TreeConfig) {
     super(world);
     this.planet = cfg.planet;
@@ -102,7 +98,7 @@ export class Tree extends Part {
     this.grow(rng, 0, halfH, -Math.PI / 2, trunkWidth, 1, 0);
 
     // Render tree to an offscreen canvas once
-    this.buildCache();
+    this.buildRenderCache();
 
     // Free geometry data — no longer needed after caching
     this.segments = [];
@@ -170,9 +166,8 @@ export class Tree extends Part {
     }
   }
 
-  /** Render the tree geometry to an OffscreenCanvas for fast per-frame blitting. */
-  private buildCache(): void {
-    // Compute bounding box of all geometry in local space
+  /** Compute bounding box and build the offscreen render cache. */
+  protected override buildRenderCache(): void {
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
@@ -187,7 +182,6 @@ export class Tree extends Part {
     }
 
     for (const leaf of this.leaves) {
-      // Leaf is a rotated rect; use the diagonal as a conservative bound
       const d = Math.hypot(leaf.w, leaf.h);
       minX = Math.min(minX, leaf.x - d);
       minY = Math.min(minY, leaf.y - d);
@@ -195,18 +189,28 @@ export class Tree extends Part {
       maxY = Math.max(maxY, leaf.y + d);
     }
 
-    // Integer dimensions for the offscreen canvas
     const w = Math.ceil(maxX - minX) + CACHE_PADDING * 2;
     const h = Math.ceil(maxY - minY) + CACHE_PADDING * 2;
-    this.cacheOffsetX = minX - CACHE_PADDING;
-    this.cacheOffsetY = minY - CACHE_PADDING;
+    const originX = minX - CACHE_PADDING;
+    const originY = minY - CACHE_PADDING;
 
-    const oc = new OffscreenCanvas(w, h);
-    const ctx = oc.getContext("2d")!;
+    super.buildRenderCache(w, h, originX, originY);
+  }
 
-    // Translate so that local-space (minX, minY) maps to (CACHE_PADDING, CACHE_PADDING)
-    ctx.translate(-this.cacheOffsetX, -this.cacheOffsetY);
+  private positionOnPlanet(): void {
+    const surfR = surfaceRadiusAt(this.planet, this.surfaceAngle);
+    const nx = Math.cos(this.surfaceAngle);
+    const ny = Math.sin(this.surfaceAngle);
+    this.x = this.planet.x + nx * (surfR + this.trunkHeight * 0.5);
+    this.y = this.planet.y + ny * (surfR + this.trunkHeight * 0.5);
+    this.rotation = this.surfaceAngle + Math.PI / 2;
+  }
 
+  doUpdate(): void {
+    // Static — no update logic needed.
+  }
+
+  doRender(ctx: RenderingContext2D): void {
     // Draw branch segments
     ctx.strokeStyle = this.trunkColor;
     ctx.lineCap = "round";
@@ -228,30 +232,5 @@ export class Tree extends Part {
       ctx.fillRect(0, 0, leaf.w, leaf.h);
       ctx.restore();
     }
-
-    this.cache = oc;
-  }
-
-  private positionOnPlanet(): void {
-    const surfR = surfaceRadiusAt(this.planet, this.surfaceAngle);
-    const nx = Math.cos(this.surfaceAngle);
-    const ny = Math.sin(this.surfaceAngle);
-    this.x = this.planet.x + nx * (surfR + this.trunkHeight * 0.5);
-    this.y = this.planet.y + ny * (surfR + this.trunkHeight * 0.5);
-    this.rotation = this.surfaceAngle + Math.PI / 2;
-  }
-
-  doUpdate(): void {
-    // Static — no update logic needed.
-  }
-
-  doRender(ctx: CanvasRenderingContext2D): void {
-    if (!this.cache) return;
-
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.rotation);
-    ctx.drawImage(this.cache, this.cacheOffsetX, this.cacheOffsetY);
-    ctx.restore();
   }
 }

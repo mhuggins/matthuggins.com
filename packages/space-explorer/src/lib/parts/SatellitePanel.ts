@@ -1,4 +1,4 @@
-import { rectPolygon } from "@matthuggins/platforming-engine";
+import { type RenderingContext2D, rectPolygon } from "@matthuggins/platforming-engine";
 import { Color } from "../../types";
 import type { World } from "../World";
 import { Part, RenderLayer } from "./Part";
@@ -67,7 +67,7 @@ export class SatellitePanel extends Part {
     }
   }
 
-  protected override doRender(ctx: CanvasRenderingContext2D): void {
+  protected override doRender(ctx: RenderingContext2D): void {
     const s = this.scale;
     const side = this.side;
 

@@ -1,4 +1,4 @@
-import { type Point } from "@matthuggins/platforming-engine";
+import { type Point, type RenderingContext2D } from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { World } from "../World";
 import { Part, RenderLayer } from "./Part";
@@ -121,7 +121,7 @@ export class Ramp extends Part {
 
   protected override doUpdate(): void {}
 
-  protected override doRender(ctx: CanvasRenderingContext2D): void {
+  protected override doRender(ctx: RenderingContext2D): void {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle + Math.PI / 2);

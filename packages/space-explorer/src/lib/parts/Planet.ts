@@ -1,4 +1,8 @@
-import { type GroundingResult, HeightFieldPart } from "@matthuggins/platforming-engine";
+import {
+  type GroundingResult,
+  HeightFieldPart,
+  type RenderingContext2D,
+} from "@matthuggins/platforming-engine";
 import { clamp } from "../../helpers/clamp";
 import {
   GRAVITY_RADIUS_BASE,
@@ -100,7 +104,7 @@ export class Planet extends HeightFieldPart {
     // Planets are static — no movement.
   }
 
-  doRender(ctx: CanvasRenderingContext2D): void {
+  doRender(ctx: RenderingContext2D): void {
     const player = this.world.player;
     const planets = this.world.planets;
 
@@ -122,7 +126,7 @@ export class Planet extends HeightFieldPart {
     this.drawDecorations(ctx);
   }
 
-  private drawBands(ctx: CanvasRenderingContext2D, bandVisibility: number): void {
+  private drawBands(ctx: RenderingContext2D, bandVisibility: number): void {
     const influenceRadius = this.radius * (1 + GRAVITY_RADIUS_MULTIPLIER) + GRAVITY_RADIUS_BASE;
     const numBands = Math.max(3, Math.round(this.gravity * 32));
     const period = 1500 / this.gravity;
@@ -164,7 +168,7 @@ export class Planet extends HeightFieldPart {
     ctx.restore();
   }
 
-  private drawBody(ctx: CanvasRenderingContext2D): void {
+  private drawBody(ctx: RenderingContext2D): void {
     const g = ctx.createRadialGradient(
       this.x - this.radius * 0.35,
       this.y - this.radius * 0.4,
@@ -192,7 +196,7 @@ export class Planet extends HeightFieldPart {
     ctx.fill();
   }
 
-  private drawDecorations(ctx: CanvasRenderingContext2D): void {
+  private drawDecorations(ctx: RenderingContext2D): void {
     for (const d of this.deco) {
       const surfR = surfaceRadiusAt(this, d.angle);
       const ox = Math.cos(d.angle) * (surfR - d.size * 0.8);

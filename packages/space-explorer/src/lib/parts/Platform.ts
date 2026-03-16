@@ -1,4 +1,4 @@
-import { rectPolygon } from "@matthuggins/platforming-engine";
+import { type RenderingContext2D, rectPolygon } from "@matthuggins/platforming-engine";
 import { surfaceRadiusAt } from "../../helpers/surfaceRadiusAt";
 import { World } from "../World";
 import { Part, RenderLayer } from "./Part";
@@ -48,7 +48,7 @@ export class Platform extends Part {
 
   protected override doUpdate(): void {}
 
-  protected override doRender(ctx: CanvasRenderingContext2D): void {
+  protected override doRender(ctx: RenderingContext2D): void {
     ctx.save();
     ctx.translate(this.x, this.y);
     // Rotate so the rectangle is tangent to the planet surface:

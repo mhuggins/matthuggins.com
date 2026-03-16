@@ -1,6 +1,6 @@
 import autoBind from "auto-bind";
 import { CachedValue } from "../helpers/CachedValue";
-import type { Point } from "../types";
+import type { Point, RenderingContext2D } from "../types";
 import { Input } from "./Input";
 import type { Modifier } from "./Modifier";
 import type { World } from "./World";
@@ -84,15 +84,56 @@ export abstract class Part {
     return this._boundingRadius;
   }
 
+  /** Pre-rendered offscreen canvas for static parts. */
+  protected renderCache: OffscreenCanvas | null = null;
+  protected renderCacheOffsetX = 0;
+  protected renderCacheOffsetY = 0;
+
   render(ctx: CanvasRenderingContext2D): void {
-    if (this.isOffScreen(ctx)) return;
-    this.doRender(ctx);
+    if (this.isOffScreen(ctx)) {
+      return;
+    }
+
+    if (this.renderCache) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      ctx.drawImage(this.renderCache, this.renderCacheOffsetX, this.renderCacheOffsetY);
+      ctx.restore();
+    } else {
+      this.doRender(ctx);
+    }
+
     this.renderModifiers(ctx);
+  }
+
+  /**
+   * Build an offscreen render cache for static geometry.
+   * Creates an offscreen canvas at the given size, translates by the origin
+   * offset, and calls `doRender` to draw the content once. Subsequent
+   * `render()` calls blit the cached image instead of calling `doRender`.
+   */
+  protected buildRenderCache(
+    width: number,
+    height: number,
+    originX: number,
+    originY: number,
+  ): void {
+    const oc = new OffscreenCanvas(width, height);
+    const ctx = oc.getContext("2d")!;
+    ctx.translate(-originX, -originY);
+    this.doRender(ctx);
+    this.renderCache = oc;
+    this.renderCacheOffsetX = originX;
+    this.renderCacheOffsetY = originY;
   }
 
   protected isOffScreen(ctx: CanvasRenderingContext2D): boolean {
     const r = this.boundingRadius;
-    if (r === 0) return false;
+    if (r === 0) {
+      return false;
+    }
+
     const t = ctx.getTransform();
     const sx = t.a * this.x + t.c * this.y + t.e;
     const sy = t.b * this.x + t.d * this.y + t.f;
@@ -126,11 +167,15 @@ export abstract class Part {
     upY: number,
     gradability: number,
   ): GroundingResult | null {
-    if (!this.anchored) return null;
+    if (!this.anchored) {
+      return null;
+    }
 
     const verts = this.worldVertices();
     const n = verts.length;
-    if (n < 3) return null;
+    if (n < 3) {
+      return null;
+    }
 
     const cosGrad = Math.cos(gradability);
 
@@ -157,7 +202,9 @@ export abstract class Part {
       const edx = bx - ax;
       const edy = by - ay;
       const len = Math.hypot(edx, edy);
-      if (len < 1e-6) continue;
+      if (len < 1e-6) {
+        continue;
+      }
 
       // Edge tangent (a → b) and candidate outward normal.
       const tx = edx / len;
@@ -174,15 +221,21 @@ export abstract class Part {
       }
 
       // Only consider edges walkable within the gradability threshold.
-      if (nx * upX + ny * upY < cosGrad) continue;
+      if (nx * upX + ny * upY < cosGrad) {
+        continue;
+      }
 
       // Signed distance from player to edge line (positive = normal side).
       const dist = (px - ax) * nx + (py - ay) * ny;
-      if (dist >= bestDist) continue;
+      if (dist >= bestDist) {
+        continue;
+      }
 
       // Project player onto edge direction.
       const t = (px - ax) * tx + (py - ay) * ty;
-      if (t < -halfWidth || t > len + halfWidth) continue;
+      if (t < -halfWidth || t > len + halfWidth) {
+        continue;
+      }
 
       bestDist = dist;
       best = {
@@ -231,7 +284,7 @@ export abstract class Part {
   }
 
   protected abstract doUpdate(): void;
-  protected abstract doRender(ctx: CanvasRenderingContext2D): void;
+  protected abstract doRender(ctx: RenderingContext2D): void;
 
   protected applyInputs(_input: Input): void {}
 

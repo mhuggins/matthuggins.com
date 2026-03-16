@@ -1,4 +1,9 @@
-import { Part as EnginePart, Player as EnginePlayer, Part } from "@matthuggins/platforming-engine";
+import {
+  Part as EnginePart,
+  Player as EnginePlayer,
+  Part,
+  type RenderingContext2D,
+} from "@matthuggins/platforming-engine";
 import { angleToUpVector } from "../../helpers/angleToUpVector";
 import { clamp } from "../../helpers/clamp";
 import { clampVelocity } from "../../helpers/clampVelocity";
@@ -342,7 +347,7 @@ export class Player extends PlayerPart {
     return false; // player renders at screen center, always visible
   }
 
-  doRender(ctx: CanvasRenderingContext2D): void {
+  doRender(ctx: RenderingContext2D): void {
     const canvas = this.world.canvas;
     const cx = canvas.clientWidth / 2;
     const cy = canvas.clientHeight / 2;
