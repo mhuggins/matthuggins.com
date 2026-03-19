@@ -17,7 +17,7 @@ export function createWorld(...args: WorldArgs): World {
     world.add(new Planet(world, cfg));
   }
 
-  // Add trees
+  // Add trees (skip planets with extreme terrain where trees look wrong)
   for (const planet of world.planets) {
     for (const tree of createTrees(planet)) {
       world.add(tree);
@@ -358,6 +358,27 @@ const PLANET_CONFIGS: PlanetConfig[] = [
       { angle: 3.5, amplitude: 52, width: 0.32 },
       { angle: 4.5, amplitude: -14, width: 0.55 },
       { angle: 5.3, amplitude: 40, width: 0.3 },
+    ],
+  },
+  {
+    name: "Jagged",
+    x: -2200,
+    y: 2800,
+    radius: 350,
+    gravity: 0.26,
+    color: { r: 140, g: 160, b: 150 },
+    ringColor: { r: 140, g: 160, b: 150 },
+    deco: [
+      { angle: 1.2, size: 10, color: "#b8c4be" },
+      { angle: 3.8, size: 11, color: "#b8c4be" },
+    ],
+    terrain: [
+      // Sharp peaks and valleys — slopes exceed 60° gradability
+      { angle: 0.8, amplitude: 80, width: 0.18 },
+      { angle: 2.0, amplitude: -50, width: 0.15 },
+      { angle: 3.3, amplitude: 95, width: 0.16 },
+      { angle: 4.5, amplitude: -65, width: 0.14 },
+      { angle: 5.8, amplitude: 75, width: 0.17 },
     ],
   },
   {
