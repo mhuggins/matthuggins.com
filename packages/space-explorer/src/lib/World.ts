@@ -5,7 +5,6 @@ import {
 } from "@matthuggins/platforming-engine";
 import { gravityStrengthForPlanet } from "../helpers/gravityStrengthForPlanets";
 import { gravityVectorForPlanet } from "../helpers/gravityVectorForPlanet";
-import { roundRect } from "../helpers/roundRect";
 import { surfaceRadiusAt } from "../helpers/surfaceRadiusAt";
 import { Camera } from "./Camera";
 import { Input } from "./Input";
@@ -399,18 +398,14 @@ export class World extends EngineWorld<Input, Camera> {
   private drawMinimap = (): void => {
     const ctx = this.ctx;
     const player = this.player;
-    const mapW = 160;
-    const mapH = 100;
+    const radius = 70;
     const margin = 12;
-    const pad = 8;
 
-    const originX = margin;
-    const originY = this.canvas.clientHeight - margin - mapH;
-    const mapCX = originX + mapW / 2;
-    const mapCY = originY + mapH / 2;
+    const mapCX = margin + radius;
+    const mapCY = this.canvas.clientHeight - margin - radius;
 
     const viewRadius = 8500;
-    const scale = Math.min(mapW / 2 - pad, mapH / 2 - pad) / viewRadius;
+    const scale = (radius - 6) / viewRadius;
 
     const worldToMinimap = (wx: number, wy: number) => {
       const dx = wx - player.x;
@@ -423,49 +418,98 @@ export class World extends EngineWorld<Input, Camera> {
       };
     };
 
+    // Clip to circle
     ctx.save();
-    roundRect(ctx, originX, originY, mapW, mapH, 8);
+    ctx.beginPath();
+    ctx.arc(mapCX, mapCY, radius, 0, Math.PI * 2);
     ctx.clip();
 
-    ctx.fillStyle = "rgba(10, 16, 32, 0.88)";
-    ctx.fillRect(originX, originY, mapW, mapH);
+    // Dark green background
+    ctx.fillStyle = "rgba(0, 12, 0, 0.9)";
+    ctx.beginPath();
+    ctx.arc(mapCX, mapCY, radius, 0, Math.PI * 2);
+    ctx.fill();
 
+    // Rotating sweep
+    const sweepSpeed = 0.0012; // radians per ms
+    const sweepAngle = (performance.now() * sweepSpeed) % (Math.PI * 2);
+    const sweepSpan = Math.PI * 0.4;
+
+    const grad = ctx.createConicGradient(sweepAngle - sweepSpan, mapCX, mapCY);
+    grad.addColorStop(0, "rgba(0, 255, 0, 0)");
+    grad.addColorStop(sweepSpan / (Math.PI * 2), "rgba(0, 255, 0, 0.18)");
+    grad.addColorStop(sweepSpan / (Math.PI * 2) + 0.001, "rgba(0, 255, 0, 0)");
+    grad.addColorStop(1, "rgba(0, 255, 0, 0)");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(mapCX, mapCY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Concentric ring grid
+    ctx.strokeStyle = "rgba(0, 200, 0, 0.25)";
+    ctx.lineWidth = 0.5;
+    const ringCount = 4;
+    for (let i = 1; i <= ringCount; i++) {
+      ctx.beginPath();
+      ctx.arc(mapCX, mapCY, (radius / ringCount) * i, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Radial grid lines
+    const spokes = 8;
+    for (let i = 0; i < spokes; i++) {
+      const a = (Math.PI * 2 * i) / spokes;
+      ctx.beginPath();
+      ctx.moveTo(mapCX, mapCY);
+      ctx.lineTo(mapCX + Math.cos(a) * radius, mapCY + Math.sin(a) * radius);
+      ctx.stroke();
+    }
+
+    // Planets (green-tinted)
     for (const p of this.planets) {
       const mp = worldToMinimap(p.x, p.y);
       const r = Math.max(3, p.radius * scale);
-
-      const g = ctx.createRadialGradient(mp.x - r * 0.35, mp.y - r * 0.4, r * 0.2, mp.x, mp.y, r);
-      g.addColorStop(0, "rgba(255,255,255,0.20)");
-      g.addColorStop(0.18, `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`);
-      g.addColorStop(1, "#111111");
-      ctx.fillStyle = g;
+      ctx.fillStyle = "rgba(0, 220, 60, 0.7)";
       ctx.beginPath();
       ctx.arc(mp.x, mp.y, r, 0, Math.PI * 2);
       ctx.fill();
     }
 
+    // Asteroids
     ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
     for (const a of this.asteroids) {
       const mp = worldToMinimap(a.x, a.y);
       ctx.fillRect(mp.x, mp.y, 1, 1);
     }
 
-    ctx.fillStyle = "rgba(255, 80, 180, 0.8)";
+    // Crystals (brighter green blips)
+    ctx.fillStyle = "rgba(100, 255, 100, 0.9)";
     for (const c of this.crystals) {
       const mp = worldToMinimap(c.x, c.y);
       ctx.fillRect(mp.x - 0.5, mp.y - 0.5, 2, 2);
     }
 
-    ctx.fillStyle = "#f7f8ff";
+    // Player dot (bright green center)
+    ctx.fillStyle = "#00ff44";
     ctx.beginPath();
-    ctx.arc(mapCX, mapCY, 3, 0, Math.PI * 2);
+    ctx.arc(mapCX, mapCY, 2.5, 0, Math.PI * 2);
     ctx.fill();
+
+    // Sweep line
+    ctx.strokeStyle = "rgba(0, 255, 0, 0.8)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(mapCX, mapCY);
+    ctx.lineTo(mapCX + Math.cos(sweepAngle) * radius, mapCY + Math.sin(sweepAngle) * radius);
+    ctx.stroke();
 
     ctx.restore();
 
-    roundRect(ctx, originX, originY, mapW, mapH, 8);
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
-    ctx.lineWidth = 1;
+    // Outer ring border
+    ctx.beginPath();
+    ctx.arc(mapCX, mapCY, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(0, 200, 0, 0.4)";
+    ctx.lineWidth = 1.5;
     ctx.stroke();
   };
 
@@ -474,9 +518,10 @@ export class World extends EngineWorld<Input, Camera> {
     const player = this.player;
     const fuelPct = player.fuel / player.maxFuel;
 
-    // Position: top-right area of the canvas.
-    const gaugeX = this.canvas.clientWidth - 52;
-    const gaugeY = 52;
+    // Position: bottom-left, to the right of the radar minimap.
+    const radarRight = 12 + 70 * 2; // margin + diameter
+    const gaugeX = radarRight + 12 + 32; // gap + outerRadius
+    const gaugeY = this.canvas.clientHeight - 12 - 32; // margin + outerRadius from bottom
     const outerRadius = 32;
     const innerRadius = 24;
     const lineWidth = outerRadius - innerRadius;
