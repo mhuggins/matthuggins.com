@@ -1,18 +1,18 @@
 ---
 title: Orchestrating Image-to-SVG Conversion with an Artifact-Based Pipeline
-date: 2025-12-30
-published: false
+date: 2026-03-20
+published: true
 tags: [typescript, javascript, graphics]
 summary: Converting raster images to vector graphics involves multiple processing stages, each feeding into the next. Here's how I designed an artifact-based pipeline architecture that tracks provenance, enforces type safety, and makes debugging complex transformations straightforward.
 image: /blog/orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline.jpg
 thumbnail: /blog/orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline.thumb.jpg
 ---
 
-I've been working on a tool that converts raster images to scalable vector graphics—a process that involves multiple stages: segmentation, region detection, topology construction, and curve fitting. Each stage produces intermediate data that feeds into the next, and the transformations can be computationally expensive.
+While building [SVGConverter.io](https://svgconverter.io), a tool that converts raster images to scalable vector graphics, I needed to orchestrate a multi-stage processing pipeline to handle segmentation, region detection, topology construction, and curve fitting. Each stage produces intermediate data that feeds into the next, and the transformations can be computationally expensive.
 
-Early on, I ran into the usual problems: when the output looked wrong, I couldn't tell which stage caused it. Adding optional steps meant rewriting half the pipeline. And debugging felt like archaeology.
+Early on, I ran into the usual problems: when the output looked wrong, I couldn't tell which stage caused it. Adding optional steps meant rewriting half the pipeline, and debugging felt like archaeology.
 
-Here's the artifact-based pipeline architecture I landed on to orchestrate this conversion. The design prioritizes traceability, composability, and type safety—making it easier to debug, extend, and reason about complex multi-stage transformations.
+Here's the artifact-based pipeline architecture I landed on to orchestrate this conversion. The design prioritizes traceability, composability, and type safety, making it easier to debug, extend, and reason about complex multi-stage transformations.
 
 ## The Problem with Traditional Pipelines
 
@@ -38,7 +38,7 @@ This works for simple cases, but breaks down as complexity grows:
 
 ## The Artifact-Based Approach
 
-My solution was to stop passing raw data between functions. Instead, the pipeline operates on **artifacts**—typed data structures that carry metadata describing what they contain, where they came from, and how they were produced.
+My solution was to stop passing raw data between functions. Instead, the pipeline operates on **artifacts**, which are typed data structures that carry metadata describing what they contain, where they came from, and how they were produced.
 
 ### Defining Artifacts
 
@@ -109,7 +109,7 @@ export interface PipelineState {
 
 The `byKind` index enables efficient lookup: "give me all artifacts of type `raster/rgb`". The `tags` index supports labeling artifacts for special retrieval patterns.
 
-State updates are immutable—each step receives the current state and returns a new state:
+State updates are immutable, with each step receiving the current state and returning a new state:
 
 ```typescript
 export function addArtifacts(
@@ -130,7 +130,7 @@ export function addArtifacts(
 }
 ```
 
-This immutability guarantee means steps can't accidentally corrupt each other's data—something I've been bitten by in stateful pipelines before.
+This immutability guarantee prevents steps from accidentally corrupt each other's data, which could have potentially bitten me in a stateful pipeline.
 
 ## Pipeline Steps as Declarative Units
 
@@ -315,7 +315,11 @@ export function createPipeline(config: PipelineConfig = {}): ArtifactPipeline {
 
 This composability makes it easy to A/B test different pipeline configurations or expose options to users.
 
-## Handling Coordinate Spaces
+## Pipeline in Practice
+
+With the core architecture in place, a couple of domain-specific concerns show how the artifact model pays off in practice.
+
+### Handling Coordinate Spaces
 
 Image processing involves two distinct coordinate systems:
 
@@ -330,11 +334,11 @@ Artifacts representing per-pixel data (rasters, segment maps) use `CoordSpace.Pi
 
 This matters for boundary precision. Pixel coordinates are integers, but path coordinates need sub-pixel precision to produce smooth curves that don't have visible stairstepping.
 
-## Gap-Free Topology with DCEL
+### Gap-Free Topology with DCEL
 
 One of the trickier challenges in vectorization is ensuring adjacent regions share exact boundaries. If two neighboring regions have slightly different edge vertices, you get visible gaps or overlaps in the rendered SVG.
 
-I solved this using a **Doubly-Connected Edge List (DCEL)**—a data structure from computational geometry that represents planar subdivisions with explicit half-edge relationships.
+I solved this using a **Doubly-Connected Edge List (DCEL)**, a data structure from computational geometry that represents planar subdivisions with explicit half-edge relationships.
 
 ```typescript
 export interface RegionContour {
@@ -396,7 +400,7 @@ function traceArtifact(state: PipelineState, artifactId: ArtifactId): void {
 }
 ```
 
-This traces the complete lineage of any artifact back to its source inputs—exactly what I need when trying to understand why a particular output looks the way it does.
+This traces the complete lineage of any artifact back to its source inputs, which is exactly what I need when trying to understand why a particular output looks the way it does.
 
 ## Key Takeaways
 

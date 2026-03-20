@@ -21,6 +21,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://matthuggins.com/blog/posts/orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline</loc>
+    <lastmod>2026-03-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://matthuggins.com/blog/posts/multi-step-form-validation-with-tanstack-form</loc>
     <lastmod>2026-03-06</lastmod>
     <changefreq>yearly</changefreq>
@@ -87,6 +93,11 @@
   </url>
   <url>
     <loc>https://matthuggins.com/blog/tags/form%20management</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://matthuggins.com/blog/tags/graphics</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

@@ -4,21 +4,37 @@
 import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
 
 export const blogTags: ReadonlySet<BlogTag> = new Set([
-  "react",
-  "typescript",
-  "tanstack form",
+  "data fetching",
   "form management",
+  "graphics",
   "javascript",
   "node.js",
-  "security",
-  "tanstack query",
-  "data fetching",
-  "user experience",
+  "react",
   "ruby",
-  "ruby on rails"
+  "ruby on rails",
+  "security",
+  "tanstack form",
+  "tanstack query",
+  "typescript",
+  "user experience"
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
+  {
+    "slug": "orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline",
+    "filePath": "orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline.md",
+    "title": "Orchestrating Image-to-SVG Conversion with an Artifact-Based Pipeline",
+    "date": "2026-03-20",
+    "summary": "Converting raster images to vector graphics involves multiple processing stages, each feeding into the next. Here's how I designed an artifact-based pipeline architecture that tracks provenance, enforces type safety, and makes debugging complex transformations straightforward.",
+    "image": "/blog/orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline.jpg",
+    "thumbnail": "/blog/orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline.thumb.jpg",
+    "note": null,
+    "tags": [
+      "typescript",
+      "javascript",
+      "graphics"
+    ]
+  },
   {
     "slug": "multi-step-form-validation-with-tanstack-form",
     "filePath": "multi-step-form-validation-with-tanstack-form.md",
