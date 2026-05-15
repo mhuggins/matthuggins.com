@@ -32,6 +32,7 @@ export function Resume() {
             description='Building intuitive user experiences to help CISOs answer the question: "am I protected?"'
             startDate="Sept. 2024"
             tasks={[
+              "Built an AI-powered backend service in Node.js using the Vercel AI SDK, integrating LLM tool-calling with internal product APIs to automate contextual report generation.",
               "Architected an interactive security control visualization using React Flow, providing real-time insight into EDR, Endpoint Management, Vulnerability Management, Email, and Identity security posture with animated node states and drill-down capabilities.",
               "Built a comprehensive custom reporting system with time series, number, percentage, bar, column, and pie chart visualizations, including PDF export, JSON import/export, and advanced filtering.",
               "Designed and implemented a robust OData filter architecture featuring a custom lexer/parser and predictive autocomplete, enabling consistent data querying across all platform surfaces.",
