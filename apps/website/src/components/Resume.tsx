@@ -14,9 +14,10 @@ export function Resume() {
   return (
     <div className="flex flex-col gap-12">
       <ResumeSection title="Career Profile" icon={UserIcon}>
-        Software engineer with broad experience across frontend, backend, and architectural
-        decision-making. Passionate about building reliable, maintainable systems and intuitive user
-        experiences.
+        Staff-level software engineer with 20+ years of experience building scalable web
+        applications and developer platforms using React, TypeScript, Node.js, and Ruby on Rails.
+        Experienced in frontend architecture, API design, and integrating LLM-powered features such
+        as AI-generated reporting and workflow automation into production applications.
       </ResumeSection>
 
       <ResumeSection title="Skills" icon={WrenchIcon}>
