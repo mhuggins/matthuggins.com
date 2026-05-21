@@ -21,6 +21,19 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
   {
+    "slug": "typescript-patterns-for-type-consistency",
+    "filePath": "typescript-patterns-for-type-consistency.md",
+    "title": "TypeScript Patterns for Type Consistency",
+    "date": "2026-05-21",
+    "summary": "Every TypeScript type you write is either earning its keep by catching drift, enforcing exhaustiveness, and surfacing mismatches between systems, or just decoration. Here are the patterns I reach for to keep types pulling their weight across a codebase.",
+    "image": "/blog/typescript-patterns-for-type-consistency.jpg",
+    "thumbnail": "/blog/typescript-patterns-for-type-consistency.thumb.jpg",
+    "note": null,
+    "tags": [
+      "typescript"
+    ]
+  },
+  {
     "slug": "orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline",
     "filePath": "orchestrating-image-to-svg-conversion-with-an-artifact-based-pipeline.md",
     "title": "Orchestrating Image-to-SVG Conversion with an Artifact-Based Pipeline",
