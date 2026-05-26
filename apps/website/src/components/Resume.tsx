@@ -30,8 +30,9 @@ export function Resume() {
             role="Staff Software Engineer"
             company="Prelude Security"
             location="Remote"
-            description='Building intuitive user experiences to help CISOs answer the question: "am I protected?"'
+            description='Provided intuitive user experiences to help CISOs answer the question: "am I protected?"'
             startDate="Sept. 2024"
+            endDate="May 2026"
             tasks={[
               "Built an AI-powered backend service in Node.js using the Vercel AI SDK, integrating LLM tool-calling with internal product APIs to automate contextual report generation.",
               "Architected an interactive security control visualization using React Flow, providing real-time insight into EDR, Endpoint Management, Vulnerability Management, Email, and Identity security posture with animated node states and drill-down capabilities.",
