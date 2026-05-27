@@ -9,6 +9,33 @@ import {
 import { Experience } from "./Experience";
 import { Project } from "./Project";
 import { ResumeSection } from "./ResumeSection";
+import { type SkillSet, SkillSets } from "./SkillSets";
+
+const skills: SkillSet[] = [
+  {
+    label: "Languages & Frameworks",
+    items: [
+      "React",
+      "TypeScript",
+      "JavaScript",
+      "CSS/SCSS",
+      "Ruby & Ruby on Rails",
+      "SQL",
+      "Java",
+      "PHP",
+    ],
+  },
+  {
+    label: "Artificial Intelligence",
+    items: [
+      "LLM Integration",
+      "AI Agent Architecture & Development",
+      "Tool-Integrated AI Systems",
+      "Prompt Engineering",
+      "AI-Assisted Development Workflows",
+    ],
+  },
+];
 
 export function Resume() {
   return (
@@ -21,7 +48,7 @@ export function Resume() {
       </ResumeSection>
 
       <ResumeSection title="Skills" icon={WrenchIcon}>
-        React, TypeScript, JavaScript, CSS/SCSS, Ruby/Ruby on Rails, SQL, Java, PHP
+        <SkillSets skills={skills} />
       </ResumeSection>
 
       <ResumeSection title="Experience" icon={BriefcaseIcon}>
