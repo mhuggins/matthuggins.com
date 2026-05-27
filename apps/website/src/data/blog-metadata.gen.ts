@@ -21,6 +21,22 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
   {
+    "slug": "building-a-predictive-text-input-in-react",
+    "filePath": "building-a-predictive-text-input-in-react.md",
+    "title": "Building a Predictive Text Input in React",
+    "date": "2026-05-27",
+    "summary": "Standard autocomplete dropdowns work well for simple cases, but sometimes you want inline \"ghost text\" predictions like an IDE. Here's how I built a predictive text input using contentEditable, careful cursor management, and a healthy respect for the DOM.",
+    "image": "/blog/building-a-predictive-text-input-in-react.jpg",
+    "thumbnail": "/blog/building-a-predictive-text-input-in-react.thumb.jpg",
+    "note": null,
+    "tags": [
+      "react",
+      "typescript",
+      "form management",
+      "user experience"
+    ]
+  },
+  {
     "slug": "typescript-patterns-for-type-consistency",
     "filePath": "typescript-patterns-for-type-consistency.md",
     "title": "TypeScript Patterns for Type Consistency",

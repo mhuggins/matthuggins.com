@@ -1,20 +1,22 @@
 ---
 title: Building a Predictive Text Input in React
-date: 2026-03-20
-published: false
+date: 2026-05-27
+published: true
 tags: [react, typescript, form management, user experience]
 summary: Standard autocomplete dropdowns work well for simple cases, but sometimes you want inline "ghost text" predictions like an IDE. Here's how I built a predictive text input using contentEditable, careful cursor management, and a healthy respect for the DOM.
+image: /blog/building-a-predictive-text-input-in-react.jpg
+thumbnail: /blog/building-a-predictive-text-input-in-react.thumb.jpg
 ---
 
-When building an interface for entering query syntax, I wanted autocomplete that felt like an IDE — ghost text that appears inline as you type, which you can accept with Tab or arrow keys. Standard dropdown autocomplete felt clunky for this use case. Users were typing structured queries with known keywords, and showing predictions inline would let them stay in flow without shifting focus to a dropdown menu.
+When building an interface for entering query syntax, I wanted autocomplete that felt like an IDE. Since these would be structured queries with known keywords, a standard dropdown autocomplete didn't feel like the right fit. Instead, as the user typed, ghost text should appear inline, offering suggested text to complete the current word or predict the next one, which could then be accepted with the <kbd>Tab</kbd> or <kbd>→</kbd> key. By showing predictions inline, users could maintain their flow without shifting focus to a dropdown menu.
 
-The challenge? React and `contentEditable` have a notoriously tricky relationship. But for this kind of fine-grained control over rendered content, it was the right tool. Here's how I built it.
+The `<input>` and `<textarea>` DOM elements don't offer this level of interactivity for text input, unfortunately. Instead, we'll need to reach for the `contentEditable` attribute on another block element such as a `div`. Here's how I built it.
 
 ## Why contentEditable?
 
-A regular `<input>` element renders plain text — you can't style part of the content differently. But I needed to show the user's typed text normally while rendering the prediction in gray, inline, right at the cursor position.
+A regular `<input>` element renders plain text, and applying different styles to different parts of the content is simply not possible. We need to show the user's typed text normally while rendering the prediction in gray, inline, right at the cursor position.
 
-`contentEditable` lets you render arbitrary HTML inside an editable region. The trade-off is that you're now managing a mini rich-text editor, complete with cursor positions, selection ranges, and DOM nodes. React's declarative model doesn't map cleanly onto this — you'll be doing imperative DOM manipulation with refs.
+`contentEditable` allows you to render arbitrary HTML inside an editable region. The trade-off is that you're now managing a mini rich-text editor, complete with cursor positions, selection ranges, and DOM nodes. React's declarative model doesn't map cleanly onto this, meaning we'll need to perform some imperative DOM manipulation with refs.
 
 The core idea is simple: as the user types, detect the current word and find a matching keyword. If there's a match, insert a styled `<span>` containing the rest of the keyword. When the user presses Tab, replace the span with real text.
 
@@ -69,9 +71,9 @@ export const PredictiveTextInput = forwardRef<
 A few things to note:
 
 - **`suppressContentEditableWarning`** tells React not to warn about children in a `contentEditable` element. We're intentionally managing the content ourselves.
-- **`isUpdatingRef`** is a flag we'll use to prevent feedback loops when we modify the DOM programmatically. When we insert a prediction span, accept a prediction, or sync an external value change, those DOM modifications can trigger `input` and `selectionchange` events. Without this guard, those events would fire our handlers, which would try to update predictions, which would modify the DOM again — an infinite loop. By setting this flag before programmatic changes and checking it in our event handlers, we can distinguish "the user did something" from "we did something."
+- **`isUpdatingRef`** is a flag we'll use to prevent feedback loops when we modify the DOM programmatically. When we insert a prediction span, accept a prediction, or sync an external value change, those DOM modifications can trigger `input` and `selectionchange` events. Without this guard, those events would fire our handlers, which would try to update predictions, which would modify the DOM again, causing an infinite loop. By setting this flag before programmatic changes and checking it in our event handlers, we can distinguish "the user did something" from "the component did something."
 - **`data-placeholder`** allows styling a placeholder via CSS when the input is empty.
-- **No `id` or `name` attribute** — since `div` elements are not [labelable](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Content_categories#labelable), we can't associate a `<label>` element with this field using the standard `for`/`id` relationship. If you need a label, wrap both in a container or use `aria-labelledby`.
+- **No `id` or `name` attribute.** Since `div` elements are not [labelable](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Content_categories#labelable), we can't associate a `<label>` element with this field using the standard `for`/`id` relationship. If you need a label, wrap both in a container or use `aria-labelledby`.
 
 ## Tracking Cursor Position
 
@@ -99,14 +101,18 @@ const getCursorPosition = useCallback(() => {
   // Get text content, excluding prediction spans
   const tempDiv = document.createElement("div");
   tempDiv.appendChild(preCaretRange.cloneContents());
-  const predictionSpans = tempDiv.querySelectorAll('[data-id="prediction-text"]');
-  predictionSpans.forEach((span) => span.remove());
+  clearPredictions(tempDiv);
 
   return tempDiv.textContent?.length || 0;
 }, []);
+
+function clearPredictions(el: HTMLDivElement) {
+  const predictionSpans = el.querySelectorAll('[data-id="prediction-text"]');
+  predictionSpans.forEach((span) => span.remove());
+}
 ```
 
-The key insight here is that we need to exclude prediction spans from the calculation. The prediction text isn't "real" — if the user has typed "filt" and we're showing "er" as a prediction, the cursor position should be 4, not 6.
+The key insight here is that we need to exclude prediction spans from the calculation. The prediction text isn't "real". If the user types "filt" and we're showing "er" as a prediction, the cursor position should be 4, not 6.
 
 ## Getting Clean Text Content
 
@@ -119,18 +125,17 @@ const getCleanText = useCallback(() => {
   }
 
   const clone = contentRef.current.cloneNode(true) as HTMLDivElement;
-  const predictionSpans = clone.querySelectorAll('[data-id="prediction-text"]');
-  predictionSpans.forEach((span) => span.remove());
+  clearPredictions(clone);
 
   return clone.textContent ?? "";
 }, []);
 ```
 
-This pattern of "clone, remove prediction spans, read" appears in both `getCursorPosition` and `getCleanText`. The duplication is intentional — `getCursorPosition` works with a Range fragment, while `getCleanText` works with the full element.
+This pattern of "clone, remove prediction spans, read" appears in both `getCursorPosition` and `getCleanText`. The duplication is intentional, as `getCursorPosition` works with a Range fragment, while `getCleanText` works with the full element.
 
 ## Finding the Current Word
 
-To show a prediction, we need to know what word the user is currently typing. This means finding the word at the cursor position and checking if the cursor is at the end of that word (predictions mid-word would be confusing):
+To show a prediction, we need to know what word the user is currently typing. This means finding the word at the cursor position and checking if the cursor sits at the end of that word. Offering completions while the cursor is parked inside an existing word would be confusing:
 
 ```tsx
 const getCurrentWord = useCallback(() => {
@@ -187,7 +192,7 @@ const findPrediction = useCallback(
 );
 ```
 
-We return only the untyped portion of the keyword. If the user has typed "filt" and "filter" is a keyword, we return "er" — that's what we'll display as ghost text.
+We return only the untyped portion of the keyword. If the user has typed "filt" and "filter" is a keyword, we return "er", which we'll then display as ghost text.
 
 ## Removing the Prediction Span
 
@@ -256,7 +261,49 @@ const insertPredictionSpan = useCallback(
 
 The prediction span is styled to be non-interactive: `pointer-events-none` prevents clicks, `select-none` prevents text selection, and the gray color visually distinguishes it from typed text.
 
-After inserting the span, we immediately reposition the cursor before it. Without this, the cursor would end up after the prediction, which feels wrong — the user hasn't "typed" that text yet.
+After inserting the span, we immediately reposition the cursor before it. Without this, the cursor would end up after the prediction, which feels wrong since the user hasn't "typed" that text yet.
+
+## Triggering Predictions
+
+With those pieces in place, we can wire them together. The `updatePrediction` function reads the current word, asks for a matching keyword, and either inserts a prediction span or clears the existing one:
+
+```tsx
+const updatePrediction = useCallback(() => {
+  if (isUpdatingRef.current) {
+    return;
+  }
+
+  const { wordAtCursor, isAtWordEnd } = getCurrentWord();
+
+  if (!isAtWordEnd) {
+    removePredictionSpan();
+    return;
+  }
+
+  const prediction = findPrediction(wordAtCursor);
+
+  if (prediction) {
+    insertPredictionSpan(prediction);
+  } else {
+    removePredictionSpan();
+  }
+}, [getCurrentWord, findPrediction, insertPredictionSpan, removePredictionSpan]);
+```
+
+This is the function called from both the `input` event handler (whenever the user types) and the `selectionchange` listener we'll set up shortly (when the user moves the cursor). The `input` handler also forwards the latest text to the parent via `onChange`:
+
+```tsx
+const handleInput = useCallback(() => {
+  if (isUpdatingRef.current) {
+    return;
+  }
+
+  onChange?.(getCleanText());
+  updatePrediction();
+}, [onChange, getCleanText, updatePrediction]);
+```
+
+Both functions guard on `isUpdatingRef` so our own programmatic DOM changes don't trigger another round of prediction logic.
 
 ## Accepting Predictions
 
@@ -335,7 +382,7 @@ useEffect(() => {
 }, [updatePrediction]);
 ```
 
-The debounce is important — `selectionchange` fires frequently during keyboard navigation, and we don't want to thrash the DOM.
+The debounce is important since `selectionchange` fires frequently during keyboard navigation, and we don't want to thrash the DOM.
 
 ## Setting Cursor Position
 
@@ -361,7 +408,7 @@ const setCursorPosition = useCallback((position: number) => {
 }, []);
 ```
 
-This is the inverse of `getCursorPosition` — instead of reading where the cursor is, we're telling it where to go. We clamp the position to avoid errors if the text is shorter than expected.
+This is the inverse of `getCursorPosition`: instead of reading where the cursor is, we're telling it where to go. We clamp the position to avoid errors if the text is shorter than expected.
 
 ## Syncing External Value Changes
 
@@ -398,7 +445,7 @@ Working with `contentEditable` in React requires accepting that you're straddlin
 
 The solution is to keep React at arm's length. We use `suppressContentEditableWarning` to acknowledge we're going off-script, and we do most of our work through refs and direct DOM manipulation. The `isUpdatingRef` flag prevents our programmatic changes from triggering React updates that would fight us.
 
-The `setTimeout(..., 0)` pattern appears several times — it's a way of saying "let the current DOM operation complete before doing the next thing." This is often necessary when chaining operations like "update content, then restore cursor."
+The `setTimeout(..., 0)` pattern appears several times. It's a way of saying "let the current DOM operation complete before doing the next thing." This is often necessary when chaining operations like "update content, then restore cursor."
 
 ## Key Takeaways
 
@@ -412,4 +459,4 @@ The `setTimeout(..., 0)` pattern appears several times — it's a way of saying 
 
 - **Debounce selection change handlers.** The `selectionchange` event fires frequently. Without debouncing, you'll waste cycles updating predictions that will immediately be replaced.
 
-The result is an input that feels native and responsive — predictions appear instantly as you type, and accepting them is a single keystroke. It's more work than a dropdown autocomplete, but for power-user interfaces like query builders, the improved UX is worth it.
+The result is an input that feels native and responsive: predictions appear instantly as you type, and accepting them is a single keystroke. It's more work than a dropdown autocomplete, but for power-user interfaces like query builders, the improved UX is worth it.
