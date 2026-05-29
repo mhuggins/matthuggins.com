@@ -51,7 +51,7 @@ export function Resume() {
         Staff-level software engineer with 20+ years of experience building scalable web
         applications and developer platforms using React, TypeScript, Node.js, and Ruby on Rails.
         Experienced in frontend architecture, API design, and integrating LLM-powered features such
-        as AI-generated reporting and workflow automation into production applications.
+        as AI-generated reporting into production applications.
       </ResumeSection>
 
       <ResumeSection title="Skills" icon={WrenchIcon} className="print:break-inside-avoid">
