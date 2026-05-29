@@ -50,7 +50,7 @@ function Root() {
   return (
     <div className="min-h-dvh bg-gray-100 font-sans text-gray-900">
       <div className="mx-auto max-w-6xl px-4 py-8 lg:px-4 lg:py-8 print:p-0">
-        <div className="min-h-screen overflow-hidden bg-white shadow-lg lg:flex">
+        <div className="min-h-screen overflow-hidden bg-white not-print:shadow-lg lg:flex">
           {/* Main Content */}
           <main className="overflow-hidden lg:flex-1">
             {/* Navigation Header */}

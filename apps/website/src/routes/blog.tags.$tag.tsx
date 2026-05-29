@@ -65,7 +65,10 @@ function TagPage() {
       <Section
         title={`Blog Posts Tagged \u201C${tag}\u201D`}
         subtitle={
-          <Link to="/blog" className="inline-flex items-center gap-2 text-primary hover:underline">
+          <Link
+            to="/blog"
+            className="inline-flex items-center gap-2 text-primary hover:underline print:hidden"
+          >
             <ArrowLeftIcon className="size-4" />
             Back to Blog
           </Link>

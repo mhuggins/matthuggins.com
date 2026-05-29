@@ -12,6 +12,13 @@
   --color-secondary-foreground: #545e6c;
 }
 
+/* Browsers strip background colors when printing by default. Apply to elements
+   whose background carries meaning (timeline dots, section icon badges, etc.). */
+.print-exact {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 /* Shiki Code Highlighting */
 pre {
   @apply rounded-lg border border-gray-200 text-sm !bg-white relative overflow-hidden;

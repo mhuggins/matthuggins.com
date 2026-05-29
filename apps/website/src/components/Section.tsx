@@ -31,7 +31,7 @@ export const Section = ({
         {icon && <CircleIcon icon={icon} size={20} />}
         {title}
       </h2>
-      {subtitle && <div className={cn("text-gray-500 text-sm", icon && "ml-10")}>{subtitle}</div>}
+      {subtitle && <div className={cn("text-gray-500 text-sm", icon && "ml-11")}>{subtitle}</div>}
     </div>
     <div>{children}</div>
   </section>

@@ -75,7 +75,10 @@ function CargoDispatchPage() {
               warehouse robots. Packages spawn in aisles and need to be picked up and delivered to
               the correct trucks &mdash; all before time runs out. Can you survive the workweek?
             </div>
-            <Link to="/lab" className="inline-flex items-center gap-2 text-primary hover:underline">
+            <Link
+              to="/lab"
+              className="inline-flex items-center gap-2 text-primary hover:underline print:hidden"
+            >
               <ArrowLeftIcon className="size-4" />
               Back to Lab
             </Link>

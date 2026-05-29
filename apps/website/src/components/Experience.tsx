@@ -31,9 +31,15 @@ const DateRange = ({ startDate, endDate }: { startDate: string; endDate?: string
 // Line spans top-3.5 (dot bottom, y=14) to -bottom-5.5 (gap-3 to next dot center).
 const TimelineRole = ({ role, isLast }: { role: Role; isLast: boolean }) => (
   <div className="relative ml-4 pl-5">
-    <div aria-hidden className="absolute top-1.5 left-0 h-2 w-2 rounded-full bg-gray-400" />
+    <div
+      aria-hidden
+      className="print-exact absolute top-1.5 left-0 h-2 w-2 rounded-full bg-gray-400"
+    />
     {!isLast && (
-      <div aria-hidden className="-bottom-5.5 absolute top-3.5 left-[3.5px] w-px bg-gray-300" />
+      <div
+        aria-hidden
+        className="print-exact -bottom-5.5 absolute top-3.5 left-[3.5px] w-px bg-gray-300"
+      />
     )}
     <div className="flex items-center justify-between gap-3">
       <div>{role.title}</div>
