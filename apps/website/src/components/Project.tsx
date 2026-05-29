@@ -18,7 +18,7 @@ export const Project = ({ title, role, url, past, children }: ProjectProps) => (
         <span className="text-primary-dark">{title}</span>
       )}
       {role && <span> - {role}</span>}
-      {past && <span className="text-muted text-sm italic"> (Past)</span>}
+      {past && <span className="text-gray-400 text-sm italic"> (Past)</span>}
     </div>
     <p className="text-secondary-foreground text-sm leading-relaxed">{children}</p>
   </div>

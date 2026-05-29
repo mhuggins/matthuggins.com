@@ -28,7 +28,7 @@ export const Section = ({
           headingClassName,
         )}
       >
-        {icon && <CircleIcon icon={icon} size={18} />}
+        {icon && <CircleIcon icon={icon} size={20} />}
         {title}
       </h2>
       {subtitle && <div className={cn("text-gray-500 text-sm", icon && "ml-10")}>{subtitle}</div>}

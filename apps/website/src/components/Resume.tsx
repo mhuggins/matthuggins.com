@@ -54,110 +54,164 @@ export function Resume() {
       <ResumeSection title="Experience" icon={BriefcaseIcon}>
         <div className="flex flex-col gap-6">
           <Experience
-            role="Staff Software Engineer"
             company="Prelude Security"
-            location="Remote"
+            location="Seattle, Washington (Remote)"
             description='Provided intuitive user experiences to help CISOs answer the question: "am I protected?"'
-            startDate="Sept. 2024"
-            endDate="May 2026"
-            tasks={[
-              "Built an AI-powered backend service in Node.js using the Vercel AI SDK, integrating LLM tool-calling with internal product APIs to automate contextual report generation.",
-              "Architected an interactive security control visualization using React Flow, providing real-time insight into EDR, Endpoint Management, Vulnerability Management, Email, and Identity security posture with animated node states and drill-down capabilities.",
-              "Built a comprehensive custom reporting system with time series, number, percentage, bar, column, and pie chart visualizations, including PDF export, JSON import/export, and advanced filtering.",
-              "Designed and implemented a robust OData filter architecture featuring a custom lexer/parser and predictive autocomplete, enabling consistent data querying across all platform surfaces.",
-              "Created a reusable form component library, migrating the entire application from react-hook-form to TanStack Form for improved type safety, performance, and developer experience.",
-              "Established E2E testing infrastructure with Playwright and Storybook, improving release confidence and component documentation.",
+            roles={[
+              {
+                title: "Staff Software Engineer",
+                startDate: "Sept. 2024",
+                endDate: "May 2026",
+                tasks: [
+                  "Built an AI-powered backend service in Node.js using the Vercel AI SDK, integrating LLM tool-calling with internal product APIs to automate contextual report generation.",
+                  "Architected an interactive security control visualization using React Flow, providing real-time insight into EDR, Endpoint Management, Vulnerability Management, Email, and Identity security posture with animated node states and drill-down capabilities.",
+                  "Built a comprehensive custom reporting system with time series, number, percentage, bar, column, and pie chart visualizations, including PDF export, JSON import/export, and advanced filtering.",
+                  "Designed and implemented a robust OData filter architecture featuring a custom lexer/parser and predictive autocomplete, enabling consistent data querying across all platform surfaces.",
+                  "Created a reusable form component library, migrating the entire application from react-hook-form to TanStack Form for improved type safety, performance, and developer experience.",
+                  "Established E2E testing infrastructure with Playwright and Storybook, improving release confidence and component documentation.",
+                ],
+              },
             ]}
           />
           <Experience
-            role="Staff Software Engineer"
             company="Tanium"
-            location="Remote"
-            startDate="Aug. 2019"
-            endDate="Aug. 2024"
-            tasks={[
-              "Built cohesive first time user experiences with TypeScript and React.",
-              "Automated common user workflows.",
-              "Architected reusable front-end experiences for security management, enterprise risk, & software management applications.",
-              "Coordinated with leadership and engineering to define project scope, team structure, and beneficial process changes.",
-              "Led a team of 8 to coordinate the implementation of consistent React-based user experiences across 17 products.",
-              "Created endpoint security management & software management applications with React.",
+            location="Kirkland, Washington (Remote)"
+            roles={[
+              {
+                title: "Staff Software Engineer",
+                startDate: "Apr. 2022",
+                endDate: "Aug. 2024",
+                tasks: [
+                  "Built cohesive first time user experiences with TypeScript and React.",
+                  "Automated common user workflows.",
+                ],
+              },
+              {
+                title: "Principal Software Engineer",
+                startDate: "Jan. 2021",
+                endDate: "Apr. 2022",
+                tasks: [
+                  "Architected reusable front-end experiences for security management, enterprise risk, & software management applications.",
+                  "Coordinated with leadership and engineering to define project scope, team structure, and beneficial process changes.",
+                ],
+              },
+              {
+                title: "Senior Software Engineer",
+                startDate: "Aug. 2019",
+                endDate: "Jan. 2021",
+                tasks: [
+                  "Led a team of 8 to coordinate the implementation of consistent React-based user experiences across 17 products.",
+                  "Created endpoint security management & software management applications with React.",
+                ],
+              },
             ]}
           />
           <Experience
-            role="Technical Lead"
-            company="Upload Kapost"
+            company="Upland Kapost"
             location="Boulder CO"
-            startDate="Mar. 2015"
-            endDate="Aug. 2019"
-            tasks={[
-              "Enabled team success through architectural decisions, scope definition, pair programming, code reviews, and general leadership and guidance.",
-              "Architected scalable internal cross-application services using Ruby on Rails.",
-              "Built consumer-grade application front-ends with React, Redux, and Webpack.",
+            roles={[
+              {
+                title: "Technical Lead",
+                startDate: "Mar. 2018",
+                endDate: "Aug. 2019",
+                tasks: [
+                  "Enabled team success through architectural decisions, scope definition, pair programming, code reviews, and general leadership and guidance.",
+                  "Architected scalable internal cross-application services using Ruby on Rails.",
+                  "Built consumer-grade application front-ends with React, Redux, and Webpack.",
+                ],
+              },
+              {
+                title: "Senior Developer",
+                startDate: "Mar. 2015",
+                endDate: "Mar. 2018",
+                tasks: [
+                  "Authored the open-source “circuitry” rubygem for reliable cross-application fanout messaging atop Amazon SNS & SQS.",
+                ],
+              },
             ]}
           />
           <Experience
-            role="Senior Developer (Consultant)"
             company="Quick Left"
             location="Boulder CO"
-            startDate="Jun. 2013"
-            endDate="Mar. 2015"
-            tasks={[
-              "Built MVP mobile app for outdoor social network using Cordova, React, & Ampersand.js.",
-              "Outlined and resolved technical problems preventing a financial startup’s growth by migrating from MongoDB to PostgreSQL, fixing inherent data structure flaws, and replacing custom encryption with an accepted standard.",
+            roles={[
+              {
+                title: "Senior Developer (Consultant)",
+                startDate: "Jun. 2013",
+                endDate: "Mar. 2015",
+                tasks: [
+                  "Built MVP mobile app for outdoor social network using Cordova, React, & Ampersand.js.",
+                  "Outlined and resolved technical problems preventing a financial startup’s growth by migrating from MongoDB to PostgreSQL, fixing inherent data structure flaws, and replacing custom encryption with an accepted standard.",
+                ],
+              },
             ]}
           />
           <Experience
-            role="Senior Developer"
             company="Bloomberg Law"
             location="New York NY"
-            startDate="Jan. 2012"
-            endDate="May 2013"
-            tasks={[
-              "Acted as team’s Ruby on Rails subject matter expert for the Bloomberg Law product.",
-              "Replaced unreliable client architecture with a robust extensible gem solution for use with propriety API services.",
-              "Introduced unit and functional test suites for existing code, and presented an ongoing testing strategy.",
+            roles={[
+              {
+                title: "Senior Developer",
+                startDate: "Jan. 2012",
+                endDate: "May 2013",
+                tasks: [
+                  "Acted as team’s Ruby on Rails subject matter expert for the Bloomberg Law product.",
+                  "Replaced unreliable client architecture with a robust extensible gem solution for use with propriety API services.",
+                  "Introduced unit and functional test suites for existing code, and presented an ongoing testing strategy.",
+                ],
+              },
             ]}
           />
           <Experience
-            role="Web & Mobile Developer"
             company="Food on the Table, Austin TX"
             location="Austin TX"
-            startDate="Feb. 2010"
-            endDate="Jan. 2012"
-            tasks={[
-              "Utilized lean startup methodology to implement minimum viable product solutions focused on learning what the customer wants and needs from our product.",
-              "Produced Ruby on Rails backend code and HTML, CSS, & jQuery front-ends to manage up to 40 concurrent experiments focused on continuously testing changes and learning user behavior.",
-              "Responsible for Facebook Connect integration and coordination of viral acquisition efforts.",
-              "Concurrently iterated on iPhone and Android mobile apps using data-driven development.",
+            roles={[
+              {
+                title: "Web & Mobile Developer",
+                startDate: "Feb. 2010",
+                endDate: "Jan. 2012",
+                tasks: [
+                  "Utilized lean startup methodology to implement minimum viable product solutions focused on learning what the customer wants and needs from our product.",
+                  "Produced Ruby on Rails backend code and HTML, CSS, & jQuery front-ends to manage up to 40 concurrent experiments focused on continuously testing changes and learning user behavior.",
+                  "Responsible for Facebook Connect integration and coordination of viral acquisition efforts.",
+                  "Concurrently iterated on iPhone and Android mobile apps using data-driven development.",
+                ],
+              },
             ]}
           />
           <Experience
-            role="Game Developer"
             company="Challenge Online Games"
             location="Austin TX"
-            startDate="Oct. 2008"
-            endDate="Aug. 2009"
-            tasks={[
-              "Led company-wide integration of Facebook Platform into all games, resulting in Zynga acquisition.",
-              "Designed and developed reusable cross-game components within the CakePHP MVC framework.",
-              "Coordinated the delivery of resources from designers, artists, and programming team members for the duration of an experimental Facebook gaming project.",
+            roles={[
+              {
+                title: "Game Developer",
+                startDate: "Oct. 2008",
+                endDate: "Aug. 2009",
+                tasks: [
+                  "Led company-wide integration of Facebook Platform into all games, resulting in Zynga acquisition.",
+                  "Designed and developed reusable cross-game components within the CakePHP MVC framework.",
+                  "Coordinated the delivery of resources from designers, artists, and programming team members for the duration of an experimental Facebook gaming project.",
+                ],
+              },
             ]}
           />
           <Experience
-            role="Applications Developer"
             company="QVC"
             location="West Chester PA"
-            startDate="Jun. 2004"
-            endDate="Aug. 2006"
-            tasks={[
-              "Built Java web services utilizing the Spring Framework for back-end processing.",
-              "Designed and developed enterprise solutions within ASP.NET.",
-              "Enhanced public websites and internal applications using Java, C#, C++, Perl and ASP languages.",
-              "Resolved production issues for QVC.com, QVC.de, and QVC.co.uk via on-call support.",
-              "Produced technical documentation formalizing functionality and semantics of enterprise system application processes.",
-              "Developed enterprise applications utilizing Java-based web services, formatting XML data with XSL style sheets via ASP to present dynamic XHTML to Customer Service representatives.",
-              "Maintained existing applications using ASP and VBScript for presentation and VB COM+ components for data source interaction.",
+            roles={[
+              {
+                title: "Applications Developer",
+                startDate: "Jun. 2004",
+                endDate: "Aug. 2006",
+                tasks: [
+                  "Built Java web services utilizing the Spring Framework for back-end processing.",
+                  "Designed and developed enterprise solutions within ASP.NET.",
+                  "Enhanced public websites and internal applications using Java, C#, C++, Perl and ASP languages.",
+                  "Resolved production issues for QVC.com, QVC.de, and QVC.co.uk via on-call support.",
+                  "Produced technical documentation formalizing functionality and semantics of enterprise system application processes.",
+                  "Developed enterprise applications utilizing Java-based web services, formatting XML data with XSL style sheets via ASP to present dynamic XHTML to Customer Service representatives.",
+                  "Maintained existing applications using ASP and VBScript for presentation and VB COM+ components for data source interaction.",
+                ],
+              },
             ]}
           />
         </div>
@@ -165,8 +219,12 @@ export function Resume() {
 
       <ResumeSection title="Education" icon={GraduationCapIcon}>
         <div className="flex flex-col gap-4">
-          <Project title="Masters Program, Business">University of Delaware (2004 - 2006)</Project>
-          <Project title="BS in Computer Science">University of Delaware (2000 - 2004)</Project>
+          <Project title="Masters Program, Business">
+            University of Delaware <span className="text-gray-400">(2004 - 2006)</span>
+          </Project>
+          <Project title="BS in Computer Science">
+            University of Delaware <span className="text-gray-400">(2000 - 2004)</span>
+          </Project>
         </div>
       </ResumeSection>
 
