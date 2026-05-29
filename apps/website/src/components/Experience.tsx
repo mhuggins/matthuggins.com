@@ -59,7 +59,7 @@ export const Experience = ({
   if (roles.length === 1) {
     const [{ title, startDate, endDate, tasks }] = roles;
     return (
-      <div {...props}>
+      <div {...props} className="print:break-inside-avoid">
         <div className="flex items-center">
           <BuildingIcon aria-hidden size={20} className="mx-2 shrink-0 text-gray-400" />
           <div className="flex flex-1 items-center justify-between gap-3">
@@ -79,7 +79,7 @@ export const Experience = ({
   }
 
   return (
-    <div {...props}>
+    <div {...props} className="print:break-inside-avoid">
       <div className="flex items-center">
         <BuildingIcon aria-hidden size={20} className="mx-2 shrink-0 text-gray-400" />
         <div className="text-base">{company}</div>

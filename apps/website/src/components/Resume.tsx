@@ -40,21 +40,21 @@ const skills: SkillSet[] = [
 export function Resume() {
   return (
     <div className="flex flex-col gap-12">
-      <header className="hidden print:block">
+      <header className="hidden print:block print:break-inside-avoid">
         <h1 className="font-bold text-2xl text-primary-dark">Matt Huggins</h1>
         <div className="text-secondary-foreground text-sm">
           Leander, TX • matt.huggins@gmail.com
         </div>
       </header>
 
-      <ResumeSection title="Career Profile" icon={UserIcon}>
+      <ResumeSection title="Career Profile" icon={UserIcon} className="print:break-inside-avoid">
         Staff-level software engineer with 20+ years of experience building scalable web
         applications and developer platforms using React, TypeScript, Node.js, and Ruby on Rails.
         Experienced in frontend architecture, API design, and integrating LLM-powered features such
         as AI-generated reporting and workflow automation into production applications.
       </ResumeSection>
 
-      <ResumeSection title="Skills" icon={WrenchIcon}>
+      <ResumeSection title="Skills" icon={WrenchIcon} className="print:break-inside-avoid">
         <SkillSets skills={skills} />
       </ResumeSection>
 
@@ -224,7 +224,11 @@ export function Resume() {
         </div>
       </ResumeSection>
 
-      <ResumeSection title="Education" icon={GraduationCapIcon}>
+      <ResumeSection
+        title="Education"
+        icon={GraduationCapIcon}
+        className="print:break-inside-avoid"
+      >
         <div className="flex flex-col gap-4">
           <Project title="Masters Program, Business">
             University of Delaware <span className="text-gray-400">(2004 - 2006)</span>
@@ -235,7 +239,7 @@ export function Resume() {
         </div>
       </ResumeSection>
 
-      <ResumeSection title="Projects" icon={DesktopIcon}>
+      <ResumeSection title="Projects" icon={DesktopIcon} className="print:break-inside-avoid">
         <div className="flex flex-col gap-4">
           <Project title="Codebound" role="Creator" url="https://codebound.io">
             Programmable collectible card game. <em>(In development.)</em>
@@ -252,7 +256,11 @@ export function Resume() {
         </div>
       </ResumeSection>
 
-      <ResumeSection title="OSS Contributions" icon={PackageIcon}>
+      <ResumeSection
+        title="OSS Contributions"
+        icon={PackageIcon}
+        className="print:break-inside-avoid"
+      >
         <div className="flex flex-col gap-4">
           <Project title="circuitry" url="https://github.com/kapost/circuitry">
             Ruby gem for decoupling applications via Amazon SNS fanout and SQS processing.
