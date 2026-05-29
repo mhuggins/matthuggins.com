@@ -40,6 +40,13 @@ const skills: SkillSet[] = [
 export function Resume() {
   return (
     <div className="flex flex-col gap-12">
+      <header className="hidden print:block">
+        <h1 className="font-bold text-2xl text-primary-dark">Matt Huggins</h1>
+        <div className="text-secondary-foreground text-sm">
+          Leander, TX • matt.huggins@gmail.com
+        </div>
+      </header>
+
       <ResumeSection title="Career Profile" icon={UserIcon}>
         Staff-level software engineer with 20+ years of experience building scalable web
         applications and developer platforms using React, TypeScript, Node.js, and Ruby on Rails.
