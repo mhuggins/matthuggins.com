@@ -5,11 +5,11 @@ interface ProjectProps {
   title: string;
   role?: string;
   url?: string;
-  past?: boolean;
+  note?: string;
   children: ReactNode;
 }
 
-export const Project = ({ title, role, url, past, children }: ProjectProps) => (
+export const Project = ({ title, role, url, note, children }: ProjectProps) => (
   <div>
     <div className="text-base">
       {url ? (
@@ -18,7 +18,7 @@ export const Project = ({ title, role, url, past, children }: ProjectProps) => (
         <span className="text-primary-dark">{title}</span>
       )}
       {role && <span> - {role}</span>}
-      {past && <span className="text-gray-400 text-sm italic"> (Past)</span>}
+      {note && <span className="text-gray-400 text-sm italic"> ({note})</span>}
     </div>
     <p className="text-secondary-foreground text-sm leading-relaxed">{children}</p>
   </div>

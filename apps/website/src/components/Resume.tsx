@@ -241,16 +241,21 @@ export function Resume() {
 
       <ResumeSection title="Projects" icon={DesktopIcon} className="print:break-inside-avoid">
         <div className="flex flex-col gap-4">
-          <Project title="Codebound" role="Creator" url="https://codebound.io">
-            Programmable collectible card game. <em>(In development.)</em>
+          <Project
+            title="Codebound"
+            role="Creator"
+            url="https://codebound.io"
+            note="In development"
+          >
+            Programmable collectible card game.
           </Project>
           <Project title="SVGConverter.io" role="Creator" url="https://svgconverter.io">
             Web-app for converting raster images into vectorized SVGs.
           </Project>
-          <Project title="nOS" role="Lead Developer" past url="https://nos.io">
+          <Project title="nOS" role="Lead Developer" url="https://nos.io" note="Past">
             Browser, app store, and crypto wallet for the nOS cryptocurrency.
           </Project>
-          <Project title="Black Book Singles" role="Founder" past>
+          <Project title="Black Book Singles" role="Founder" note="Past">
             Free online dating website and mobile application.
           </Project>
         </div>
