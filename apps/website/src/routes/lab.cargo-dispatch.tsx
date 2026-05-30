@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy } from "react";
 import { Section } from "@/components/Section";
 import { DOMAIN } from "@/constants/site";
+import { useTheme } from "@/context/ThemeContext";
 
 const CargoDispatch = lazy(async () => ({
   default: (await import("@matthuggins/cargo-dispatch")).CargoDispatch,
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/lab/cargo-dispatch")({
 });
 
 function CargoDispatchPage() {
+  const { theme } = useTheme();
   const title = "Cargo Dispatch";
   const description =
     "Programming game for routing packages from warehouse shelves to delivery trucks";
@@ -87,7 +89,7 @@ function CargoDispatchPage() {
         icon={FlaskIcon}
         headingClassName="uppercase"
       >
-        <CargoDispatch className="mt-6" />
+        <CargoDispatch className="mt-6" theme={theme} />
       </Section>
     </>
   );

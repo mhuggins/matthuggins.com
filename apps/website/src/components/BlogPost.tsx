@@ -41,24 +41,27 @@ export function BlogPost({ post, Component }: BlogPostProps) {
           <img
             src={metadata.image}
             alt={metadata.title}
-            className="mx-auto mt-4 mb-8 rounded-lg border-2 border-slate-200 shadow-lg"
+            className="mx-auto mt-4 mb-8 rounded-lg border-2 border-slate-200 shadow-lg dark:border-gray-700"
           />
         )}
         {metadata.note && (
-          <div className="relative mb-4 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-4 pl-16 text-gray-600 text-sm italic">
-            <NoteIcon size={36} className="absolute top-4 left-4 text-gray-400" />
+          <div className="relative mb-4 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-4 pl-16 text-gray-600 text-sm italic dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <NoteIcon
+              size={36}
+              className="absolute top-4 left-4 text-gray-400 dark:text-gray-500"
+            />
             <span
-              className="prose prose-sm prose-gray inline"
+              className="prose prose-sm prose-gray dark:prose-invert inline"
               {...createHtmlProps(markdownToHtml(`Author's Note: ${metadata.note}`))}
             />
           </div>
         )}
 
-        <div className="prose prose-gray max-w-none">
+        <div className="prose prose-gray dark:prose-invert max-w-none">
           <Component />
         </div>
 
-        <div className="mt-12 border-gray-200 border-t pt-8">
+        <div className="mt-12 border-gray-200 border-t pt-8 dark:border-gray-700">
           <h2 className="mb-4 font-semibold text-lg">Comments</h2>
           <Comments pageId={metadata.slug} pageTitle={metadata.title} />
         </div>

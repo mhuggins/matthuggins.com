@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTheme } from "@/context/ThemeContext";
 import { useIsMounted } from "@/hooks/useIsMounted";
 
 interface CommentsProps {
@@ -18,6 +19,7 @@ declare global {
 
 export function Comments({ pageId, pageTitle }: CommentsProps) {
   const isMounted = useIsMounted();
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!isMounted) {
@@ -36,7 +38,7 @@ export function Comments({ pageId, pageTitle }: CommentsProps) {
       site_id: siteId,
       url: `${window.location.origin}/blog/posts/${pageId}`,
       page_title: pageTitle,
-      theme: "light",
+      theme,
       locale: "en",
       no_footer: true,
     };
@@ -55,7 +57,7 @@ export function Comments({ pageId, pageTitle }: CommentsProps) {
       }
       script.remove();
     };
-  }, [isMounted, pageId, pageTitle]);
+  }, [isMounted, pageId, pageTitle, theme]);
 
   if (!isMounted) {
     return null;

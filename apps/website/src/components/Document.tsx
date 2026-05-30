@@ -1,15 +1,17 @@
 import dedent from "dedent";
 import type { ReactNode } from "react";
+import type { Theme } from "@/utils/theme";
 
 interface DocumentProps {
   children: ReactNode;
   scripts?: string[];
   styles?: string[];
+  theme?: Theme;
 }
 
-export function Document({ children, scripts = [], styles = [] }: DocumentProps) {
+export function Document({ children, scripts = [], styles = [], theme = "light" }: DocumentProps) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en" dir="ltr" className={theme === "dark" ? "dark" : undefined}>
       <head>
         {/* REF: https://github.com/vitejs/vite/issues/1984 */}
         {!import.meta.env.PROD && (

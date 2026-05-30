@@ -68,7 +68,14 @@ export default defineConfig({
         [
           rehypeShiki,
           {
-            theme: "github-light",
+            // Dual themes: light is the inline default, dark is emitted as
+            // `--shiki-dark*` CSS variables and activated under `.dark` in
+            // style.css. See the `.dark .shiki` rule there.
+            themes: {
+              light: "github-light",
+              dark: "github-dark",
+            },
+            defaultColor: "light",
             transformers: [
               transformerNotationHighlight(),
               transformerNotationFocus(),

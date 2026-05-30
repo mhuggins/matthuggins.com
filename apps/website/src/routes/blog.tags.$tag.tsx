@@ -21,7 +21,7 @@ function NotFound() {
   return (
     <div className="flex flex-col gap-12">
       <Section title="Tag Not Found" icon={TagIcon}>
-        <p className="text-gray-600">The requested tag could not be found.</p>
+        <p className="text-gray-600 dark:text-gray-400">The requested tag could not be found.</p>
         <Link to="/" className="mt-4 inline-flex items-center gap-2 text-primary hover:underline">
           <ArrowLeftIcon className="size-4" />
           Return Home

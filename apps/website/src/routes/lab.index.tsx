@@ -33,9 +33,9 @@ function LabPage() {
           <Link
             key={project.href}
             to={project.href}
-            className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 transition-shadow hover:shadow-md"
+            className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 transition-shadow hover:shadow-md dark:border-gray-700"
           >
-            <div className="flex h-44 items-center justify-center border-gray-200 border-b bg-gray-100">
+            <div className="flex h-44 items-center justify-center border-gray-200 border-b bg-gray-100 dark:border-gray-700 dark:bg-gray-800">
               {project.image ? (
                 <img
                   src={project.image}
@@ -43,7 +43,7 @@ function LabPage() {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <FlaskIcon className="size-12 text-gray-300" />
+                <FlaskIcon className="size-12 text-gray-300 dark:text-gray-600" />
               )}
             </div>
             <div className="flex flex-1 flex-col gap-1 p-4">

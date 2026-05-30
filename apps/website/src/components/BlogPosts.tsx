@@ -7,11 +7,11 @@ import { Tags } from "./Tags";
 
 export function BlogPosts({ posts }: { posts: BlogPost[] }) {
   if (posts.length === 0) {
-    return <p className="text-gray-600">No blog posts yet.</p>;
+    return <p className="text-gray-600 dark:text-gray-400">No blog posts yet.</p>;
   }
 
   return (
-    <div className="flex flex-col gap-6 divide-y divide-gray-200">
+    <div className="flex flex-col gap-6 divide-y divide-gray-200 dark:divide-gray-700">
       {posts.map((post) => (
         <Section
           key={post.metadata.slug}
@@ -38,13 +38,13 @@ export function BlogPosts({ posts }: { posts: BlogPost[] }) {
                 <img
                   src={post.metadata.thumbnail}
                   alt={post.metadata.title}
-                  className="w-32 rounded-sm border border-slate-200 shadow-md"
+                  className="w-32 rounded-sm border border-slate-200 shadow-md dark:border-gray-700"
                 />
               </Link>
             )}
             {post.metadata.summary && (
               <div
-                className="prose prose-gray prose-sm max-w-none text-gray-700 leading-relaxed"
+                className="prose prose-gray prose-sm dark:prose-invert max-w-none text-gray-700 leading-relaxed dark:text-gray-300"
                 {...createHtmlProps(markdownToHtml(post.metadata.summary))}
               />
             )}

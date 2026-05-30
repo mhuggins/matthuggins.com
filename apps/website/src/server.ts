@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import type { ViteDevServer } from "vite";
+import { parseThemeCookie, type Theme } from "./utils/theme.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProd = process.env.NODE_ENV === "production";
@@ -62,7 +63,7 @@ async function createServer() {
     try {
       let render: (
         url: string,
-        options: { scripts: string[]; styles: string[] },
+        options: { scripts: string[]; styles: string[]; theme: Theme },
       ) => Promise<{ html: string; statusCode: number }>;
       let scripts: string[];
       let styles: string[];
@@ -83,7 +84,8 @@ async function createServer() {
         styles = assets.styles;
       }
 
-      const { html, statusCode } = await render(url, { scripts, styles });
+      const theme = parseThemeCookie(req.headers.cookie);
+      const { html, statusCode } = await render(url, { scripts, styles, theme });
       res.status(statusCode).set({ "Content-Type": "text/html" }).send(html);
     } catch (e) {
       console.error("SSR Error:", e);

@@ -11,7 +11,7 @@ export const Tags = ({ tags }: TagsProps) => (
         key={tag}
         to="/blog/tags/$tag"
         params={{ tag }}
-        className="print-exact rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 text-xs transition-colors hover:bg-gray-200 hover:text-gray-800"
+        className="print-exact rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 text-xs transition-colors hover:bg-gray-200 hover:text-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100"
       >
         {tag}
       </Link>

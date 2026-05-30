@@ -2,11 +2,14 @@ import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { renderToPipeableStream } from "react-dom/server";
 import { Document } from "./components/Document";
+import { ThemeProvider } from "./context/ThemeContext";
 import { createRouter } from "./router";
+import type { Theme } from "./utils/theme";
 
 interface RenderOptions {
   scripts?: string[];
   styles?: string[];
+  theme?: Theme;
 }
 
 interface RenderResult {
@@ -15,7 +18,7 @@ interface RenderResult {
 }
 
 export async function render(url: string, options: RenderOptions = {}): Promise<RenderResult> {
-  const { scripts = [], styles = [] } = options;
+  const { scripts = [], styles = [], theme = "light" } = options;
   const history = createMemoryHistory({ initialEntries: [url] });
   const router = createRouter({ history });
 
@@ -28,8 +31,10 @@ export async function render(url: string, options: RenderOptions = {}): Promise<
 
     const { pipe } = renderToPipeableStream(
       <StrictMode>
-        <Document scripts={scripts} styles={styles}>
-          <RouterProvider router={router} />
+        <Document scripts={scripts} styles={styles} theme={theme}>
+          <ThemeProvider initialTheme={theme}>
+            <RouterProvider router={router} />
+          </ThemeProvider>
         </Document>
       </StrictMode>,
       {

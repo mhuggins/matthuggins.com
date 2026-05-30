@@ -8,6 +8,7 @@ import { ContactLinks } from "@/components/ContactLinks";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { Profile } from "@/components/Profile";
 import { Tags } from "@/components/Tags";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { getAllPosts, getAllTags } from "@/data/blog-metadata";
 import { useIsMounted } from "@/hooks/useIsMounted";
 import { formatDate } from "@/utils/formatDate";
@@ -48,13 +49,13 @@ function Root() {
   const isLabActive = pathname.split("/")[1] === "lab";
 
   return (
-    <div className="min-h-dvh bg-gray-100 font-sans text-gray-900">
+    <div className="min-h-dvh bg-gray-100 font-sans text-gray-900 dark:bg-gray-950 dark:text-gray-100">
       <div className="mx-auto max-w-6xl px-4 py-8 lg:px-4 lg:py-8 print:p-0">
-        <div className="min-h-screen overflow-hidden bg-white not-print:shadow-lg lg:flex">
+        <div className="min-h-screen overflow-hidden bg-white not-print:shadow-lg lg:flex dark:bg-gray-900">
           {/* Main Content */}
           <main className="overflow-hidden lg:flex-1">
             {/* Navigation Header */}
-            <nav className="bg-primary px-4 text-white lg:px-12 print:hidden">
+            <nav className="bg-primary-surface px-4 text-white lg:px-12 print:hidden">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex text-sm">
                   <Link
@@ -84,8 +85,11 @@ function Root() {
                   </Link>
                 </div>
 
-                {/* Mobile: Hamburger Menu on right */}
-                <HamburgerMenu />
+                {/* Right: theme toggle (all sizes) + hamburger (mobile) */}
+                <div className="flex items-center gap-3">
+                  <ThemeToggle />
+                  <HamburgerMenu />
+                </div>
               </div>
             </nav>
 

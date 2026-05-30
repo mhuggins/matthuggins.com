@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Manual dark mode: `dark:` utilities key off a `.dark` class on <html>.
+   Scoped to `@media screen` so dark styling never applies when printing —
+   every `dark:` utility falls back to its light base, forcing a light printout
+   regardless of the active theme. :where() keeps specificity at 0. */
+@custom-variant dark {
+  @media screen {
+    &:where(.dark, .dark *) {
+      @slot;
+    }
+  }
+}
+
 @source '../../../apps/**/*.{js,jsx,ts,tsx}';
 @source '../../../packages/**/*.{js,jsx,ts,tsx}';
 
@@ -10,6 +22,53 @@
   --color-primary-dark: #2d7788;
   --color-primary-darker: #1a454f;
   --color-secondary-foreground: #545e6c;
+  --color-primary-surface: #358799;
+  /* Stable deep teal for the theme toggle's ink (track-off, rays, crescent,
+     ring). Same tone as primary-darker's light value, but its own token because
+     primary-darker brightens in dark mode and the toggle needs a dark ink on
+     its white disc in both themes. */
+  --color-ink: #1a454f;
+}
+
+/* Dark-theme brand colors. Redefining the same custom properties means every
+   `text-primary`, `bg-primary-dark`, etc. flips automatically when `.dark` is
+   active — no per-element `dark:` variants needed.
+
+   Wrapped in `@media screen` so printing always uses the light values above.
+
+   Text tokens are brightened for contrast on the dark content surface:
+   `primary-dark`/`primary-darker` (headings, links) and `secondary-foreground`
+   (body text). In dark mode the "-dark" suffix therefore reads *lighter* than
+   `primary` — intentional, since contrast inverts on a dark bg.
+
+   Background tokens are muted into deep teals so the nav/profile/sidebar feel
+   intentionally dark rather than inheriting the bright light-mode teal, while
+   white text stays readable: `primary-surface` (nav + profile, darker) and
+   `primary-light` (sidebar, active-nav highlight, mobile menu, a touch lighter
+   so the active highlight reads against the nav). `primary` itself is left
+   unchanged because it doubles as `text-primary` link color on the dark card.
+
+   Exception: CircleIcon uses `bg-primary-dark` as a white-text badge, so it is
+   pinned to `dark:bg-primary` in the component to stay a dark teal here. */
+@media screen {
+  .dark {
+    --color-primary-light: #2c6470;
+    --color-primary-dark: #5cc2d6;
+    --color-primary-darker: #82d4e4;
+    --color-secondary-foreground: #9aa5b5;
+    --color-primary-surface: #1d4e58;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/** Ensure overscroll shows consistent background with rest of site. */
+body {
+  @apply bg-gray-100 dark:bg-gray-950;
 }
 
 /* Browsers strip background colors when printing by default. Apply to elements
@@ -73,6 +132,36 @@ pre:hover .code-block-header {
 /* Inline code styling */
 :not(pre) > code {
   @apply rounded bg-gray-100 px-1.5 py-0.5 text-sm font-mono;
+}
+
+/* Dark mode overrides for code surfaces. The base rules use !important / hard
+   utilities, so the dark overrides must match that specificity and come after.
+   Wrapped in `@media screen` so printing always falls back to the light base. */
+@media screen {
+  .dark pre {
+    @apply !bg-gray-900 border-gray-700;
+  }
+
+  .dark .code-block-header {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .dark :not(pre) > code {
+    @apply bg-gray-800 text-gray-100;
+  }
+
+  .dark .copy-code-btn {
+    background-color: #d1d5db; /* gray-300 — better contrast on dark code blocks */
+  }
+
+  /* Swap Shiki syntax tokens to the dark theme palette. The dual-theme build
+     emits each token's dark color as a `--shiki-dark` CSS variable while the
+     light color stays inline; `!important` is required to beat that inline
+     color. The code-block background stays gray-900 via `.dark pre` above. */
+  .dark .shiki,
+  .dark .shiki span {
+    color: var(--shiki-dark) !important;
+  }
 }
 
 /* Override Tailwind Typography prose styles for inline code */

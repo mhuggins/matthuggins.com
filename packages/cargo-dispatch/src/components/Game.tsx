@@ -18,7 +18,16 @@ import { LevelTimeline } from "./LevelTimeline";
 import { StatusBar } from "./StatusBar";
 import { StrategyEditor } from "./StrategyEditor";
 
-export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export interface CargoDispatchProps extends HTMLAttributes<HTMLDivElement> {
+  /**
+   * The site's active theme. Accepted so the lab can react to it; currently
+   * Cargo Dispatch opts out and keeps its own styling regardless of value.
+   * Destructured out below so it is not spread onto the DOM element.
+   */
+  theme?: "light" | "dark";
+}
+
+export function CargoDispatch({ className, theme = "light", ...props }: CargoDispatchProps) {
   const [status, setStatus] = useState<GameStatus>("idle");
   const [world, setWorld] = useState<WorldState>(() => createWorld(LEVELS[0]!));
   const [errors, setErrors] = useState<string[]>([]);
@@ -167,7 +176,7 @@ export function CargoDispatch({ className, ...props }: HTMLAttributes<HTMLDivEle
     ) : null;
 
   return (
-    <div {...props} className={cn("flex flex-col gap-2", className)}>
+    <div {...props} data-theme={theme} className={cn("flex flex-col gap-2", className)}>
       <ControlsBar
         status={status}
         speed={speed}
