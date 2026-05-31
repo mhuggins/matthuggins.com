@@ -45,12 +45,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://matthuggins.com/blog/posts/reusing-form-sections-with-tanstack-forms-withfieldgroup</loc>
-    <lastmod>2026-03-20</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://matthuggins.com/blog/posts/multi-step-form-validation-with-tanstack-form</loc>
     <lastmod>2026-03-06</lastmod>
     <changefreq>yearly</changefreq>
