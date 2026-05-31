@@ -5,9 +5,9 @@ import { promisify } from "node:util";
 import type { Plugin } from "vite";
 
 const execAsync = promisify(exec);
-const scriptPath = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  "../scripts/generate-blog-metadata.ts",
+
+const scriptPaths = ["../scripts/generate-blog-metadata.ts", "../scripts/generate-sitemap.ts"].map(
+  (f) => resolve(dirname(fileURLToPath(import.meta.url)), f),
 );
 
 export function blogWatcherPlugin(): Plugin {
@@ -25,7 +25,7 @@ export function blogWatcherPlugin(): Plugin {
     console.log(`🔄 ${reason}, regenerating metadata...`);
 
     try {
-      await execAsync(`tsx ${scriptPath}`);
+      await execAsync(scriptPaths.map((s) => `tsx ${s}`).join(" && "));
       console.log("✅ Blog metadata regenerated");
     } catch (error) {
       console.error("❌ Error regenerating blog metadata:", error);

@@ -81,6 +81,22 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     ]
   },
   {
+    "slug": "reusing-form-sections-with-tanstack-forms-withfieldgroup",
+    "filePath": "reusing-form-sections-with-tanstack-forms-withfieldgroup.md",
+    "title": "Reusing Form Sections with TanStack Form's `withFieldGroup`",
+    "date": "2026-03-20",
+    "summary": "TanStack Form's `withFieldGroup` HOC is commonly shown being used with nested objects. Though it's not as well documented, it's also possible to extract reusable form sections from flat, non-nested data shapes.",
+    "image": "/blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.jpg",
+    "thumbnail": "/blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.thumb.jpg",
+    "note": null,
+    "tags": [
+      "react",
+      "typescript",
+      "tanstack form",
+      "form management"
+    ]
+  },
+  {
     "slug": "multi-step-form-validation-with-tanstack-form",
     "filePath": "multi-step-form-validation-with-tanstack-form.md",
     "title": "Multi-Step Form Validation with TanStack Form",
