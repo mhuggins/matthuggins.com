@@ -2,7 +2,7 @@
 title: Structuring the GraphQL Request Context
 date: 2026-05-30
 published: false
-tags: [graphql, prisma, node.js, typescript, javascript]
+tags: [graphql, node.js, typescript, javascript]
 summary: "My approach to shaping an Apollo server's GraphQL context around three fields: a resolved current user, a shared data layer, and a fresh set of DataLoaders."
 image: /blog/structuring-the-graphql-request-context.jpg
 thumbnail: /blog/structuring-the-graphql-request-context.thumb.jpg
