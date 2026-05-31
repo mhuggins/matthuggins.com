@@ -21,6 +21,22 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
   {
+    "slug": "reusing-form-sections-with-tanstack-forms-withfieldgroup",
+    "filePath": "reusing-form-sections-with-tanstack-forms-withfieldgroup.md",
+    "title": "Reusing Form Sections with TanStack Form's `withFieldGroup`",
+    "date": "2026-05-31",
+    "summary": "TanStack Form's `withFieldGroup` HOC is commonly shown being used with nested objects. Though it's not as well documented, it's also possible to extract reusable form sections from flat, non-nested data shapes.",
+    "image": "/blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.jpg",
+    "thumbnail": "/blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.thumb.jpg",
+    "note": null,
+    "tags": [
+      "react",
+      "typescript",
+      "tanstack form",
+      "form management"
+    ]
+  },
+  {
     "slug": "building-a-predictive-text-input-in-react",
     "filePath": "building-a-predictive-text-input-in-react.md",
     "title": "Building a Predictive Text Input in React",

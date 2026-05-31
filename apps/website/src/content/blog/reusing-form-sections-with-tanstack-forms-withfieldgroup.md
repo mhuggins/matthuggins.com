@@ -1,14 +1,14 @@
 ---
 title: Reusing Form Sections with TanStack Form's `withFieldGroup`
-date: 2026-03-20
-published: false
+date: 2026-05-31
+published: true
 tags: [react, typescript, tanstack form, form management]
 summary: TanStack Form's `withFieldGroup` HOC is commonly shown being used with nested objects. Though it's not as well documented, it's also possible to extract reusable form sections from flat, non-nested data shapes.
 image: /blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.jpg
 thumbnail: /blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.thumb.jpg
 ---
 
-[TanStack Form](https://tanstack.com/form)'s `withFieldGroup` higher-order component is a powerful way to extract reusable form sections. The more common use case of pulling out fields for a nested object is well-documented. What's less clear, (and was previously undocumented), is that it also works for fields embedded directly in the parent object.
+[TanStack Form](https://tanstack.com/form)'s `withFieldGroup` higher-order component is a powerful way to extract reusable form sections. The more common use case of pulling out fields for a nested object is well-documented. What's less clear (and was previously undocumented) is that it also works for fields embedded directly in the parent object.
 
 ## The Nested Object Case
 
@@ -74,7 +74,7 @@ interface Admin extends Person {
 }
 ```
 
-Both `Customer` and `Admin` have `firstName` and `lastName`, but they're not nested -- they sit at the top level of each object. You might still want a single `NameFields` component that works in both a customer form and an admin form without duplicating the field definitions.
+Both `Customer` and `Admin` have `firstName` and `lastName`, but they're not nested. Instead, they sit at the top level of each object. You might still want a single `NameFields` component that works in both a customer form and an admin form without duplicating the field definitions.
 
 The `withFieldGroup` HOC supports this by accepting an object as the `fields` prop instead of a string. The object maps the sub-form's field names to their corresponding field names in the parent form:
 
@@ -123,4 +123,4 @@ In this case the mapping is one-to-one since the field names happen to match. Bu
 
 Use a string (e.g. `fields="homePhone"`) when the shared fields are grouped under a single nested key. Use a mapping object (e.g. `fields={{ firstName: "firstName" }}`) when the shared fields live directly on the parent object without a common prefix.
 
-Both forms give you the same type safety -- the generic parameter on `withFieldGroup` constrains what field names are valid, and the `fields` prop is checked against the parent form's data type.
+Both forms give you the same type safety. The generic parameter on `withFieldGroup` constrains what field names are valid, and the `fields` prop is checked against the parent form's data type.
