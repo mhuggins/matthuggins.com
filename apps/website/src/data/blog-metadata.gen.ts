@@ -104,7 +104,7 @@ export const blogMetadata: readonly BlogPostMetadata[] = [
     "summary": "While integrating TanStack Form with schema validation libraries like Zod, I ran into a subtle type system gap that caused validation errors to silently fail. Here's how I diagnosed the issue and built a type-safe wrapper to prevent it from happening again.",
     "image": "/blog/avoiding-tanstack-form-pitfalls.jpg",
     "thumbnail": "/blog/avoiding-tanstack-form-pitfalls.thumb.jpg",
-    "note": "After writing this article, I submitted a [pull request](https://github.com/TanStack/form/pull/1987) to TanStack Form that, if accepted, would resolve the pitfall covered in the first half of this article. Regardless, the content still provides interesting lessons related to types, generics, and ensuring a consistent error structure is used across forms.",
+    "note": "After writing this article, I submitted a [pull request](https://github.com/TanStack/form/pull/1987) to TanStack Form that has since been merged, which resolves the pitfall covered in the first half of this article. Despite its acceptance into the codebase, the content in this article still provides beneficial insights related to types, generics, and ensuring a consistent error structure is used across forms.",
     "tags": [
       "react",
       "typescript",
