@@ -64,6 +64,15 @@ Do two checks:
 
 Where a pronoun change alters meaning or could go either way, ask the user instead of guessing.
 
+### 7. Link to relevant internal posts
+
+Whenever it fits naturally, link from the target post to one or more other published posts on the site. This helps readers and benefits SEO. This is **opportunistic, not forced** — only add a link where the surrounding prose already references a topic that another post covers, and the link reads as a natural fit. Never add a link just to hit a quota, and never reword or restructure a sentence to manufacture a place for one.
+
+- Use the published posts you read in step 1 to know what internal topics exist.
+- Internal blog post URLs are of the form `/blog/posts/{slug}`, where `{slug}` is the post's filename without the `.md` extension.
+- Prefer linking an existing relevant phrase rather than appending "see my other post" boilerplate, so it matches the author's existing linking style. Check how the author already formats links in the published posts.
+- If a good linking opportunity exists but you are unsure it fits, flag it for the user rather than inserting it.
+
 ## Output
 
 1. Apply the safe corrections (spelling, grammar, em dashes, clear pronoun fixes) directly to the file with edits.
@@ -73,6 +82,7 @@ Where a pronoun change alters meaning or could go either way, ask the user inste
    - **Em dashes:** how many replaced and the replacement chosen for each (or a sample if many).
    - **Style consistency:** anything flagged for the user's decision.
    - **Pronoun consistency:** fixes applied and anything flagged.
+   - **Internal links:** any links to other published posts added (with the target slug), and any opportunities flagged for the user's decision.
 3. For anything you flagged rather than changed, list it clearly so the user can decide. If any pronoun or style call is genuinely ambiguous, ask before applying.
 </content>
 </invoke>
