@@ -12,7 +12,7 @@ GraphQL gives you a single contract that two codebases agree on: the client asks
 
 My approach removes that hand-maintenance entirely. There's **one** `.graphql` schema, written in GraphQL's Schema Definition Language (SDL), and it's the only thing I author by hand. Both the client and the server run [GraphQL Code Generator](https://the-guild.dev/graphql/codegen) against that same schema, each with a different preset suited to its role. Everything in TypeScript, on both sides, is generated. A field I add to the schema shows up as a type change in both codebases, and anything that no longer lines up becomes a compile error rather than a runtime surprise.
 
-I'll use a small e-commerce domain throughout (users, products, orders, and order line items) because the shapes are familiar. This is the same domain I used in [Structuring the GraphQL Request Context](/blog/structuring-the-graphql-request-context), and the two posts are companions: that one is about what the server hands each resolver, while this one is about how the schema and its types travel between the client and the server.
+I'll use a small e-commerce domain throughout (users, products, orders, and order line items) because the shapes are familiar. This is the same domain I used in [Structuring the GraphQL Request Context](/blog/posts/structuring-the-graphql-request-context), and the two posts are companions: that one is about what the server hands each resolver, while this one is about how the schema and its types travel between the client and the server.
 
 ## The single source of truth
 
@@ -86,7 +86,7 @@ module.exports = {
 
 No copying, no network. The schema has exactly one on-disk home, and the client reads it. This is a real improvement, but it leans on a relative path between two projects, which is brittle if either one moves.
 
-**4. Share it as a workspace package.** This is the option I reach for, and it's the reason I'm such a fan of [pnpm workspaces](/blog/pnpm-makes-monorepos-effortless). I put the schema in its own package, say `@acme/graphql-schema`, that exports the `.graphql` file (and, optionally, the generated server-side types). Both the client and the server depend on it with the `workspace:*` syntax:
+**4. Share it as a workspace package.** This is the option I reach for, and it's the reason I'm such a fan of [pnpm workspaces](/blog/posts/pnpm-makes-monorepos-effortless). I put the schema in its own package, say `@acme/graphql-schema`, that exports the `.graphql` file (and, optionally, the generated server-side types). Both the client and the server depend on it with the `workspace:*` syntax:
 
 ```json
 {
@@ -111,7 +111,7 @@ module.exports = {
 };
 ```
 
-The schema now has exactly one owner, it's versioned like any other dependency, and there's no copy to drift and no relative path to break. When I touch the schema, both packages rebuild against the change, and pnpm's workspace linking means I never manually bump a version to make that happen. If you haven't set up a workspace before, the [pnpm post](/blog/pnpm-makes-monorepos-effortless) walks through the whole thing; sharing a GraphQL schema is one of the cleanest examples of why it's worth it.
+The schema now has exactly one owner, it's versioned like any other dependency, and there's no copy to drift and no relative path to break. When I touch the schema, both packages rebuild against the change, and pnpm's workspace linking means I never manually bump a version to make that happen. If you haven't set up a workspace before, the [pnpm post](/blog/posts/pnpm-makes-monorepos-effortless) walks through the whole thing; sharing a GraphQL schema is one of the cleanest examples of why it's worth it.
 
 Whichever option you pick, the principle is the same: the SDL is authored once, and every consumer generates from that one definition rather than describing the shapes a second time by hand.
 
@@ -119,7 +119,7 @@ Whichever option you pick, the principle is the same: the SDL is authored once, 
 
 The client and the server consume the schema for opposite reasons, so they run codegen with different presets.
 
-On the **server**, I generate resolver types with `typescript` and `typescript-resolvers`, then bind each GraphQL type to its backing database model with `mappers`. The whole point there is to type the *implementation* of the schema: what a resolver receives as its parent, what it must return, and what lives on the request context. I covered that side in depth (and why the context has exactly the shape it does) in [the request context post](/blog/structuring-the-graphql-request-context), so I won't repeat it here.
+On the **server**, I generate resolver types with `typescript` and `typescript-resolvers`, then bind each GraphQL type to its backing database model with `mappers`. The whole point there is to type the *implementation* of the schema: what a resolver receives as its parent, what it must return, and what lives on the request context. I covered that side in depth (and why the context has exactly the shape it does) in [the request context post](/blog/posts/structuring-the-graphql-request-context), so I won't repeat it here.
 
 On the **client**, I have the opposite job. I'm not implementing the schema, I'm *consuming* it: writing queries and fragments and getting back precisely typed results. For that, codegen's [client preset](https://the-guild.dev/graphql/codegen/plugins/presets/preset-client) is purpose-built. Here is the full client config:
 
@@ -368,7 +368,7 @@ The generated variables type now requires `includeRevenue` and `includeMargin`, 
 End to end, the approach is one schema and two generators:
 
 1. **Author the schema once** as SDL, and give it a single owner. A workspace package is the cleanest home, since it kills both the copy-drift and the relative-path fragility of the alternatives.
-2. **Generate on the server** with `typescript-resolvers` and `mappers`, so the implementation is typed against the schema (covered in [the request context post](/blog/structuring-the-graphql-request-context)).
+2. **Generate on the server** with `typescript-resolvers` and `mappers`, so the implementation is typed against the schema (covered in [the request context post](/blog/posts/structuring-the-graphql-request-context)).
 3. **Generate on the client** with the client preset, so every query and fragment yields a precise result type with no hand-written interfaces.
 4. **Declare shared shapes once** as fragments, compose queries from them, and let fragment masking enforce that code only reads what it selected.
 5. **Derive complex view types** from the generated fragment types with intersections and `keyof`, so the flat shapes the UI consumes still trace back to a single field declaration in the schema.

@@ -8,7 +8,7 @@ image: /blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.jpg
 thumbnail: /blog/reusing-form-sections-with-tanstack-forms-withfieldgroup.thumb.jpg
 ---
 
-[TanStack Form](https://tanstack.com/form)'s `withFieldGroup` higher-order component is a powerful way to extract reusable form sections. The more common use case of pulling out fields for a nested object is well-documented. What's less clear (and was previously undocumented) is that it also works for fields embedded directly in the parent object. The `withFieldGroup` HOC and the `field.*` components used throughout this post come from a custom form hook that I previously covered in [Building a Reusable Form Component Library with TanStack Form](/blog/building-a-reusable-form-component-library-with-tanstack-form).
+[TanStack Form](https://tanstack.com/form)'s `withFieldGroup` higher-order component is a powerful way to extract reusable form sections. The more common use case of pulling out fields for a nested object is well-documented. What's less clear (and was previously undocumented) is that it also works for fields embedded directly in the parent object. The `withFieldGroup` HOC and the `field.*` components used throughout this post come from a custom form hook that I previously covered in [Building a Reusable Form Component Library with TanStack Form](/blog/posts/building-a-reusable-form-component-library-with-tanstack-form).
 
 ## The Nested Object Case
 

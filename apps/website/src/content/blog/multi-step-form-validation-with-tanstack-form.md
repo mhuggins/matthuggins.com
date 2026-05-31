@@ -189,7 +189,7 @@ export function InputField({ className, label, ...props }: InputFieldProps, ref)
 }
 ```
 
-As long as the error is returned with `fields.email[n].message`, TanStack Form routes it to the right field, no matter which validation step produced it. I recommend taking a look at the [Bonus: Typed Error Messages](/blog/avoiding-tanstack-form-pitfalls) section of my previous article to understand how we can maintain type safety while extracting the error message.
+As long as the error is returned with `fields.email[n].message`, TanStack Form routes it to the right field, no matter which validation step produced it. I recommend taking a look at the [Bonus: Typed Error Messages](/blog/posts/avoiding-tanstack-form-pitfalls) section of my previous article to understand how we can maintain type safety while extracting the error message.
 
 ## Key Takeaways
 
