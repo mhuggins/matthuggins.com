@@ -46,9 +46,9 @@ const form = useAppForm({
 });
 ```
 
-The `satisfies` keyword ensures that the object literal conforms to `FormSchema` at the point of assignment. If you make a mistake -- say, setting `favoriteNumber` to a boolean -- TypeScript will catch it immediately. The subsequent `as FormSchema` cast tells TypeScript to treat the value as the wider union type, resolving the mismatch.
+The `satisfies` keyword ensures that the object literal conforms to `FormSchema` at the point of assignment. If you make a mistake (say, setting `favoriteNumber` to a boolean), TypeScript will catch it immediately. The subsequent `as FormSchema` cast tells TypeScript to treat the value as the wider union type, resolving the mismatch.
 
-Using `satisfies` and `as` together is what makes this safe. The `as` cast alone would suppress the error but silently allow invalid values. The `satisfies` check ensures you still get an error if the default value isn't actually valid for the schema. Neither alone gives you both guarantees.
+Using `satisfies` and `as` together is what makes this safe. The `as` cast alone would suppress the error but silently allow invalid values. The `satisfies` check ensures you still get an error if the default value isn't actually valid for the schema. Neither alone gives you both guarantees. I cover this `satisfies X as X` combination, along with several other ways to keep types and reality in lockstep, in [TypeScript Patterns for Type Consistency](/blog/posts/typescript-patterns-for-type-consistency).
 
 ## Why This Comes Up
 
