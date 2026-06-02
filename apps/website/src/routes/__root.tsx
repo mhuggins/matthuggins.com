@@ -134,8 +134,15 @@ function Root() {
                     <Link
                       to="/blog/posts/$slug"
                       params={{ slug: post.metadata.slug }}
-                      className="hover:underline"
+                      className="group flex flex-col gap-2 hover:underline"
                     >
+                      {post.metadata.thumbnail && (
+                        <img
+                          src={post.metadata.thumbnail}
+                          alt={post.metadata.title}
+                          className="w-full rounded-sm border border-white/20 shadow-md"
+                        />
+                      )}
                       {post.metadata.title}
                     </Link>
                   ),
