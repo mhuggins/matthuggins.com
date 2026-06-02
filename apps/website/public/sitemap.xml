@@ -21,6 +21,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://matthuggins.com/blog/posts/fixing-tanstack-form-default-values-type-discrepancies</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://matthuggins.com/blog/posts/reusing-form-sections-with-tanstack-forms-withfieldgroup</loc>
     <lastmod>2026-05-31</lastmod>
     <changefreq>yearly</changefreq>

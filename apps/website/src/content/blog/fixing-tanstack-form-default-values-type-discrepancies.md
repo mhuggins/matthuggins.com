@@ -1,7 +1,7 @@
 ---
 title: Fixing TanStack Form `defaultValues` Type Discrepancies
-date: 2026-03-20
-published: false
+date: 2026-06-02
+published: true
 tags: [react, typescript, tanstack form, form management]
 summary: When TanStack Form's `defaultValues` object narrows a union type to a more specific type than a given validation schema, TypeScript complains. However, there's a clean way to resolve it without sacrificing type safety.
 image: /blog/fixing-tanstack-form-default-values-type-discrepancies.jpg
