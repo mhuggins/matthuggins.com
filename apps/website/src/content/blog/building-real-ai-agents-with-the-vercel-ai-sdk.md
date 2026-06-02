@@ -168,15 +168,15 @@ interface User {
 }
 
 function buildSystemPrompt(user: User) {
-  return dedent(`
-    ${SYSTEM_PROMPT}
-
+  const userContext = dedent(`
     <current_user>
     Name: ${user.name}
     Team: ${user.team}
     Role: ${user.role}
     </current_user>
   `).trim();
+
+  return [SYSTEM_PROMPT, userContext].join("\n\n");
 }
 ```
 
