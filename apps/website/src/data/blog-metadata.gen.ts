@@ -4,6 +4,7 @@
 import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
 
 export const blogTags: ReadonlySet<BlogTag> = new Set([
+  "ai",
   "data fetching",
   "form management",
   "graphics",
@@ -20,6 +21,22 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
+  {
+    "slug": "building-real-ai-agents-with-the-vercel-ai-sdk",
+    "filePath": "building-real-ai-agents-with-the-vercel-ai-sdk.md",
+    "title": "Building Real AI Agents with the Vercel AI SDK",
+    "date": "2026-06-02",
+    "summary": "The Vercel AI SDK makes it easy to call a model and stream a response, but the quickstart skips the parts that matter for a real application: forwarding the user's identity to your internal services, writing a system prompt that holds up under pressure, and building tools the model can't misuse. Here's how I approach all three.",
+    "image": "/blog/building-real-ai-agents-with-the-vercel-ai-sdk.jpg",
+    "thumbnail": "/blog/building-real-ai-agents-with-the-vercel-ai-sdk.thumb.jpg",
+    "note": null,
+    "tags": [
+      "typescript",
+      "node.js",
+      "ai",
+      "security"
+    ]
+  },
   {
     "slug": "fixing-tanstack-form-default-values-type-discrepancies",
     "filePath": "fixing-tanstack-form-default-values-type-discrepancies.md",
