@@ -5,14 +5,25 @@ import { promisify } from "node:util";
 import type { Plugin } from "vite";
 
 const execAsync = promisify(exec);
-const scriptPath = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  "../scripts/generate-lab-metadata.ts",
-);
+
+const pluginName = "lab-watcher";
+
+const pluginDir = dirname(fileURLToPath(import.meta.url));
+const contentDir = resolve(pluginDir, "../../../packages/lab-content/content");
+const sitemapGeneratorPath = resolve(pluginDir, "../scripts/generate-sitemap.ts");
+
+const regenerateCommand = [
+  "pnpm --filter @matthuggins/lab-content build",
+  `tsx ${sitemapGeneratorPath}`,
+].join(" && ");
+
+function isLabContent(file: string) {
+  return file.includes("lab-content/content/") && /\.(md|mdx)$/i.test(file);
+}
 
 export function labWatcherPlugin(): Plugin {
   if (process.env.VITEST) {
-    return { name: "lab-watcher" };
+    return { name: pluginName };
   }
 
   let isBuilding = false;
@@ -25,7 +36,7 @@ export function labWatcherPlugin(): Plugin {
     console.log(`🔄 ${reason}, regenerating lab metadata...`);
 
     try {
-      await execAsync(`tsx ${scriptPath}`);
+      await execAsync(regenerateCommand);
       console.log("✅ Lab metadata regenerated");
     } catch (error) {
       console.error("❌ Error regenerating lab metadata:", error);
@@ -35,7 +46,7 @@ export function labWatcherPlugin(): Plugin {
   };
 
   return {
-    name: "lab-watcher",
+    name: pluginName,
     buildStart() {
       if (!hasInitialized) {
         hasInitialized = true;
@@ -43,22 +54,22 @@ export function labWatcherPlugin(): Plugin {
       }
     },
     configureServer(server) {
-      server.watcher.add("src/content/lab/**/*.{md,mdx}");
+      server.watcher.add(`${contentDir}/**/*.{md,mdx}`);
 
       server.watcher.on("change", (file) => {
-        if (file.includes("src/content/lab/") && /\.(md|mdx)$/i.test(file)) {
+        if (isLabContent(file)) {
           runLabScript();
         }
       });
 
       server.watcher.on("add", (file) => {
-        if (file.includes("src/content/lab/") && /\.(md|mdx)$/i.test(file)) {
+        if (isLabContent(file)) {
           runLabScript();
         }
       });
 
       server.watcher.on("unlink", (file) => {
-        if (file.includes("src/content/lab/") && /\.(md|mdx)$/i.test(file)) {
+        if (isLabContent(file)) {
           runLabScript();
         }
       });

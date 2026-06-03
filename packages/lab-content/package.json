@@ -1,0 +1,42 @@
+{
+  "name": "@matthuggins/lab-content",
+  "version": "1.0.0",
+  "description": "Lab project content and metadata for matthuggins.com",
+  "private": true,
+  "type": "module",
+  "main": "src/main.ts",
+  "types": "src/main.ts",
+  "exports": {
+    ".": "./src/main.ts"
+  },
+  "scripts": {
+    "build": "tsx scripts/generate-lab-metadata.ts",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run --passWithNoTests",
+    "test:watch": "vitest --watch",
+    "test:lint": "pnpm run lint && pnpm run format && pnpm run typecheck && pnpm run test"
+  },
+  "keywords": [],
+  "author": "Matt Huggins <matt.huggins@gmail.com>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@matthuggins/cargo-dispatch": "workspace:*"
+  },
+  "devDependencies": {
+    "@matthuggins/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "tsx": "^4.20.5",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "yaml": "^2.8.1"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
+  }
+}

@@ -1,5 +1,6 @@
-import type { LabEntryMetadata } from "@/types/lab.gen";
-import { labMetadata } from "./lab-metadata.gen";
+import { type LabEntryMetadata, labMetadata } from "@matthuggins/lab-content";
+
+export type { LabEntryMetadata };
 
 export type LabEntryLoader = Promise<React.ComponentType>;
 

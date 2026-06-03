@@ -33,7 +33,7 @@ export function blogWatcherPlugin(): Plugin {
     if (isBuilding) return;
 
     isBuilding = true;
-    console.log(`🔄 ${reason}, regenerating metadata...`);
+    console.log(`🔄 ${reason}, regenerating blog metadata...`);
 
     try {
       await execAsync(regenerateCommand);
