@@ -22,8 +22,7 @@ import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import type { ShikiTransformer } from "shiki";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { blogWatcherPlugin } from "./plugins/blog-watcher";
-import { labWatcherPlugin } from "./plugins/lab-watcher";
+import { contentWatcherPlugin } from "./plugins/content-watcher";
 import { typeGeneratorPlugin } from "./plugins/type-generator";
 
 export default defineConfig({
@@ -50,8 +49,8 @@ export default defineConfig({
   },
   plugins: [
     typeGeneratorPlugin(),
-    blogWatcherPlugin(),
-    labWatcherPlugin(),
+    contentWatcherPlugin({ packageName: "blog-content" }),
+    contentWatcherPlugin({ packageName: "lab-content" }),
     tsconfigPaths(),
     tanstackRouter({
       target: "react",
