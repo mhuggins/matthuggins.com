@@ -1,5 +1,11 @@
-import type { BlogPostMetadata, BlogTag } from "@/types/blog.gen";
-import { blogMetadata, blogTags } from "./blog-metadata.gen";
+import {
+  type BlogPostMetadata,
+  type BlogTag,
+  blogMetadata,
+  blogTags,
+} from "@matthuggins/blog-content";
+
+export type { BlogPostMetadata, BlogTag };
 
 export type BlogPostLoader = Promise<React.ComponentType>;
 

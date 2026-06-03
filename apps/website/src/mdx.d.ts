@@ -1,4 +1,4 @@
-import type { BlogPostMetadata } from "./types/blog.gen";
+import type { BlogPostMetadata } from "@matthuggins/blog-content";
 
 declare module "*.mdx" {
   import type { ComponentType } from "react";

@@ -1,0 +1,10 @@
+{
+  "extends": "@matthuggins/tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "baseUrl": "./",
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*", "scripts/**/*"]
+}

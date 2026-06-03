@@ -56,6 +56,9 @@ importers:
 
   apps/website:
     dependencies:
+      '@matthuggins/blog-content':
+        specifier: workspace:*
+        version: link:../../packages/blog-content
       '@matthuggins/cargo-dispatch':
         specifier: workspace:*
         version: link:../../packages/cargo-dispatch
@@ -168,6 +171,30 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.3.3)(jiti@2.5.1)(jsdom@27.4.0)(lightningcss@1.30.1)(tsx@4.20.5)(yaml@2.8.1)
+
+  packages/blog-content:
+    devDependencies:
+      '@matthuggins/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.3.3
+      react:
+        specifier: 'catalog:'
+        version: 19.1.1
+      tsx:
+        specifier: ^4.20.5
+        version: 4.20.5
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.2
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.3.3)(jiti@2.5.1)(jsdom@27.4.0)(lightningcss@1.30.1)(tsx@4.20.5)(yaml@2.8.1)
+      yaml:
+        specifier: ^2.8.1
+        version: 2.8.1
 
   packages/cargo-dispatch:
     dependencies:

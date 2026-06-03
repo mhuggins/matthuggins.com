@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { blogMetadata } from "@matthuggins/blog-content";
 import { DOMAIN } from "../src/constants/site";
-import { blogMetadata } from "../src/data/blog-metadata.gen";
 import { labMetadata } from "../src/data/lab-metadata.gen";
 
 const SITEMAP_PATH = resolve(process.cwd(), "public/sitemap.xml");

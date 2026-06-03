@@ -1,3 +1,4 @@
+import type { BlogTag } from "@matthuggins/blog-content";
 import { ArrowLeftIcon, TagIcon } from "@phosphor-icons/react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { BlogPosts } from "@/components/BlogPosts";
@@ -5,7 +6,6 @@ import { Link } from "@/components/Link";
 import { Section } from "@/components/Section";
 import { DOMAIN } from "@/constants/site";
 import { getPostsByTag, isValidTag } from "@/data/blog-metadata";
-import type { BlogTag } from "@/types/blog.gen";
 
 export const Route = createFileRoute("/blog/tags/$tag")({
   beforeLoad: ({ params }) => {

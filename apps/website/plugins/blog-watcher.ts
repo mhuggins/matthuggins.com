@@ -6,13 +6,24 @@ import type { Plugin } from "vite";
 
 const execAsync = promisify(exec);
 
-const scriptPaths = ["../scripts/generate-blog-metadata.ts", "../scripts/generate-sitemap.ts"].map(
-  (f) => resolve(dirname(fileURLToPath(import.meta.url)), f),
-);
+const pluginName = "blog-watcher";
+
+const pluginDir = dirname(fileURLToPath(import.meta.url));
+const contentDir = resolve(pluginDir, "../../../packages/blog-content/content");
+const sitemapGeneratorPath = resolve(pluginDir, "../scripts/generate-sitemap.ts");
+
+const regenerateCommand = [
+  "pnpm --filter @matthuggins/blog-content build",
+  `tsx ${sitemapGeneratorPath}`,
+].join(" && ");
+
+function isBlogContent(file: string) {
+  return file.includes("blog-content/content/") && /\.(md|mdx)$/i.test(file);
+}
 
 export function blogWatcherPlugin(): Plugin {
   if (process.env.VITEST) {
-    return { name: "blog-watcher" };
+    return { name: pluginName };
   }
 
   let isBuilding = false;
@@ -25,7 +36,7 @@ export function blogWatcherPlugin(): Plugin {
     console.log(`🔄 ${reason}, regenerating metadata...`);
 
     try {
-      await execAsync(scriptPaths.map((s) => `tsx ${s}`).join(" && "));
+      await execAsync(regenerateCommand);
       console.log("✅ Blog metadata regenerated");
     } catch (error) {
       console.error("❌ Error regenerating blog metadata:", error);
@@ -35,7 +46,7 @@ export function blogWatcherPlugin(): Plugin {
   };
 
   return {
-    name: "blog-watcher",
+    name: pluginName,
     buildStart() {
       // Run on initial build/dev start
       if (!hasInitialized) {
@@ -44,23 +55,23 @@ export function blogWatcherPlugin(): Plugin {
       }
     },
     configureServer(server) {
-      // Watch the blog content directory for changes
-      server.watcher.add("src/content/blog/**/*.{md,mdx}");
+      // Watch the package's blog content directory for changes
+      server.watcher.add(`${contentDir}/**/*.{md,mdx}`);
 
       server.watcher.on("change", (file) => {
-        if (file.includes("src/content/blog/") && /\.(md|mdx)$/i.test(file)) {
+        if (isBlogContent(file)) {
           runBlogScript();
         }
       });
 
       server.watcher.on("add", (file) => {
-        if (file.includes("src/content/blog/") && /\.(md|mdx)$/i.test(file)) {
+        if (isBlogContent(file)) {
           runBlogScript();
         }
       });
 
       server.watcher.on("unlink", (file) => {
-        if (file.includes("src/content/blog/") && /\.(md|mdx)$/i.test(file)) {
+        if (isBlogContent(file)) {
           runBlogScript();
         }
       });
