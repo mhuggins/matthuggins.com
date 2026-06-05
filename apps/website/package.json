@@ -51,21 +51,20 @@
   "devDependencies": {
     "@mdx-js/rollup": "^3.1.1",
     "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "^4.1.13",
+    "@tailwindcss/vite": "^4.3.0",
     "@tanstack/router-plugin": "^1.131.43",
     "@types/express": "^5.0.3",
     "@types/hast": "^3.0.4",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@vitejs/plugin-react": "^5.0.2",
+    "@vitejs/plugin-react": "catalog:",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
     "remark-mdx-frontmatter": "^5.0.0",
     "tsx": "^4.20.5",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "catalog:"
   }
 }

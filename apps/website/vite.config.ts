@@ -21,7 +21,6 @@ import remarkGfm from "remark-gfm";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import type { ShikiTransformer } from "shiki";
 import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { contentWatcherPlugin } from "./plugins/content-watcher";
 import { typeGeneratorPlugin } from "./plugins/type-generator";
 
@@ -47,11 +46,13 @@ export default defineConfig({
   ssr: {
     noExternal: ["@tanstack/react-router", "@phosphor-icons/react"],
   },
+  resolve: {
+    tsconfigPaths: true,
+  },
   plugins: [
     typeGeneratorPlugin(),
     contentWatcherPlugin({ packageName: "blog-content" }),
     contentWatcherPlugin({ packageName: "lab-content" }),
-    tsconfigPaths(),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: false,

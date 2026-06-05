@@ -80,12 +80,6 @@ class SafeConsole implements Omit<Console, "Console"> {
   }
 
   // Non-standard — optional chaining guards against missing implementations
-  profile(label?: string): void {
-    console.profile?.(label);
-  }
-  profileEnd(label?: string): void {
-    console.profileEnd?.(label);
-  }
   timeStamp(label?: string): void {
     console.timeStamp?.(label);
   }
