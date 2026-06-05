@@ -30,5 +30,25 @@ export const labMetadata: readonly LabEntryMetadata[] = [
     "thumbnail": "/lab/cargo-dispatch.svg",
     "ogImage": "/lab/cargo-dispatch.og-image.png",
     "schemaType": "Game"
+  },
+  {
+    "slug": "chart-builder",
+    "filePath": "chart-builder.mdx",
+    "title": "Chart Builder",
+    "description": "A fully front-end AI agent that turns plain-language questions into real weather charts, with the system prompt and tools laid bare",
+    "keywords": [
+      "ai",
+      "agent",
+      "vercel ai sdk",
+      "anthropic",
+      "claude",
+      "tools",
+      "system prompt",
+      "typescript",
+      "data visualization"
+    ],
+    "thumbnail": "/lab/chart-builder.svg",
+    "ogImage": "/lab/chart-builder.og-image.png",
+    "schemaType": "WebApplication"
   }
 ];

@@ -1,5 +1,6 @@
 import { ArrowLeftIcon, FileXIcon, FlaskIcon } from "@phosphor-icons/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { mdxProse } from "@/components/mdxProse";
 import { Section } from "@/components/Section";
 import { DOMAIN } from "@/constants/site";
 import { getLabEntryBySlug, hasLabEntry, loadLabEntryContent } from "@/data/lab-metadata";
@@ -100,7 +101,12 @@ function LabEntryPage() {
         icon={FlaskIcon}
         headingClassName="uppercase"
       >
-        <Component />
+        {/* No `.prose` wrapper: prose styling is applied per markdown element via
+            `mdxProse`, so the embedded lab component renders outside prose (and
+            needs no `not-prose`). `mdx-prose` only scopes the inline-code reset. */}
+        <div className="mdx-prose max-w-none text-gray-700 leading-7 dark:text-white/80 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
+          <Component components={mdxProse} />
+        </div>
       </Section>
     </>
   );

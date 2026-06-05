@@ -27,6 +27,7 @@
   "dependencies": {
     "@matthuggins/blog-content": "workspace:*",
     "@matthuggins/cargo-dispatch": "workspace:*",
+    "@matthuggins/chart-builder": "workspace:*",
     "@matthuggins/lab-content": "workspace:*",
     "@matthuggins/ui": "workspace:*",
     "@phosphor-icons/react": "catalog:",

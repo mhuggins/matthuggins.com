@@ -1,7 +1,7 @@
 {
-  "name": "@matthuggins/lab-content",
+  "name": "@matthuggins/chart-builder",
   "version": "1.0.0",
-  "description": "Lab project content and metadata for matthuggins.com",
+  "description": "Front-end AI agent lab: natural-language weather charts via the Vercel AI SDK",
   "private": true,
   "type": "module",
   "main": "src/main.ts",
@@ -10,7 +10,7 @@
     ".": "./src/main.ts"
   },
   "scripts": {
-    "build": "tsx scripts/generate-lab-metadata.ts",
+    "build": "tsc -b",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format .",
@@ -24,20 +24,35 @@
   "author": "Matt Huggins <matt.huggins@gmail.com>",
   "license": "UNLICENSED",
   "dependencies": {
-    "@matthuggins/cargo-dispatch": "workspace:*",
-    "@matthuggins/chart-builder": "workspace:*"
+    "@ai-sdk/anthropic": "^3.0.81",
+    "@matthuggins/form": "workspace:*",
+    "@matthuggins/ui": "workspace:*",
+    "@phosphor-icons/react": "catalog:",
+    "ai": "^6.0.196",
+    "dedent": "^1.7.1",
+    "react-markdown": "^10.1.0",
+    "react-vega": "^8.0.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
+    "remeda": "^2.37.0",
+    "vega": "^6.2.0",
+    "vega-embed": "^7.1.0",
+    "vega-lite": "^6.4.3",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@matthuggins/tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "react": "catalog:",
-    "tsx": "^4.20.5",
+    "react-dom": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "yaml": "^2.8.1"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
-    "react": "catalog:"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   }
 }

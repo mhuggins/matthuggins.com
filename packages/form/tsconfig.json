@@ -1,0 +1,10 @@
+{
+  "extends": "@matthuggins/tsconfig/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "types": ["react"],
+    "composite": true
+  },
+  "include": ["src/**/*"]
+}

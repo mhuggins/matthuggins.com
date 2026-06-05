@@ -1,0 +1,27 @@
+---
+title: Chart Builder
+description: A fully front-end AI agent that turns plain-language questions into real weather charts, with the system prompt and tools laid bare
+published: true
+keywords: [ai, agent, vercel ai sdk, anthropic, claude, tools, system prompt, typescript, data visualization]
+thumbnail: /lab/chart-builder.svg
+ogImage: /lab/chart-builder.og-image.png
+schemaType: WebApplication
+---
+
+import { ChartBuilder } from "../src/lazy/ChartBuilder"
+
+A companion to my post on [building real AI agents with the Vercel AI
+SDK](/blog/posts/building-real-ai-agents-with-the-vercel-ai-sdk). Ask for a
+weather chart in plain language and watch a Claude agent geocode the place,
+fetch real data from the free [Open-Meteo](https://open-meteo.com) API, and draw
+the result. Everything runs in your browser: you supply your own Anthropic key,
+and there is no backend.
+
+The point is to make the machinery from the post visible. A "glass box" beside
+the chat shows the editable system prompt, lets you toggle individual tools on
+and off, and pairs the loose intent the model emits with the deterministic,
+syntactically perfect output the code produces. Edit the prompt to forbid pie
+charts, or turn off the geocoding tool, and watch the agent's behavior change in
+real time.
+
+<ChartBuilder className="mt-6" />

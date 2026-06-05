@@ -2,7 +2,13 @@ import { type LabEntryMetadata, labMetadata } from "@matthuggins/lab-content";
 
 export type { LabEntryMetadata };
 
-export type LabEntryLoader = Promise<React.ComponentType>;
+/** Compiled MDX content. Accepts a `components` map to style intrinsic markdown
+ * elements (see apps/website/src/components/mdxProse.tsx). */
+export type LabContentComponent = React.ComponentType<{
+  components?: Record<string, React.ComponentType>;
+}>;
+
+export type LabEntryLoader = Promise<LabContentComponent>;
 
 export interface LabEntry {
   metadata: LabEntryMetadata;
@@ -36,7 +42,7 @@ export function hasLabEntry(slug: string): boolean {
 // Pre-built map of all lab entry loaders
 const labEntryLoaders = import.meta.glob<{
   frontmatter?: LabEntryMetadata;
-  default: React.ComponentType;
+  default: LabContentComponent;
 }>("../content/lab/**/*.{md,mdx}");
 
 /**
@@ -57,7 +63,7 @@ function getLabEntryLoader(slug: string) {
 /**
  * Load lab entry content (MDX component)
  */
-export async function loadLabEntryContent(slug: string): Promise<React.ComponentType> {
+export async function loadLabEntryContent(slug: string): Promise<LabContentComponent> {
   const loader = getLabEntryLoader(slug);
   if (!loader) {
     throw new Error(`Loader not found for lab entry: ${slug}`);
