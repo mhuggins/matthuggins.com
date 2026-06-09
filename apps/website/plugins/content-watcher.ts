@@ -1,4 +1,5 @@
 import { exec } from "node:child_process";
+import { realpathSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -28,19 +29,40 @@ export function contentWatcherPlugin({ packageName }: ContentWatcherOptions): Pl
   }
 
   const contentDir = resolve(pluginDir, `../../../packages/${packageName}/content`);
-  const contentMatch = `${packageName}/content/`;
+
+  // The content package is symlinked into the app's `src` root (e.g.
+  // src/content/blog -> packages/blog-content/content), and Vite watches that
+  // root. So a change is reported under the symlinked path (.../src/content/blog/foo.md),
+  // not the real package path. Resolve through symlinks before comparing.
+  const realContentDir = realpathSync(contentDir);
+
   const regenerateCommand = [
     `pnpm --filter @matthuggins/${packageName} build`,
     `tsx ${sitemapGeneratorPath}`,
   ].join(" && ");
 
-  const isContentFile = (file: string) => file.includes(contentMatch) && /\.(md|mdx)$/i.test(file);
+  const isContentFile = (file: string) => {
+    if (!/\.(md|mdx)$/i.test(file)) {
+      return false;
+    }
+    try {
+      // Resolve the parent dir (rather than the file) so `unlink` events for
+      // an already-deleted file still resolve through the symlink. This also
+      // attributes each change to its owning package, so a blog edit doesn't
+      // trigger the lab watcher and vice versa.
+      return realpathSync(dirname(file)).startsWith(realContentDir);
+    } catch {
+      return false;
+    }
+  };
 
   let isBuilding = false;
   let hasInitialized = false;
 
   const regenerate = async (reason = `${packageName} changed`) => {
-    if (isBuilding) return;
+    if (isBuilding) {
+      return;
+    }
 
     isBuilding = true;
     console.log(`🔄 ${reason}, regenerating ${packageName} metadata...`);
@@ -69,15 +91,21 @@ export function contentWatcherPlugin({ packageName }: ContentWatcherOptions): Pl
       server.watcher.add(`${contentDir}/**/*.{md,mdx}`);
 
       server.watcher.on("change", (file) => {
-        if (isContentFile(file)) regenerate();
+        if (isContentFile(file)) {
+          regenerate();
+        }
       });
 
       server.watcher.on("add", (file) => {
-        if (isContentFile(file)) regenerate();
+        if (isContentFile(file)) {
+          regenerate();
+        }
       });
 
       server.watcher.on("unlink", (file) => {
-        if (isContentFile(file)) regenerate();
+        if (isContentFile(file)) {
+          regenerate();
+        }
       });
     },
   };
