@@ -32,5 +32,6 @@
   },
   "[scss]": {
     "editor.defaultFormatter": "biomejs.biome"
-  }
+  },
+  "search.followSymlinks": false
 }
