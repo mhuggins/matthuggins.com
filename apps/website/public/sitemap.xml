@@ -21,6 +21,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://matthuggins.com/blog/posts/structuring-the-graphql-request-context</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://matthuggins.com/blog/posts/building-real-ai-agents-with-the-vercel-ai-sdk</loc>
     <lastmod>2026-06-02</lastmod>
     <changefreq>yearly</changefreq>
@@ -133,6 +139,11 @@
   </url>
   <url>
     <loc>https://matthuggins.com/blog/tags/graphics</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://matthuggins.com/blog/tags/graphql</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

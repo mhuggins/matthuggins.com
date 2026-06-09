@@ -1,7 +1,7 @@
 ---
 title: Structuring the GraphQL Request Context
-date: 2026-05-30
-published: false
+date: 2026-06-09
+published: true
 tags: [graphql, node.js, typescript, javascript]
 summary: "My approach to shaping an Apollo server's GraphQL context around three fields: a resolved current user, a shared data layer, and a fresh set of DataLoaders."
 image: /blog/structuring-the-graphql-request-context.jpg
@@ -10,7 +10,7 @@ thumbnail: /blog/structuring-the-graphql-request-context.thumb.jpg
 
 There's a lot written about modeling a GraphQL schema, but less about the other half of standing up a server: **what I put into the per-request context every resolver receives.**
 
-The context is the single most important design decision in an Apollo server, because every resolver receives it and nothing else ambient is allowed in. Get it right and your resolvers stay small, testable, and free of import-time coupling. Get it wrong and you end up reaching for module-level singletons, leaking state between requests, or firing one database query per row.
+The context is an important design decision in an Apollo server, because every resolver receives it and nothing else ambient is allowed in. It's powerful because a well-shaped context keeps your resolvers small, testable, and free of import-time coupling. It helps avoid reaching for module-level singletons, leaking state between requests, or firing one database query per row.
 
 I'll use a small, recognizable e-commerce domain throughout (users, products, orders, order line items) so the examples stay concrete. My context has exactly three things on it:
 
@@ -30,7 +30,7 @@ export interface RequestContext {
 - `prisma`: the Prisma client the resolvers read and write through
 - `dataLoaders`: a fresh set of batching loaders, created once per request
 
-Let's build the server around that shape and then dig into *why* the last two are worth the ceremony.
+Let's build the server around that shape and then dig into *why* the last two are valuable.
 
 ## The server bootstrap
 
@@ -340,7 +340,7 @@ Fifty order items now produce **one** batched `WHERE id IN (...)` query for thei
 
 ### Why *per request*, and not a singleton?
 
-This is the detail people most often get wrong, so it's worth stating plainly: **the loaders are created inside the context factory**, which means a brand-new set is built for every request. That's not an accident or an inefficiency; it's the whole point.
+This detail is easy to overlook, so it's worth stating plainly: **the loaders are created inside the context factory**, which means a brand-new set is built for every request. That's deliberate, and the per-request lifetime is exactly what makes them safe.
 
 DataLoader caches by id *for the lifetime of the loader*. That caching is a feature within one request (don't load the same order twice while resolving one query) and a **bug** if it outlives the request:
 
@@ -363,7 +363,7 @@ Standing up the server comes down to one typed `ApolloServer<RequestContext>` an
 
 This design has one more step in it, and it's the one I'd take next: drop `prisma` from the context entirely and route *every* database read through a loader.
 
-Right now the context offers two doors to the database. Mutations and top-level queries reach for `prisma` directly; relation fields go through `dataLoaders`. That split works, but it leaves a gap, and it's the kind of gap that eventually gets tripped over by accident: nothing stops a resolver from calling `prisma.order.findUnique` inside a `.map` over a list and quietly reintroducing the exact N+1 problem the loaders exist to prevent. The batched path is *available* when it should be *mandatory*.
+Right now the context offers two doors to the database. Mutations and top-level queries reach for `prisma` directly; relation fields go through `dataLoaders`. That split works, but it leaves a gap that's easy to fall into: nothing stops a resolver from calling `prisma.order.findUnique` inside a `.map` over a list and quietly reintroducing the exact N+1 problem the loaders exist to prevent. The batched path is *available* when it should be *mandatory*.
 
 So make `dataLoaders.order.load(id)` the only way to read a record. Every keyed lookup is then batched and accounted for by construction, an accidental N+1 takes real effort to write, and the context shrinks back to two honest fields:
 

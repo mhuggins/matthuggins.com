@@ -13,13 +13,14 @@ export interface BlogPostMetadata {
   tags: BlogTag[];
 }
 
-export type BlogTag = "ai" | "data fetching" | "form management" | "graphics" | "javascript" | "node.js" | "react" | "ruby" | "ruby on rails" | "security" | "tanstack form" | "tanstack query" | "typescript" | "user experience";
+export type BlogTag = "ai" | "data fetching" | "form management" | "graphics" | "graphql" | "javascript" | "node.js" | "react" | "ruby" | "ruby on rails" | "security" | "tanstack form" | "tanstack query" | "typescript" | "user experience";
 
 export const blogTags: ReadonlySet<BlogTag> = new Set([
   "ai",
   "data fetching",
   "form management",
   "graphics",
+  "graphql",
   "javascript",
   "node.js",
   "react",
@@ -33,6 +34,22 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
+  {
+    "slug": "structuring-the-graphql-request-context",
+    "filePath": "structuring-the-graphql-request-context.md",
+    "title": "Structuring the GraphQL Request Context",
+    "date": "2026-06-09",
+    "summary": "My approach to shaping an Apollo server's GraphQL context around three fields: a resolved current user, a shared data layer, and a fresh set of DataLoaders.",
+    "image": "/blog/structuring-the-graphql-request-context.jpg",
+    "thumbnail": "/blog/structuring-the-graphql-request-context.thumb.jpg",
+    "note": null,
+    "tags": [
+      "graphql",
+      "node.js",
+      "typescript",
+      "javascript"
+    ]
+  },
   {
     "slug": "building-real-ai-agents-with-the-vercel-ai-sdk",
     "filePath": "building-real-ai-agents-with-the-vercel-ai-sdk.md",
