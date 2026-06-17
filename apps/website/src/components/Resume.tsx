@@ -267,11 +267,8 @@ export function Resume() {
         className="print:break-inside-avoid"
       >
         <div className="flex flex-col gap-4">
-          <Project title="circuitry" url="https://github.com/kapost/circuitry">
-            Ruby gem for decoupling applications via Amazon SNS fanout and SQS processing.
-          </Project>
-          <Project title="ruby-measurement" url="https://github.com/mhuggins/ruby-measurement">
-            Ruby gem for calculating and converting units of measure.
+          <Project title="measurable" url="https://github.com/mhuggins/measurable">
+            TypeScript package for calculating and converting units of measure.
           </Project>
           <Project
             title="@poker-apprentice/hand-evaluator"
@@ -298,6 +295,12 @@ export function Resume() {
           >
             TypeScript package for converting poker hand range notations to and from actual poker
             hands.
+          </Project>
+          <Project title="circuitry" url="https://github.com/kapost/circuitry">
+            Ruby gem for decoupling applications via Amazon SNS fanout and SQS processing.
+          </Project>
+          <Project title="ruby-measurement" url="https://github.com/mhuggins/ruby-measurement">
+            Ruby gem for calculating and converting units of measure.
           </Project>
         </div>
       </ResumeSection>
