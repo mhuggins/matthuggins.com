@@ -1,14 +1,14 @@
 ---
 title: "One Schema, Two Codegens: Typing GraphQL Across Client and Server"
-date: 2026-05-30
-published: false
+date: 2026-06-17
+published: true
 tags: [graphql, node.js, typescript, javascript]
 summary: "How I keep a single GraphQL schema as the source of truth across a client and a server: sharing the SDL, generating types on both ends, and using fragments to declare a shape once and compose it into complex reusable types."
 image: /blog/typing-graphql-across-client-and-server.jpg
 thumbnail: /blog/typing-graphql-across-client-and-server.thumb.jpg
 ---
 
-GraphQL gives you a single contract that two codebases agree on: the client asks for exactly the data it wants, and the server promises exactly the data it has. The catch is that the contract is only as good as the types around it. If the client's idea of a `Product` and the server's idea of a `Product` are two hand-maintained TypeScript interfaces, they will drift, and GraphQL's whole "ask for what you need" guarantee quietly stops being checked.
+GraphQL gives you a single contract that two codebases agree on, but that contract is only as good as the types around it. The client asks for exactly the data it wants and the server promises exactly the data it has. If the client's idea of a `Product` and the server's idea of a `Product` are two hand-maintained TypeScript interfaces, they will drift, and GraphQL's whole "ask for what you need" guarantee quietly stops being checked.
 
 My approach removes that hand-maintenance entirely. There's **one** `.graphql` schema, written in GraphQL's Schema Definition Language (SDL), and it's the only thing I author by hand. Both the client and the server run [GraphQL Code Generator](https://the-guild.dev/graphql/codegen) against that same schema, each with a different preset suited to its role. Everything in TypeScript, on both sides, is generated. A field I add to the schema shows up as a type change in both codebases, and anything that no longer lines up becomes a compile error rather than a runtime surprise.
 
@@ -178,7 +178,7 @@ When I execute `productDoc`, the result is typed as `{ product: { id: string; na
 The three `config` options above are what make those types precise rather than approximate:
 
 - **`scalars`** maps custom GraphQL scalars onto real TypeScript types. GraphQL only knows `DateTime` is "some scalar," so without this it would type as `any`. Mapping `DateTime: 'string'` tells the generator that this scalar arrives over the wire as a string (which it does, as JSON), so every `createdAt` is typed `string` end to end.
-- **`defaultsScalarType: 'unknown'`** is a safety net. Any scalar I forget to map becomes `unknown` instead of `any`, so an unmapped scalar surfaces as a type I'm forced to narrow rather than one that silently swallows mistakes.
+- **`defaultsScalarType: 'unknown'`** is a safety net. Any scalar I forget to map becomes `unknown` instead of `any`, so an unmapped scalar surfaces as a type I'm forced to narrow before I can use it. An `any` would just swallow the mistake silently.
 - **`useTypeImports: true`** emits `import type` for type-only imports, which keeps the generated types from pulling runtime code into bundles and plays nicely with `isolatedModules`.
 
 The result is that a GraphQL object on the client is never something I describe. It is something the schema describes, narrowed to the fields I actually asked for.
@@ -256,7 +256,7 @@ const orderLinesDoc = graphql(`
 `);
 ```
 
-There's one wrinkle that trips people up the first time, and it's a feature, not a bug. The client preset uses **fragment masking**. When a query spreads `...OrderItemDetails`, the query's result type doesn't expose those fields directly. Instead it exposes an opaque reference, and the only way to read the fields is to "unmask" the reference with the fragment's own document. That is what `unmaskFunctionName: 'getFragmentData'` in the config sets up. The component (or hook) that wants the data calls `getFragmentData` with the same fragment it depends on:
+There's one wrinkle that trips people up the first time, though it's working as intended. The client preset uses **fragment masking**. When a query spreads `...OrderItemDetails`, the query's result type doesn't expose those fields directly. Instead it exposes an opaque reference, and the only way to read the fields is to "unmask" the reference with the fragment's own document. That is what `unmaskFunctionName: 'getFragmentData'` in the config sets up. The component (or hook) that wants the data calls `getFragmentData` with the same fragment it depends on:
 
 ```ts
 const { orderLines } = await client.request(orderLinesDoc, { input });
@@ -265,11 +265,11 @@ const pagination = getFragmentData(paginationFragmentDoc, orderLines.pagination)
 //    ^ { offset: number; limit: number; totalCount: number }
 ```
 
-The payoff is that each piece of code can only see the fields it explicitly declared a dependency on. A component that spreads `PaginationDetails` can't accidentally reach into product fields that happen to ride along in the same response. The fragment is both the data dependency and the access key, so the coupling between "what this code reads" and "what this code selected" is enforced rather than trusted.
+The payoff is that each piece of code can only see the fields it explicitly declared a dependency on. A component that spreads `PaginationDetails` can't accidentally reach into product fields that happen to ride along in the same response. The fragment is both the data dependency and the access key, so the compiler enforces the coupling between "what this code reads" and "what this code selected" instead of leaving it to convention.
 
 ## Converting fragments into complex reusable types
 
-This is where the approach goes from "less duplication" to "genuinely powerful." Because codegen emits a named TypeScript type for every fragment, I can build higher-order types *out of those fragment types*. The generator names them predictably: `OrderItemDetails` becomes `OrderItemDetailsFragment`, `ProductDetails` becomes `ProductDetailsFragment`, and so on.
+Because codegen emits a named TypeScript type for every fragment, I can build higher-order types *out of those fragment types*. The generator names them predictably: `OrderItemDetails` becomes `OrderItemDetailsFragment`, `ProductDetails` becomes `ProductDetailsFragment`, and so on.
 
 The motivating case: my UI doesn't actually want the nested shape the query returns (a line item containing an order containing a product). It wants one flat row per line, with the product and order fields merged in, ready to drop into a data grid. I want a single `OrderLine` type for that, and I want it derived from the fragments so it can't drift from what I selected.
 

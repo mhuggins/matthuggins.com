@@ -35,6 +35,22 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
   {
+    "slug": "typing-graphql-across-client-and-server",
+    "filePath": "typing-graphql-across-client-and-server.md",
+    "title": "One Schema, Two Codegens: Typing GraphQL Across Client and Server",
+    "date": "2026-06-17",
+    "summary": "How I keep a single GraphQL schema as the source of truth across a client and a server: sharing the SDL, generating types on both ends, and using fragments to declare a shape once and compose it into complex reusable types.",
+    "image": "/blog/typing-graphql-across-client-and-server.jpg",
+    "thumbnail": "/blog/typing-graphql-across-client-and-server.thumb.jpg",
+    "note": null,
+    "tags": [
+      "graphql",
+      "node.js",
+      "typescript",
+      "javascript"
+    ]
+  },
+  {
     "slug": "structuring-the-graphql-request-context",
     "filePath": "structuring-the-graphql-request-context.md",
     "title": "Structuring the GraphQL Request Context",
