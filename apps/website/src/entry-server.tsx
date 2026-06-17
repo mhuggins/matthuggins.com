@@ -46,7 +46,7 @@ export async function render(url: string, options: RenderOptions = {}): Promise<
               callback();
             },
           });
-          writable.on("finish", () => resolve({ html: "<!DOCTYPE html>" + html, statusCode }));
+          writable.on("finish", () => resolve({ html, statusCode }));
           writable.on("error", reject);
           pipe(writable);
         },
