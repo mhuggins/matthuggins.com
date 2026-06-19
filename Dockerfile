@@ -10,6 +10,7 @@ COPY apps/website/package.json apps/website/
 COPY packages/blog-content/package.json packages/blog-content/
 COPY packages/cargo-dispatch/package.json packages/cargo-dispatch/
 COPY packages/lab-content/package.json packages/lab-content/
+COPY packages/measurable-demos/package.json packages/measurable-demos/
 COPY packages/tsconfig/package.json packages/tsconfig/
 COPY packages/ui/package.json packages/ui/
 
