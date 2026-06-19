@@ -35,6 +35,21 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
   {
+    "slug": "cooking-with-measurable",
+    "filePath": "cooking-with-measurable.mdx",
+    "title": "Cooking with measurable",
+    "date": "2026-06-19",
+    "summary": "I published measurable, a TypeScript library for converting between units of measurement. Here is a tour of what it does, built around four interactive recipe examples you can poke at: formatting labels, scaling servings, switching measurement systems, and merging recipes into one shopping list.",
+    "image": "/blog/cooking-with-measurable.jpg",
+    "thumbnail": "/blog/cooking-with-measurable.thumb.jpg",
+    "note": null,
+    "tags": [
+      "typescript",
+      "javascript",
+      "react"
+    ]
+  },
+  {
     "slug": "typing-graphql-across-client-and-server",
     "filePath": "typing-graphql-across-client-and-server.md",
     "title": "One Schema, Two Codegens: Typing GraphQL Across Client and Server",

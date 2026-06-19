@@ -1,7 +1,7 @@
 {
-  "name": "@matthuggins/blog-content",
+  "name": "@matthuggins/measurable-demos",
   "version": "1.0.0",
-  "description": "Blog post content and metadata for matthuggins.com",
+  "description": "Interactive demos of the measurable unit-conversion library, embedded in a blog post",
   "private": true,
   "type": "module",
   "main": "src/main.ts",
@@ -10,7 +10,7 @@
     ".": "./src/main.ts"
   },
   "scripts": {
-    "build": "tsx scripts/generate-blog-metadata.ts",
+    "build": "tsc -b",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format .",
@@ -21,22 +21,27 @@
     "test:lint": "pnpm run lint && pnpm run format && pnpm run typecheck && pnpm run test"
   },
   "keywords": [],
-  "author": "Matt Huggins <matt.huggins@gmail.com>",
+  "author": "Matt Huggins",
   "license": "UNLICENSED",
   "dependencies": {
-    "@matthuggins/measurable-demos": "workspace:*"
+    "@matthuggins/ui": "workspace:*",
+    "@phosphor-icons/react": "catalog:",
+    "measurable": "^3.1.0",
+    "remeda": "^2.39.0"
   },
   "devDependencies": {
     "@matthuggins/tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "react": "catalog:",
-    "tsx": "^4.20.5",
+    "react-dom": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "yaml": "^2.8.1"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
-    "react": "catalog:"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   }
 }
