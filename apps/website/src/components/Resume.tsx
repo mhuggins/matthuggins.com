@@ -61,6 +61,17 @@ export function Resume() {
       <ResumeSection title="Experience" icon={BriefcaseIcon}>
         <div className="flex flex-col gap-6">
           <Experience
+            company="Loancrate"
+            location="Santa Monica, California (Remote)"
+            roles={[
+              {
+                title: "Software Engineer",
+                startDate: "June 2026",
+                tasks: ["Building a reusable React component library on top of Base UI."],
+              },
+            ]}
+          />
+          <Experience
             company="Prelude Security"
             location="Seattle, Washington (Remote)"
             description='Provided intuitive user experiences to help CISOs answer the question: "am I protected?"'
