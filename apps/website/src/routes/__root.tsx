@@ -2,6 +2,7 @@ import { cn } from "@matthuggins/ui";
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 import Codebound from "@/assets/codebound.png";
+import PokerNexus from "@/assets/pokernexus.png";
 import SvgConverter from "@/assets/svg-converter.svg";
 import { BackgroundSection } from "@/components/BackgroundSection";
 import { ContactLinks } from "@/components/ContactLinks";
@@ -108,6 +109,16 @@ function Root() {
               <BackgroundSection
                 title="Projects"
                 entries={[
+                  {
+                    name: (
+                      <ProjectLink
+                        name="PokerNexus"
+                        image={PokerNexus}
+                        href="https://pokernexus.com"
+                      />
+                    ),
+                    metadata: ["Poker social network"],
+                  },
                   {
                     name: (
                       <ProjectLink name="Codebound" image={Codebound} href="https://codebound.io" />

@@ -48,10 +48,11 @@ export function Resume() {
       </header>
 
       <ResumeSection title="Career Profile" icon={UserIcon} className="print:break-inside-avoid">
-        Staff-level software engineer with 20+ years of experience building scalable web
-        applications and developer platforms using React, TypeScript, Node.js, and Ruby on Rails.
-        Experienced in frontend architecture, API design, and integrating LLM-powered features such
-        as AI-generated reporting into production applications.
+        Staff-level software engineer with 20+ years of experience building scalable web and mobile
+        applications and developer platforms using React, TypeScript, Node.js, and Ruby on Rails,
+        currently shipping a cross-platform social product end to end as a founder. Depth in
+        frontend architecture, API design, and integrating LLM-powered features such as AI-generated
+        reporting into production applications.
       </ResumeSection>
 
       <ResumeSection title="Skills" icon={WrenchIcon} className="print:break-inside-avoid">
@@ -68,6 +69,22 @@ export function Resume() {
                 title: "Software Engineer",
                 startDate: "June 2026",
                 tasks: ["Building a reusable React component library on top of Base UI."],
+              },
+            ]}
+          />
+          <Experience
+            company="PokerNexus LLC"
+            location="Austin, Texas"
+            description="The social network for poker players"
+            roles={[
+              {
+                title: "Founder",
+                startDate: "May 2026",
+                tasks: [
+                  "Designing and building the product end to end, shipping web and native mobile from a single React and TypeScript codebase with Capacitor.",
+                  "Building the Node.js GraphQL API and PostgreSQL data model behind it, using Redis for caching and file storage on AWS.",
+                  "Running outreach and early growth, recruiting poker venues to manage their own data in the app, and seeding the initial user base through invite codes ahead of a public launch.",
+                ],
               },
             ]}
           />
