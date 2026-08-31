@@ -6,7 +6,7 @@
   "keywords": [],
   "author": "Matt Huggins <matt.huggins@gmail.com>",
   "license": "ISC",
-  "packageManager": "pnpm@9.15.1",
+  "packageManager": "pnpm@11.24.0",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",

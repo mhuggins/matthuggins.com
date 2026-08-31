@@ -1,5 +1,5 @@
-# Use Node.js LTS version (18 or 20 for compatibility)
-FROM node:20-alpine
+# Use Node.js LTS version (22+ required by pnpm 11)
+FROM node:22-alpine
 
 # Set working directory
 WORKDIR /app
@@ -15,7 +15,7 @@ COPY packages/tsconfig/package.json packages/tsconfig/
 COPY packages/ui/package.json packages/ui/
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@11.24.0
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
