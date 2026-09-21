@@ -1,7 +1,7 @@
 {
-  "name": "@matthuggins/lab-content",
+  "name": "@matthuggins/qr-code-generator",
   "version": "1.0.0",
-  "description": "Lab project content and metadata for matthuggins.com",
+  "description": "Client-side QR code generator with styling, center icons, and framed templates",
   "private": true,
   "type": "module",
   "main": "src/main.ts",
@@ -10,7 +10,7 @@
     ".": "./src/main.ts"
   },
   "scripts": {
-    "build": "tsx scripts/generate-lab-metadata.ts",
+    "build": "tsc -b",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format .",
@@ -21,23 +21,29 @@
     "test:lint": "pnpm run lint && pnpm run format && pnpm run typecheck && pnpm run test"
   },
   "keywords": [],
-  "author": "Matt Huggins <matt.huggins@gmail.com>",
+  "author": "Matt Huggins",
   "license": "UNLICENSED",
   "dependencies": {
-    "@matthuggins/cargo-dispatch": "workspace:*",
-    "@matthuggins/qr-code-generator": "workspace:*"
+    "@matthuggins/ui": "workspace:*",
+    "@phosphor-icons/react": "catalog:",
+    "assert-never": "^1.4.0",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@matthuggins/tsconfig": "workspace:*",
     "@types/node": "catalog:",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "jsdom": "catalog:",
     "react": "catalog:",
-    "tsx": "^4.20.5",
+    "react-dom": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "yaml": "^2.8.1"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
-    "react": "catalog:"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   }
 }

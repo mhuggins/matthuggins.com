@@ -30,5 +30,26 @@ export const labMetadata: readonly LabEntryMetadata[] = [
     "thumbnail": "/lab/cargo-dispatch.svg",
     "ogImage": "/lab/cargo-dispatch.og-image.png",
     "schemaType": "Game"
+  },
+  {
+    "slug": "qr-code-generator",
+    "filePath": "qr-code-generator.mdx",
+    "title": "QR Code Generator",
+    "description": "Design and download a styled QR code entirely in the browser, with center icons, frames, and custom colors",
+    "keywords": [
+      "qr code",
+      "qr code generator",
+      "qr",
+      "barcode",
+      "svg",
+      "png",
+      "wifi qr code",
+      "vcard",
+      "react",
+      "typescript"
+    ],
+    "thumbnail": "/lab/qr-code-generator.svg",
+    "ogImage": "/lab/qr-code-generator.og-image.png",
+    "schemaType": "WebApplication"
   }
 ];

@@ -28,6 +28,7 @@
     "@matthuggins/blog-content": "workspace:*",
     "@matthuggins/cargo-dispatch": "workspace:*",
     "@matthuggins/lab-content": "workspace:*",
+    "@matthuggins/qr-code-generator": "workspace:*",
     "@matthuggins/ui": "workspace:*",
     "@phosphor-icons/react": "catalog:",
     "@shikijs/rehype": "^3.12.2",
