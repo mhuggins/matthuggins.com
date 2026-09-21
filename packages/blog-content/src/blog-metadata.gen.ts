@@ -35,6 +35,22 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
   {
+    "slug": "announcing-pokernexus",
+    "filePath": "announcing-pokernexus.md",
+    "title": "Announcing PokerNexus: The Social Network for Poker Players",
+    "date": "2026-09-21",
+    "summary": "PokerNexus is live on the web, the App Store, and Google Play. It's a free social network built for poker players: a feed, forums, direct messages, a directory of US card rooms and their schedules, and equity and ICM calculators whose results post as live cards. Here's what's in it, and how it's built.",
+    "image": "/blog/announcing-pokernexus.jpg",
+    "thumbnail": "/blog/announcing-pokernexus.thumb.jpg",
+    "note": null,
+    "tags": [
+      "typescript",
+      "react",
+      "node.js",
+      "graphql"
+    ]
+  },
+  {
     "slug": "cooking-with-measurable",
     "filePath": "cooking-with-measurable.mdx",
     "title": "Cooking with measurable",
