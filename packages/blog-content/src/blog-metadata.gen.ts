@@ -13,7 +13,7 @@ export interface BlogPostMetadata {
   tags: BlogTag[];
 }
 
-export type BlogTag = "ai" | "data fetching" | "form management" | "graphics" | "graphql" | "javascript" | "node.js" | "react" | "ruby" | "ruby on rails" | "security" | "tanstack form" | "tanstack query" | "typescript" | "user experience";
+export type BlogTag = "ai" | "data fetching" | "form management" | "graphics" | "graphql" | "javascript" | "native" | "node.js" | "react" | "ruby" | "ruby on rails" | "security" | "tanstack form" | "tanstack query" | "typescript" | "user experience";
 
 export const blogTags: ReadonlySet<BlogTag> = new Set([
   "ai",
@@ -22,6 +22,7 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
   "graphics",
   "graphql",
   "javascript",
+  "native",
   "node.js",
   "react",
   "ruby",
@@ -34,6 +35,22 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 ]);
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
+  {
+    "slug": "qr-codes-that-route-to-the-appropriate-app-store",
+    "filePath": "qr-codes-that-route-to-the-appropriate-app-store.md",
+    "title": "QR Codes that Route to the Appropriate App Store",
+    "date": "2026-09-24",
+    "summary": "A printed QR code holds exactly one URL, but a phone that scans it should land in the right app store. Here's the small redirect service behind the PokerNexus business cards: how it picks the App Store, Google Play, or the website, and the crawlers, iPads, caches, and universal links that shaped it.",
+    "image": "/blog/qr-codes-that-route-to-the-appropriate-app-store.jpg",
+    "thumbnail": "/blog/qr-codes-that-route-to-the-appropriate-app-store.thumb.jpg",
+    "note": null,
+    "tags": [
+      "typescript",
+      "node.js",
+      "native",
+      "user experience"
+    ]
+  },
   {
     "slug": "announcing-pokernexus",
     "filePath": "announcing-pokernexus.md",
