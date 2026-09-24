@@ -26,6 +26,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://matthuggins.com/blog/posts/qr-codes-that-route-to-the-appropriate-app-store</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://matthuggins.com/blog/posts/announcing-pokernexus</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>yearly</changefreq>
@@ -172,6 +178,11 @@
   </url>
   <url>
     <loc>https://matthuggins.com/blog/tags/javascript</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://matthuggins.com/blog/tags/native</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
