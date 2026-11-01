@@ -34,7 +34,7 @@ export default defineConfig({
   build: {
     minify: "esbuild",
     sourcemap: false,
-    target: "es2018",
+    target: "es2020",
     emptyOutDir: true,
     manifest: true,
     rollupOptions: {
