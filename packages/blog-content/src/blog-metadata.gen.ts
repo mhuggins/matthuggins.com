@@ -36,6 +36,21 @@ export const blogTags: ReadonlySet<BlogTag> = new Set([
 
 export const blogMetadata: readonly BlogPostMetadata[] = [
   {
+    "slug": "one-graphql-endpoint-many-schemas",
+    "filePath": "one-graphql-endpoint-many-schemas.md",
+    "title": "One GraphQL Endpoint, Many Schemas: Changing a Schema Under Shipped Mobile Apps",
+    "date": "2026-11-01",
+    "summary": "Some GraphQL changes can't be made additively when old app builds are still in the stores. Here's how PokerNexus serves each build the schema it was compiled against: a release header, one schema per cutover, legacy shapes beside the current ones, and a CI check that replays every shipped build's queries.",
+    "image": "/blog/one-graphql-endpoint-many-schemas.jpg",
+    "thumbnail": "/blog/one-graphql-endpoint-many-schemas.thumb.jpg",
+    "note": null,
+    "tags": [
+      "graphql",
+      "node.js",
+      "typescript"
+    ]
+  },
+  {
     "slug": "qr-codes-that-route-to-the-appropriate-app-store",
     "filePath": "qr-codes-that-route-to-the-appropriate-app-store.md",
     "title": "QR Codes that Route to the Appropriate App Store",
