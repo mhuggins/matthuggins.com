@@ -6,6 +6,12 @@ import {
   UserIcon,
   WrenchIcon,
 } from "@phosphor-icons/react";
+import BlackBookSingles from "@/assets/blackbooksingles.png";
+import Codebound from "@/assets/codebound.png";
+import KindBite from "@/assets/kindbite.png";
+import Nos from "@/assets/nos.svg";
+import PokerNexus from "@/assets/pokernexus.png";
+import SvgConverter from "@/assets/svg-converter.svg";
 import { Experience } from "./Experience";
 import { Project } from "./Project";
 import { ResumeSection } from "./ResumeSection";
@@ -69,22 +75,6 @@ export function Resume() {
                 title: "Software Engineer",
                 startDate: "June 2026",
                 tasks: ["Building a reusable React component library on top of Base UI."],
-              },
-            ]}
-          />
-          <Experience
-            company="PokerNexus LLC"
-            location="Austin, Texas"
-            description="The social network for poker players"
-            roles={[
-              {
-                title: "Founder",
-                startDate: "May 2026",
-                tasks: [
-                  "Designing and building the product end to end, shipping web and native mobile from a single React and TypeScript codebase with Capacitor.",
-                  "Building the Node.js GraphQL API and PostgreSQL data model behind it, using Redis for caching and file storage on AWS.",
-                  "Running outreach and early growth, recruiting poker venues to manage their own data in the app, and seeding the initial user base through invite codes ahead of a public launch.",
-                ],
               },
             ]}
           />
@@ -269,21 +259,34 @@ export function Resume() {
 
       <ResumeSection title="Projects" icon={DesktopIcon} className="print:break-inside-avoid">
         <div className="flex flex-col gap-4">
+          <Project title="PokerNexus" icon={PokerNexus} role="Founder" url="https://pokernexus.com">
+            The social network for poker players, available on web, iOS, and Android.
+          </Project>
+          <Project title="KindBite" icon={KindBite} role="Creator" url="https://kindbite.io">
+            Meal-planning app for web, iOS, and Android that adapts recipes to diet restrictions and
+            food sensitivities.
+          </Project>
           <Project
             title="Codebound"
+            icon={Codebound}
             role="Creator"
             url="https://codebound.io"
             note="In development"
           >
             Programmable collectible card game.
           </Project>
-          <Project title="SVGConverter.io" role="Creator" url="https://svgconverter.io">
+          <Project
+            title="SVGConverter.io"
+            icon={SvgConverter}
+            role="Creator"
+            url="https://svgconverter.io"
+          >
             Web-app for converting raster images into vectorized SVGs.
           </Project>
-          <Project title="nOS" role="Lead Developer" url="https://nos.io" note="Past">
+          <Project title="nOS" icon={Nos} role="Lead Developer" url="https://nos.io" note="Past">
             Browser, app store, and crypto wallet for the nOS cryptocurrency.
           </Project>
-          <Project title="Black Book Singles" role="Founder" note="Past">
+          <Project title="Black Book Singles" icon={BlackBookSingles} role="Creator" note="Past">
             Free online dating website and mobile application.
           </Project>
         </div>

@@ -2,6 +2,7 @@ import { cn } from "@matthuggins/ui";
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 import Codebound from "@/assets/codebound.png";
+import KindBite from "@/assets/kindbite.png";
 import PokerNexus from "@/assets/pokernexus.png";
 import SvgConverter from "@/assets/svg-converter.svg";
 import { BackgroundSection } from "@/components/BackgroundSection";
@@ -118,6 +119,12 @@ function Root() {
                       />
                     ),
                     metadata: ["Poker social network"],
+                  },
+                  {
+                    name: (
+                      <ProjectLink name="KindBite" image={KindBite} href="https://kindbite.io" />
+                    ),
+                    metadata: ["Diet-aware meal planning"],
                   },
                   {
                     name: (
