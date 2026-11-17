@@ -9,6 +9,7 @@ import { BackgroundSection } from "@/components/BackgroundSection";
 import { ContactLinks } from "@/components/ContactLinks";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { Profile } from "@/components/Profile";
+import { ProjectIcon } from "@/components/ProjectIcon";
 import { Tags } from "@/components/Tags";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getAllPosts, getAllTags } from "@/data/blog-metadata";
@@ -37,6 +38,43 @@ function ClientOnlyDevtools() {
     </Suspense>
   );
 }
+
+const sidebarProjects: {
+  name: string;
+  href: string;
+  image: string;
+  /** Icon tile background color; defaults to white. */
+  background?: string;
+  description: string;
+}[] = [
+  {
+    name: "PokerNexus",
+    href: "https://pokernexus.com",
+    image: PokerNexus,
+    background: "#000000",
+    description: "Poker social network",
+  },
+  {
+    name: "KindBite",
+    href: "https://kindbite.io",
+    image: KindBite,
+    background: "#FBF6E9",
+    description: "Diet-aware meal planning",
+  },
+  {
+    name: "Codebound",
+    href: "https://codebound.io",
+    image: Codebound,
+    background: "#000000",
+    description: "Collectible card game",
+  },
+  {
+    name: "SVGConverter.io",
+    href: "https://svgconverter.io",
+    image: SvgConverter,
+    description: "Vectorize raster images",
+  },
+];
 
 export const Route = createRootRoute({
   component: Root,
@@ -109,40 +147,19 @@ function Root() {
 
               <BackgroundSection
                 title="Projects"
-                entries={[
-                  {
-                    name: (
-                      <ProjectLink
-                        name="PokerNexus"
-                        image={PokerNexus}
-                        href="https://pokernexus.com"
-                      />
-                    ),
-                    metadata: ["Poker social network"],
-                  },
-                  {
-                    name: (
-                      <ProjectLink name="KindBite" image={KindBite} href="https://kindbite.io" />
-                    ),
-                    metadata: ["Diet-aware meal planning"],
-                  },
-                  {
-                    name: (
-                      <ProjectLink name="Codebound" image={Codebound} href="https://codebound.io" />
-                    ),
-                    metadata: ["Collectible card game"],
-                  },
-                  {
-                    name: (
-                      <ProjectLink
-                        name="SVGConverter.io"
-                        image={SvgConverter}
-                        href="https://svgconverter.io"
-                      />
-                    ),
-                    metadata: ["Vectorize raster images"],
-                  },
-                ]}
+                entries={sidebarProjects.map(({ name, href, image, background, description }) => ({
+                  icon: (
+                    <a href={href} target="_blank" tabIndex={-1} aria-hidden>
+                      <ProjectIcon src={image} background={background} />
+                    </a>
+                  ),
+                  name: (
+                    <a href={href} target="_blank" className="hover:underline">
+                      {name}
+                    </a>
+                  ),
+                  metadata: [description],
+                }))}
               />
 
               <BackgroundSection
@@ -178,14 +195,5 @@ function Root() {
 
       <ClientOnlyDevtools />
     </div>
-  );
-}
-
-function ProjectLink({ name, href, image }: { name: string; href: string; image: string }) {
-  return (
-    <a href={href} target="_blank" className="inline-flex items-center gap-2 hover:underline">
-      <img src={image} className="size-4 drop-shadow-md" />
-      {name}
-    </a>
   );
 }
